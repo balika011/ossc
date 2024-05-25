@@ -135,7 +135,12 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
 {
     int i, diff_lines, diff_v_hz_x100, mindiff_id=0, mindiff_lines=1000, mindiff_v_hz_x100=10000;
     mode_data_t *mode_preset;
-    mode_flags valid_lm[] = { MODE_PT, (MODE_L2 | (MODE_L2<<cc->l2_mode)), (MODE_L3_GEN_16_9<<cc->l3_mode), (MODE_L4_GEN_4_3<<cc->l4_mode), (MODE_L5_GEN_4_3<<cc->l5_mode), (MODE_L6_GEN_4_3<<cc->l6_mode) };
+    mode_flags valid_lm[] = { (MODE_PT | (cc->pt_mode ? (MODE_L5_GEN_4_3<<(cc->pt_mode-1)) : 0)),
+                              (MODE_L2 | (MODE_L2<<cc->l2_mode)),
+                              (MODE_L3_GEN_16_9<<cc->l3_mode),
+                              (MODE_L4_GEN_4_3<<cc->l4_mode),
+                              (MODE_L5_GEN_4_3<<cc->l5_mode),
+                              (MODE_L6_GEN_4_3<<cc->l6_mode) };
     mode_flags target_lm, mindiff_lm;
     uint8_t pt_only = 0;
     uint8_t upsample2x = cc->upsample2x;
@@ -243,6 +248,10 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
 
     mindiff_lm &= mode_preset->flags;    //ensure L2 mode uniqueness
 
+    // Set passthru flag for all passthru mode options
+    if (*group_ptr[mode_preset->group] == 0)
+        mindiff_lm = MODE_PT;
+
     if (mindiff_lm >= MODE_L6_GEN_4_3)
         vm_conf->y_rpt = 5;
     else if (mindiff_lm >= MODE_L5_GEN_4_3)
@@ -257,6 +266,13 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
     switch (mindiff_lm) {
         case MODE_PT:
             vm_out->vic = vm_in->vic;
+
+            if ((cc->pt_mode == 1) && ((mode_preset->group >= GROUP_384P) && (mode_preset->group <= GROUP_576P))) {
+                vmode_hv_mult(vm_in, 2, 1);
+                vmode_hv_mult(vm_out, 2, 1);
+            } else if ((cc->pt_mode >= 2) && (mode_preset->group >= GROUP_240P) && (mode_preset->group <= GROUP_288P)) {
+                vm_conf->x_rpt = vm_conf->h_skip = cc->pt_mode;
+            }
 
             // multiply horizontal resolution if necessary to fulfill min. 25MHz TMDS clock requirement. Tweak infoframe pixel repetition indicator later to make sink treat it as original resolution.
             while ((((vm_out->timings.v_hz_x100*vm_out->timings.v_total)/100)*vm_out->timings.h_total*(vm_conf->h_skip+1))>>vm_out->timings.interlaced < 25000000UL) {

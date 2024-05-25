@@ -89,6 +89,7 @@ typedef struct {
     alt_u8 pm_480i;
     alt_u8 pm_480p;
     alt_u8 pm_1080i;
+    alt_u8 pt_mode;
     alt_u8 l2_mode;
     alt_u8 l3_mode;
     alt_u8 l4_mode;
