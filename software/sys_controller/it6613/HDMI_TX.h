@@ -28,5 +28,6 @@ void HDMITX_SetOutputColorDepth(int ColorDepth);
 
 void HDMITX_SetAudioInfoFrame(BYTE bAudioDwSampling);
 void HDMITX_SetHDRInfoFrame(BYTE enableHDR);
+void HDMITX_SetVRRInfoFrame(BYTE enable);
 
 #endif /*HDMI_TX_H_*/

@@ -80,7 +80,7 @@ static SYS_STATUS SetAVIInfoFrame(AVI_InfoFrame *pAVIInfoFrame) ;
 static SYS_STATUS SetAudioInfoFrame(Audio_InfoFrame *pAudioInfoFrame) ;
 static SYS_STATUS SetSPDInfoFrame(SPD_InfoFrame *pSPDInfoFrame) ;
 static SYS_STATUS SetMPEGInfoFrame(MPEG_InfoFrame *pMPGInfoFrame) ;
-static SYS_STATUS SetHDRInfoFrame(HDR_InfoFrame *pHDRInfoFrame) ;
+static SYS_STATUS SetGPInfoFrame(BYTE *pInfoFrameData) ;
 static SYS_STATUS ReadEDID(BYTE *pData,BYTE bSegment,BYTE offset,SHORT Count) ;
 static void AbortDDC() ;
 static void ClearDDCFIFO() ;
@@ -825,14 +825,14 @@ EnableAudioInfoFrame(BYTE bEnable,BYTE *pAudioInfoFrame)
 }
 
 BOOL
-EnableHDRInfoFrame(BYTE bEnable, BYTE *pHDRInfoFrame)
+EnableGPInfoFrame(BYTE bEnable, BYTE *pInfoFrame)
 {
     if (!bEnable) {
         DISABLE_NULL_PKT();
         return TRUE;
     }
 
-    if(SetHDRInfoFrame((HDR_InfoFrame *)pHDRInfoFrame) == ER_SUCCESS)
+    if(SetGPInfoFrame(pInfoFrame) == ER_SUCCESS)
     {
         return TRUE;
     }
@@ -3390,28 +3390,29 @@ SetAudioInfoFrame(Audio_InfoFrame *pAudioInfoFrame)
 }
 
 static SYS_STATUS
-SetHDRInfoFrame(HDR_InfoFrame *pHDRInfoFrame)
+SetGPInfoFrame(BYTE *pInfoFrameData)
 {
     int i ;
     BYTE ucData ;
+    HDR_InfoFrame *pInfoFrame = (HDR_InfoFrame*)pInfoFrameData;
 
-    if(!pHDRInfoFrame)
+    if(!pInfoFrame)
     {
         return ER_FAIL ;
     }
 
     Switch_HDMITX_Bank(1) ;
 
-    HDMITX_WriteI2C_Byte(REG_TX_PKT_HB00, (0x80+pHDRInfoFrame->info.Type));
-    HDMITX_WriteI2C_Byte(REG_TX_PKT_HB01, pHDRInfoFrame->info.Ver);
-    HDMITX_WriteI2C_Byte(REG_TX_PKT_HB02, pHDRInfoFrame->info.Len);
+    HDMITX_WriteI2C_Byte(REG_TX_PKT_HB00, (0x80+pInfoFrame->info.Type));
+    HDMITX_WriteI2C_Byte(REG_TX_PKT_HB01, pInfoFrame->info.Ver);
+    HDMITX_WriteI2C_Byte(REG_TX_PKT_HB02, pInfoFrame->info.Len);
 
-    for(i = 0,ucData = 0 ; i< HDR_INFOFRAME_LEN ; i++)
+    for(i = 0,ucData = 0 ; i< pInfoFrame->info.Len ; i++)
     {
-        HDMITX_WriteI2C_Byte(REG_TX_PKT_PB01+i, pHDRInfoFrame->pktbyte.HDR_DB[i]);
-        ucData -= pHDRInfoFrame->pktbyte.HDR_DB[i] ;
+        HDMITX_WriteI2C_Byte(REG_TX_PKT_PB01+i, pInfoFrame->pktbyte.HDR_DB[i]);
+        ucData -= pInfoFrame->pktbyte.HDR_DB[i] ;
     }
-    ucData -= 0x80+HDR_INFOFRAME_VER+HDR_INFOFRAME_TYPE+HDR_INFOFRAME_LEN ;
+    ucData -= 0x80+pInfoFrame->info.Type+pInfoFrame->info.Ver+pInfoFrame->info.Len ;
     HDMITX_WriteI2C_Byte(REG_TX_PKT_PB00, ucData);
 
     Switch_HDMITX_Bank(0) ;

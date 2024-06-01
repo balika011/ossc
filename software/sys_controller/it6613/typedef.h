@@ -252,6 +252,33 @@ typedef union _AVI_InfoFrame
     } pktbyte ;
 } AVI_InfoFrame ;
 
+typedef union _Freesync_InfoFrame {
+
+    struct {
+        BYTE Type ;
+        BYTE Ver ;
+        BYTE Len ;
+
+        BYTE Enable ;
+
+        BYTE Rsvd1 ;
+        BYTE Rsvd2 ;
+        BYTE Rsvd3 ;
+        BYTE Rsvd4 ;
+
+        BYTE Mode2 ;
+
+        BYTE min_rate ;
+        BYTE max_rate ;
+    } info ;
+
+    struct {
+        BYTE FS_HB[3] ;
+        BYTE FS_DB[VENDORSPEC_INFOFRAME_LEN] ;
+    } pktbyte ;
+
+} Freesync_InfoFrame ;
+
 typedef union _Audio_InfoFrame {
 
     struct {

@@ -828,7 +828,7 @@ BOOL CheckHDMITX(BYTE *pHPD,BYTE *pHPDChange) ;
 BOOL EnableHDCP(BYTE bEnable) ;
 BOOL EnableAVIInfoFrame(BYTE bEnable,BYTE *pAVIInfoFrame);
 BOOL EnableAudioInfoFrame(BYTE bEnable,BYTE *pAudioInfoFrame);
-BOOL EnableHDRInfoFrame(BYTE bEnable, BYTE *pHDRInfoFrame);
+BOOL EnableGPInfoFrame(BYTE bEnable, BYTE *pInfoFrame);
 // BOOL EnableVideoOutputIndirect(BYTE xCnt,BYTE inputColorMode,BYTE outputColorMode,BYTE bHDMI) ;
 void SetAVMute(BYTE bEnable) ;
 void SetOutputColorDepthPhase(BYTE ColorDepth,BYTE bPhase) ;

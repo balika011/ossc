@@ -360,5 +360,27 @@ void HDMITX_SetHDRInfoFrame(BYTE HDR_TF)
     HDRInfo.pktbyte.HDR_DB[24] = 0xfa;
     HDRInfo.pktbyte.HDR_DB[25] = 0x00;*/
 
-    EnableHDRInfoFrame(TRUE, (BYTE *) &HDRInfo);
+    EnableGPInfoFrame(TRUE, (BYTE *) &HDRInfo);
 }
+
+void HDMITX_SetVRRInfoFrame(BYTE enable)
+{
+    int i;
+    Freesync_InfoFrame VRRInfo;
+
+    VRRInfo.info.Type = SPD_INFOFRAME_TYPE;
+    VRRInfo.info.Ver = VENDORSPEC_INFOFRAME_VER;
+    VRRInfo.info.Len = VENDORSPEC_INFOFRAME_LEN;
+
+    VRRInfo.info.Enable = enable ? 0x1a : 0;
+    VRRInfo.info.Mode2 = 0x07;
+    VRRInfo.info.min_rate = 40;
+    VRRInfo.info.max_rate = 144;
+
+    for (i=1; i<VENDORSPEC_INFOFRAME_LEN-3; i++) {
+        VRRInfo.pktbyte.FS_DB[i] = 0;
+    }
+
+    EnableGPInfoFrame(TRUE, (BYTE *) &VRRInfo);
+}
+
