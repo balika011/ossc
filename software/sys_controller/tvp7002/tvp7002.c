@@ -268,7 +268,7 @@ void tvp_set_gain_offset(color_setup_t *col) {
 }
 
 // Configure H-PLL (sampling rate, VCO gain and charge pump current)
-void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 refclks_per_line, alt_u8 plldivby2)
+void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2)
 {
     alt_u32 pclk_est;
     alt_u8 vco_range;
@@ -303,7 +303,7 @@ void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 refclks_per_line, alt_u8 plldi
         vco_range = 3;
     }
 
-    cp_current = (40*Kvco[vco_range]+h_samplerate/2) / h_samplerate; //"+h_samplerate/2" for fast rounding
+    cp_current = (40*Kvco[vco_range]+pixs_per_line/2) / pixs_per_line; //"+pixs_per_line/2" for fast rounding
     if (cp_current > 7)
         cp_current = 7;
 
@@ -375,7 +375,7 @@ void tvp_set_alcfilt(alt_u8 nsv, alt_u8 nsh) {
     tvp_writereg(TVP_ALCFILT, (nsv<<3)|nsh);
 }
 
-void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 refclks_per_line, alt_u8 plldivby2, alt_u8 h_synclen_px, alt_8 clamp_user_offset)
+void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2, alt_u8 h_synclen_px, alt_8 clamp_user_offset)
 {
     // Due to short MVS width, clamp reference starts prematurely (at the end of MVS window). Adjust offset so that reference moves back to hsync trailing edge.
     alt_u8 clamp_ref_offset = h_synclen_px - (((30*h_samplerate)/refclks_per_line)+5)/10;
@@ -399,7 +399,7 @@ void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 refclks_per
         break;
     }
 
-    tvp_setup_hpll(h_samplerate, refclks_per_line, plldivby2);
+    tvp_setup_hpll(h_samplerate, pixs_per_line, refclks_per_line, plldivby2);
 }
 
 void tvp_source_sel(tvp_input_t input, tvp_sync_input_t syncinput, video_format fmt)
