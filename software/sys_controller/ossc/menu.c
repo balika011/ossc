@@ -80,6 +80,7 @@ static const char *auto_input_desc[] = { "Off", "Current input", "All inputs" };
 static const char *mask_color_desc[] = { "Black", "Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "White" };
 static const char *av3_alt_rgb_desc[] = { "Off", "AV1", "AV2" };
 static const char *shmask_mode_desc[] = { "Off", "A-Grille", "TV", "PVM" };
+static const char *lumacode_mode_desc[] = { "Off", "C64", "Spectrum", "NES" };
 
 static void sync_vth_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d mV", (v*1127)/100); }
 static void intclks_to_time_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%.2u us", (unsigned)(((1000000U*v)/(TVP_INTCLK_HZ/1000))/1000), (unsigned)((((1000000U*v)/(TVP_INTCLK_HZ/1000))%1000)/10)); }
@@ -154,6 +155,7 @@ MENU(menu_vinputproc, P99_PROTECT({ \
     { "Clamp/ALC offset",                       OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.clamp_offset,  OPT_NOWRAP, CLAMP_OFFSET_MIN, CLAMP_OFFSET_MAX, signed_disp } } },
     { "ALC V filter",                           OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.alc_v_filter,  OPT_NOWRAP, 0, ALC_V_FILTER_MAX, alc_v_filter_disp } } },
     { "ALC H filter",                           OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.alc_h_filter,  OPT_NOWRAP, 0, ALC_H_FILTER_MAX, alc_h_filter_disp } } },
+    { "Lumacode",                              OPT_AVCONFIG_SELECTION, { .sel = { &tc.lumacode_mode,  OPT_WRAP,   SETTING_ITEM(lumacode_mode_desc) } } },
 }))
 
 MENU(menu_sampling, P99_PROTECT({ \
@@ -190,6 +192,7 @@ MENU(menu_output, P99_PROTECT({ \
     { LNG("TX mode","TXﾓｰﾄﾞ"),                  OPT_AVCONFIG_SELECTION, { .sel = { &tc.tx_mode,         OPT_WRAP, SETTING_ITEM(tx_mode_desc) } } },
     { "HDMI ITC",                              OPT_AVCONFIG_SELECTION, { .sel = { &tc.hdmi_itc,        OPT_WRAP, SETTING_ITEM(off_on_desc) } } },
     { "HDMI HDR flag",                         OPT_AVCONFIG_SELECTION, { .sel = { &tc.hdmi_hdr,        OPT_WRAP, SETTING_ITEM(off_on_desc) } } },
+    { "HDMI VRR flag",                         OPT_AVCONFIG_SELECTION, { .sel = { &tc.hdmi_vrr,        OPT_WRAP, SETTING_ITEM(off_on_desc) } } },
 }))
 
 MENU(menu_scanlines, P99_PROTECT({ \
@@ -245,7 +248,9 @@ MENU(menu_settings, P99_PROTECT({ \
     { LNG("<Reset settings>","<ｾｯﾃｲｦｼｮｷｶ    >"),  OPT_FUNC_CALL,          { .fun = { set_default_avconfig, NULL } } },
 #ifndef DEBUG
     { LNG("<Import sett.  >","<ｾｯﾃｲﾖﾐｺﾐ      >"), OPT_FUNC_CALL,        { .fun = { import_userdata, NULL } } },
+#if 0
     { LNG("<Export sett.  >","<ｾｯﾃｲｶｷｺﾐ      >"), OPT_FUNC_CALL,        { .fun = { export_userdata, NULL } } },
+#endif
     { LNG("<Fw. update    >","<ﾌｧｰﾑｳｪｱｱｯﾌﾟﾃﾞｰﾄ>"), OPT_FUNC_CALL,        { .fun = { fw_update, NULL } } },
 #endif
 }))

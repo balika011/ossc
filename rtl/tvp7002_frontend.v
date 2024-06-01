@@ -62,7 +62,10 @@ localparam VSYNC_SEPARATED = 1'b0;
 localparam VSYNC_RAW = 1'b1;
 
 localparam PP_PL_START      = 1;
-localparam PP_RLPF_START    = PP_PL_START;
+localparam PP_DE_POS_START  = PP_PL_START;
+localparam PP_DE_POS_LENGTH = 1;
+localparam PP_DE_POS_END    = PP_DE_POS_START + PP_DE_POS_LENGTH;
+localparam PP_RLPF_START    = PP_DE_POS_END;
 localparam PP_RLPF_LENGTH   = 3;
 localparam PP_RLPF_END      = PP_RLPF_START + PP_RLPF_LENGTH;
 localparam PP_PL_END        = PP_RLPF_END;
@@ -82,15 +85,19 @@ reg [7:0] B_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
 reg HSYNC_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
 reg VSYNC_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
 reg FID_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
-reg DE_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
-reg datavalid_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
-reg [10:0] xpos_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
-reg [10:0] ypos_pp[PP_PL_START:PP_PL_END] /* synthesis ramstyle = "logic" */;
+reg DE_pp[PP_DE_POS_END:PP_PL_END] /* synthesis ramstyle = "logic" */;
+reg datavalid_pp[PP_DE_POS_END:PP_PL_END] /* synthesis ramstyle = "logic" */;
+reg [10:0] xpos_pp[PP_DE_POS_END:PP_PL_END] /* synthesis ramstyle = "logic" */;
+reg [10:0] ypos_pp[PP_DE_POS_END:PP_PL_END] /* synthesis ramstyle = "logic" */;
 
 // Reverse LPF
 wire rlpf_trigger_act;
 reg signed [14:0] R_diff_s15_pre, G_diff_s15_pre, B_diff_s15_pre, R_diff_s15, G_diff_s15, B_diff_s15;
 reg [7:0] R_pp_prev_rlpf, G_pp_prev_rlpf, B_pp_prev_rlpf;
+
+// Lumacode
+reg [1:0] lumacode_msbs, lumacode_lsbs;
+wire [3:0] lumacode = {lumacode_msbs, lumacode_lsbs};
 
 // Measurement registers
 reg [20:0] pcnt_frame_ctr;
@@ -114,6 +121,7 @@ wire [8:0] V_BACKPORCH = hv_in_config3[12:4];
 
 wire [5:0] MISC_REV_LPF_STR = (misc_config[11:7] + 6'd16);
 wire MISC_REV_LPF_ENABLE = (misc_config[11:7] != 5'h0);
+wire [1:0] MISC_LUMACODE_MODE = misc_config[24:23];
 
 wire [11:0] h_cnt_ref = (vsync_i_type == VSYNC_SEPARATED) ? h_cnt_sogref : h_cnt;
 wire [11:0] even_min_thold = (H_TOTAL / 12'd4);
@@ -134,6 +142,12 @@ wire HSYNC_i_np = (HSYNC_i ^ ~hsync_i_pol);
 // Sample skip for low-res optimized modes
 wire [3:0] H_SKIP = hv_in_config3[27:24];
 wire [3:0] H_SAMPLE_SEL = hv_in_config3[31:28];
+wire [3:0] H_SAMPLE_SEL_ALT = (H_SAMPLE_SEL >= (H_SKIP+1)/2) ? (H_SAMPLE_SEL - ((H_SKIP+1)/2)) : (H_SAMPLE_SEL + ((H_SKIP+1)/2));
+
+// Lumacode tables (C64, Spectrum, empty)
+wire [23:0] lumacode_data[0:2][0:15] = '{'{ 24'h000000,24'h483aaa,24'h924a40,24'h9351b6,24'h675200,24'h606060,24'h8a8a8a,24'h84c5cc,24'hc33d00,24'h867ade,24'hb3b3b3,24'hd5df7c,24'h72b14b,24'hc18178,24'hb3ec91,24'hffffff},
+                                         '{ 24'h000000,24'h000000,24'h0200FD,24'hCF01CE,24'h0100CE,24'hCF0100,24'hFF02FD,24'h01CFCF,24'hFF0201,24'h00CF15,24'h02FFFF,24'hFFFF1D,24'h00FF1C,24'hCFCF15,24'hCFCFCF,24'hFFFFFF},
+                                         '{ 24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000}};
 
 // SOF position for scaler
 wire [10:0] V_SOF_LINE = hv_in_config3[23:13];
@@ -150,14 +164,11 @@ function [7:0] apply_reverse_lpf;
 endfunction
 
 
+// Pipeline stage 1
 always @(posedge PCLK_i) begin
     R_pp[1] <= R_i;
     G_pp[1] <= G_i;
     B_pp[1] <= B_i;
-    DE_pp[1] <= (h_cnt >= H_SYNCLEN+H_BACKPORCH) & (h_cnt < H_SYNCLEN+H_BACKPORCH+H_ACTIVE) & (v_cnt >= V_SYNCLEN+V_BACKPORCH) & (v_cnt < V_SYNCLEN+V_BACKPORCH+V_ACTIVE);
-    datavalid_pp[1] <= (h_ctr == H_SAMPLE_SEL);
-    xpos_pp[1] <= (h_cnt-H_SYNCLEN-H_BACKPORCH);
-    ypos_pp[1] <= (v_cnt-V_SYNCLEN-V_BACKPORCH);
 
     HS_i_prev <= HS_i;
     VS_i_np_prev <= VS_i_np;
@@ -230,10 +241,34 @@ always @(posedge PCLK_i) begin
     end
 end
 
-// Pipeline stages 2-
+// Pipeline stage 2
+always @(posedge PCLK_i) begin
+    // Lumacode
+    if (h_ctr == H_SAMPLE_SEL) begin
+        lumacode_msbs <= G_pp[1][7:6];
+    end else if (h_ctr == H_SAMPLE_SEL_ALT) begin
+        lumacode_lsbs <= G_pp[1][7:6];
+    end
+
+    if (MISC_LUMACODE_MODE == 2'h0) begin
+        {R_pp[2], G_pp[2], B_pp[2]} <= {R_pp[1], G_pp[1], B_pp[1]};
+    end else begin
+        {R_pp[2], G_pp[2], B_pp[2]} <= lumacode_data[MISC_LUMACODE_MODE-1'b1][lumacode];
+    end
+
+    HSYNC_pp[2] <= HSYNC_pp[1];
+    VSYNC_pp[2] <= VSYNC_pp[1];
+    FID_pp[2] <= FID_pp[1];
+    DE_pp[2] <= (h_cnt >= H_SYNCLEN+H_BACKPORCH) & (h_cnt < H_SYNCLEN+H_BACKPORCH+H_ACTIVE) & (v_cnt >= V_SYNCLEN+V_BACKPORCH) & (v_cnt < V_SYNCLEN+V_BACKPORCH+V_ACTIVE);
+    datavalid_pp[2] <= (h_ctr == H_SAMPLE_SEL);
+    xpos_pp[2] <= (h_cnt-H_SYNCLEN-H_BACKPORCH);
+    ypos_pp[2] <= (v_cnt-V_SYNCLEN-V_BACKPORCH);
+end
+
+// Pipeline stages 3-
 integer pp_idx;
 always @(posedge PCLK_i) begin
-    for(pp_idx = PP_PL_START+1; pp_idx <= PP_PL_END; pp_idx = pp_idx+1) begin
+    for(pp_idx = PP_RLPF_START+1; pp_idx <= PP_PL_END; pp_idx = pp_idx+1) begin
         R_pp[pp_idx] <= R_pp[pp_idx-1];
         G_pp[pp_idx] <= G_pp[pp_idx-1];
         B_pp[pp_idx] <= B_pp[pp_idx-1];

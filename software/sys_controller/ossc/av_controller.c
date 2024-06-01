@@ -185,8 +185,10 @@ inline void TX_enable(tx_mode_t mode)
     if (mode != TX_DVI) {
         HDMITX_SetAVIInfoFrame(vmode_out.vic, (mode == TX_HDMI_RGB) ? F_MODE_RGB444 : F_MODE_YUV444, 0, 0, tc.hdmi_itc, vm_conf.hdmitx_pixr_ifr);
         HDMITX_SetHDRInfoFrame(tc.hdmi_hdr ? 3 : 0);
+        HDMITX_SetVRRInfoFrame(tc.hdmi_vrr);
         cm.cc.hdmi_itc = tc.hdmi_itc;
         cm.cc.hdmi_hdr = tc.hdmi_hdr;
+        cm.cc.hdmi_vrr = tc.hdmi_vrr;
     }
 
 #ifdef ENABLE_AUDIO
@@ -460,6 +462,7 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
     misc_config.mask_color = avconfig->mask_color;
     misc_config.reverse_lpf = avconfig->reverse_lpf;
     misc_config.shmask_mode = avconfig->shmask_mode;
+    misc_config.lumacode_mode = avconfig->lumacode_mode;
     /*misc_config.lm_deint_mode = 0;
     misc_config.nir_even_offset = 0;
     misc_config.ypbpr_cs = (avconfig->ypbpr_cs == 0) ? ((vm_in->type & VIDEO_HDTV) ? 1 : 0) : avconfig->ypbpr_cs-1;
@@ -612,6 +615,7 @@ void program_mode()
 
     tvp_source_setup(target_type,
                      pll_h_total,
+                     vmode_in.timings.h_total,
                      cm.clkcnt,
                      0,
                      (alt_u8)h_synclen_px,
@@ -1139,6 +1143,11 @@ int main()
                 printf("setting HDR flag to %d\n", tc.hdmi_hdr);
                 HDMITX_SetHDRInfoFrame(tc.hdmi_hdr ? 3 : 0);
                 cm.cc.hdmi_hdr = tc.hdmi_hdr;
+            }
+            if (tc.hdmi_vrr != cm.cc.hdmi_vrr) {
+                printf("setting VRR flag to %d\n", tc.hdmi_vrr);
+                HDMITX_SetVRRInfoFrame(tc.hdmi_vrr);
+                cm.cc.hdmi_vrr = tc.hdmi_vrr;
             }
         }
         if (tc.av3_alt_rgb != cm.cc.av3_alt_rgb) {

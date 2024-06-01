@@ -119,6 +119,7 @@ typedef struct {
     alt_u8 mask_color;
     alt_u8 reverse_lpf;
     alt_u8 shmask_mode;
+    alt_u8 lumacode_mode;
 
     /* AFE settings */
     alt_u8 sync_vth;
@@ -144,6 +145,7 @@ typedef struct {
     alt_u8 tx_mode;
     alt_u8 hdmi_itc;
     alt_u8 hdmi_hdr;
+    alt_u8 hdmi_vrr;
     alt_u8 full_tx_setup;
     alt_u8 av3_alt_rgb;
     avinput_t link_av;
