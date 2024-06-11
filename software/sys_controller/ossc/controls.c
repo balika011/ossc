@@ -185,8 +185,8 @@ int parse_control()
         case RC_SL_TYPE:
             tc.sl_type = (tc.sl_type < SL_TYPE_MAX) ? (tc.sl_type + 1) : 0;
             if (!menu_active) {
-                strncpy((char*)osd->osd_array.data[0][0], menu_scanlines.items[5].name, OSD_CHAR_COLS);
-                strncpy((char*)osd->osd_array.data[1][0], menu_scanlines.items[5].sel.setting_str[tc.sl_type], OSD_CHAR_COLS);
+                strncpy((char*)osd->osd_array.data[0][0], menu_scanlines.items[6].name, OSD_CHAR_COLS);
+                strncpy((char*)osd->osd_array.data[1][0], menu_scanlines.items[6].sel.setting_str[tc.sl_type], OSD_CHAR_COLS);
                 osd->osd_config.status_refresh = 1;
                 osd->osd_row_color.mask = 0;
                 osd->osd_sec_enable[0].mask = 3;
@@ -265,7 +265,7 @@ int parse_control()
                 set_sampler_phase(video_modes_plm[cm.id].sampler_phase, 1);
 
                 if (!menu_active) {
-                    strncpy((char*)osd->osd_array.data[0][0], menu_advtiming.items[8].name, OSD_CHAR_COLS);
+                    strncpy((char*)osd->osd_array.data[0][0], menu_advtiming.items[10].name, OSD_CHAR_COLS);
                     sampler_phase_disp(video_modes_plm[cm.id].sampler_phase);
                     strncpy((char*)osd->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
                     osd->osd_config.status_refresh = 1;

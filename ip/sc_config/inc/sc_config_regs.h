@@ -35,7 +35,7 @@ typedef union {
 
 typedef union {
     struct {
-        uint32_t pcnt_frame:20;
+        uint32_t pcnt_field:20;
         uint8_t hsync_width:8;
         uint8_t fe_rsv:4;
     } __attribute__((packed, __may_alias__));

@@ -50,7 +50,7 @@ module tvp7002_frontend (
     output reg [10:0] vtotal,
     output reg frame_change,
     output reg sof_scaler,
-    output reg [19:0] pcnt_frame,
+    output reg [19:0] pcnt_field,
     output reg [7:0] hsync_width,
     output reg sync_active
 );
@@ -102,7 +102,7 @@ wire [3:0] lumacode = {lumacode_msbs, lumacode_lsbs};
 // Measurement registers
 reg [20:0] pcnt_frame_ctr;
 reg [17:0] syncpol_det_ctr, hsync_hpol_ctr, vsync_hpol_ctr;
-reg [3:0] sync_inactive_ctr;
+reg [2:0] sync_inactive_ctr;
 reg [11:0] pcnt_line, pcnt_line_ctr, meas_h_cnt, meas_h_cnt_sogref;
 reg [7:0] hs_ctr;
 reg pcnt_line_stored;
@@ -130,8 +130,8 @@ wire [11:0] even_max_thold = (H_TOTAL / 12'd2) + (H_TOTAL / 12'd4);
 wire [11:0] meas_h_cnt_ref = (vsync_i_type == VSYNC_SEPARATED) ? meas_h_cnt_sogref : meas_h_cnt;
 wire [11:0] meas_even_min_thold = (pcnt_line / 12'd4);
 wire [11:0] meas_even_max_thold = (pcnt_line / 12'd2) + (pcnt_line / 12'd4);
-wire meas_vblank_region = (pcnt_frame_ctr < 8*pcnt_line) | (pcnt_frame_ctr > (({1'b0, pcnt_frame}<<interlace_flag) - 4*pcnt_line)) |
-                          (interlace_flag & (pcnt_frame_ctr < (pcnt_frame+8*pcnt_line)) & (pcnt_frame_ctr > (pcnt_frame - 4*pcnt_line)));
+wire meas_vblank_region = (pcnt_frame_ctr < 8*pcnt_line) | (pcnt_frame_ctr > (({1'b0, pcnt_field}<<interlace_flag) - 4*pcnt_line)) |
+                          (interlace_flag & (pcnt_frame_ctr < (pcnt_field+8*pcnt_line)) & (pcnt_frame_ctr > (pcnt_field - 4*pcnt_line)));
 wire [11:0] glitch_filt_thold = meas_vblank_region ? (pcnt_line/4) : (pcnt_line/8);
 
 // TODO: calculate H/V polarity independently
@@ -145,7 +145,7 @@ wire [3:0] H_SAMPLE_SEL = hv_in_config3[31:28];
 wire [3:0] H_SAMPLE_SEL_ALT = (H_SAMPLE_SEL >= (H_SKIP+1)/2) ? (H_SAMPLE_SEL - ((H_SKIP+1)/2)) : (H_SAMPLE_SEL + ((H_SKIP+1)/2));
 
 // Lumacode tables (C64, Spectrum, empty)
-wire [23:0] lumacode_data[0:2][0:15] = '{'{ 24'h000000,24'h483aaa,24'h924a40,24'h9351b6,24'h675200,24'h606060,24'h8a8a8a,24'h84c5cc,24'hc33d00,24'h867ade,24'hb3b3b3,24'hd5df7c,24'h72b14b,24'hc18178,24'hb3ec91,24'hffffff},
+wire [23:0] lumacode_data[0:2][0:15] = '{'{ 24'h000000,24'h2a1b9d,24'h7d202c,24'h84258c,24'h4c2e00,24'h3c3c3c,24'h646464,24'h4fb3a5,24'h7f410d,24'h6351db,24'h939393,24'hbfd04a,24'h339840,24'hb44f5c,24'h7ce587,24'hffffff},
                                          '{ 24'h000000,24'h000000,24'h0200FD,24'hCF01CE,24'h0100CE,24'hCF0100,24'hFF02FD,24'h01CFCF,24'hFF0201,24'h00CF15,24'h02FFFF,24'hFFFF1D,24'h00FF1C,24'hCFCF15,24'hCFCFCF,24'hFFFFFF},
                                          '{ 24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000,24'h000000}};
 
@@ -330,9 +330,12 @@ always @(posedge CLK_MEAS_i) begin
     if ((VSYNC_i_np_prev & ~VSYNC_i_np) & (~interlace_flag | (meas_fid == FID_EVEN))) begin
         pcnt_frame_ctr <= 1;
         pcnt_line_stored <= 1'b0;
-        pcnt_frame <= interlace_flag ? (pcnt_frame_ctr>>1) : pcnt_frame_ctr[19:0];
-    end else if (pcnt_frame_ctr < 21'h1fffff) begin
+        if (sync_active & (pcnt_frame_ctr != '1))
+            pcnt_field <= interlace_flag ? (pcnt_frame_ctr>>1) : pcnt_frame_ctr[19:0];
+    end else if (pcnt_frame_ctr < '1) begin
         pcnt_frame_ctr <= pcnt_frame_ctr + 1'b1;
+    end else begin
+        pcnt_field <= 0;
     end
 
     if (HSYNC_i_np_prev & ~HSYNC_i_np) begin
@@ -355,7 +358,7 @@ always @(posedge CLK_MEAS_i) begin
     VSYNC_i_np_prev <= VSYNC_i_np;
 end
 
-// Detect sync polarities and activity
+// Detect sync polarities and activity during ~10ms interval
 always @(posedge CLK_MEAS_i) begin
     if (syncpol_det_ctr == 0) begin
         hsync_i_pol <= (hsync_hpol_ctr > 18'h1ffff);
@@ -365,6 +368,7 @@ always @(posedge CLK_MEAS_i) begin
         vsync_hpol_ctr <= 0;
 
         if ((vsync_hpol_ctr == '0) | (vsync_hpol_ctr == '1)) begin
+            // If vsync has been stale for ~100ms, clear activity flag
             if (sync_inactive_ctr == '1)
                 sync_active <= 1'b0;
             else

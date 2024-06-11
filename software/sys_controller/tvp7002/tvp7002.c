@@ -304,8 +304,8 @@ void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks
     }
 
     cp_current = (40*Kvco[vco_range]+pixs_per_line/2) / pixs_per_line; //"+pixs_per_line/2" for fast rounding
-    if (cp_current > 7)
-        cp_current = 7;
+    if (cp_current > 6)
+        cp_current = 6;
 
     printf("VCO range: %s\nCPC: %u\n", Kvco_str[vco_range], cp_current);
     tvp_writereg(TVP_HPLLCTRL, ((vco_range << 6) | (cp_current << 3)));

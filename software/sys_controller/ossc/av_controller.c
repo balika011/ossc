@@ -294,8 +294,8 @@ inline int check_linecnt(alt_u8 progressive, alt_u32 totlines) {
 // Check if input video status / target configuration has changed
 status_t get_status(tvp_sync_input_t syncinput)
 {
-    alt_u32 totlines, clkcnt, pcnt_frame;
-    alt_u8 progressive, sync_active, valid_linecnt, hsync_width;
+    alt_u32 totlines, clkcnt, pcnt_field;
+    alt_u8 progressive, sync_active, valid_mode, hsync_width;
     status_t status = NO_CHANGE;
     alt_timestamp_type start_ts = alt_timestamp();
 
@@ -305,34 +305,32 @@ status_t get_status(tvp_sync_input_t syncinput)
             break;
     }
 
-    //sync_active = tvp_check_sync(syncinput);
-    sync_active = sc->fe_status.sync_active;
-
     // Read sync information from TVP7002 frontend
+    sync_active = sc->fe_status.sync_active;
     totlines = sc->fe_status.vtotal;
     progressive = !sc->fe_status.interlace_flag;
-    pcnt_frame = (unsigned long)sc->fe_status2.pcnt_frame;
+    pcnt_field = (unsigned long)sc->fe_status2.pcnt_field;
     hsync_width = (unsigned long)sc->fe_status2.hsync_width;
-    clkcnt = pcnt_frame/(totlines>>!progressive);
 
-    valid_linecnt = check_linecnt(progressive, totlines);
+    clkcnt = pcnt_field/(totlines>>!progressive);
+    valid_mode = (pcnt_field > 0) && check_linecnt(progressive, totlines);
 
     // Check sync activity
-    if (!cm.sync_active && sync_active && valid_linecnt) {
+    if (!cm.sync_active && sync_active && valid_mode) {
         cm.sync_active = 1;
         status = ACTIVITY_CHANGE;
-    } else if (cm.sync_active && (!sync_active || !valid_linecnt)) {
+    } else if (cm.sync_active && (!sync_active || !valid_mode)) {
         cm.sync_active = 0;
         status = ACTIVITY_CHANGE;
     }
 
-    if (valid_linecnt) {
+    if (sync_active && valid_mode) {
         if ((totlines != cm.totlines) ||
             (progressive != cm.progressive) ||
-            (pcnt_frame < (cm.pcnt_frame - PCNT_TOLERANCE)) ||
-            (pcnt_frame > (cm.pcnt_frame + PCNT_TOLERANCE)) ||
+            (pcnt_field < (cm.pcnt_field - PCNT_TOLERANCE)) ||
+            (pcnt_field > (cm.pcnt_field + PCNT_TOLERANCE)) ||
             (abs(((int)hsync_width - (int)cm.hsync_width)) > HSYNC_WIDTH_TOLERANCE)) {
-            printf("totlines: %lu (cur) / %lu (prev), pcnt_frame: %lu (cur) / %lu (prev), hsync_width: %lu (cur) / %lu (prev)\n", totlines, cm.totlines, pcnt_frame, cm.pcnt_frame, hsync_width, cm.hsync_width);
+            printf("totlines: %lu (cur) / %lu (prev), pcnt_field: %lu (cur) / %lu (prev), hsync_width: %lu (cur) / %lu (prev)\n", totlines, cm.totlines, pcnt_field, cm.pcnt_field, hsync_width, cm.hsync_width);
 
             status = (status < MODE_CHANGE) ? MODE_CHANGE : status;
         }
@@ -345,7 +343,7 @@ status_t get_status(tvp_sync_input_t syncinput)
 
         cm.totlines = totlines;
         cm.clkcnt = clkcnt;
-        cm.pcnt_frame = pcnt_frame;
+        cm.pcnt_field = pcnt_field;
         cm.hsync_width = hsync_width;
         cm.progressive = progressive;
     }
@@ -541,8 +539,8 @@ void program_mode()
 
     memset(&vmode_in, 0, sizeof(mode_data_t));
 
-    vmode_in.timings.v_hz_x100 = (100*27000000UL)/cm.pcnt_frame;
-    h_hz = (100*27000000UL)/((100*cm.pcnt_frame*(1+!cm.progressive))/cm.totlines);
+    vmode_in.timings.v_hz_x100 = (100*27000000UL)/cm.pcnt_field;
+    h_hz = (100*27000000UL)/((100*cm.pcnt_field*(1+!cm.progressive))/cm.totlines);
 
     printf("\nLines: %u %c\n", (unsigned)cm.totlines, cm.progressive ? 'p' : 'i');
     printf("Clocks per line: %u\n", (unsigned)cm.clkcnt);
@@ -941,7 +939,7 @@ int main()
         printf("### DIY VIDEO DIGITIZER / SCANCONVERTER INIT OK ###\n\n");
         sniprintf(row1, LCD_ROW_LEN+1, "OSSC  fw. %u.%.2u" FW_SUFFIX1 FW_SUFFIX2, FW_VER_MAJOR, FW_VER_MINOR);
 #ifndef DEBUG
-        strncpy(row2, "2014-2023  marqs", LCD_ROW_LEN+1);
+        strncpy(row2, "2014-2024  marqs", LCD_ROW_LEN+1);
 #else
         strncpy(row2, "** DEBUG BUILD *", LCD_ROW_LEN+1);
 #endif
@@ -1123,6 +1121,9 @@ int main()
                 auto_input_ctr = 0;
                 auto_input_timestamp = alt_timestamp();
             }
+            // Avoid detection of initial vsync pulses after auto mode switch
+            if (auto_input_changed)
+                usleep(120000);
         }
 
         // Check here to enable regardless of input

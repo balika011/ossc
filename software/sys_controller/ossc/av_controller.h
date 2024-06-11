@@ -76,7 +76,7 @@ typedef struct {
 //TODO: transform binary values into flags
 typedef struct {
     alt_u32 totlines;
-    alt_u32 pcnt_frame;
+    alt_u32 pcnt_field;
     alt_u32 hsync_width;
     alt_u32 clkcnt;
     alt_u8 progressive;
