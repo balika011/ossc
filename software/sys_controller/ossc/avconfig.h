@@ -102,6 +102,8 @@ typedef struct {
     alt_u8 ar_256col;
     alt_u8 default_vic;
     alt_u8 clamp_offset;
+    alt_u8 adc_pll_bw;
+    alt_u8 fpga_pll_bw;
 
     /* Postprocessing settings */
     alt_u8 sl_mode;

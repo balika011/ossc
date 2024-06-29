@@ -81,6 +81,7 @@ static const char *mask_color_desc[] = { "Black", "Blue", "Green", "Cyan", "Red"
 static const char *av3_alt_rgb_desc[] = { "Off", "AV1", "AV2" };
 static const char *shmask_mode_desc[] = { "Off", "A-Grille", "TV", "PVM" };
 static const char *lumacode_mode_desc[] = { "Off", "C64", "Spectrum", "Coleco/MSX" };
+static const char *pll_bw_desc[] = { "High", "Low" };
 
 static void sync_vth_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d mV", (v*1127)/100); }
 static void intclks_to_time_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%.2u us", (unsigned)(((1000000U*v)/(TVP_INTCLK_HZ/1000))/1000), (unsigned)((((1000000U*v)/(TVP_INTCLK_HZ/1000))%1000)/10)); }
@@ -173,6 +174,8 @@ MENU(menu_sync, P99_PROTECT({ \
     { LNG("Vsync threshold","Vsyncｼｷｲﾁ"),       OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.vsync_thold, OPT_NOWRAP, VSYNC_THOLD_MIN, VSYNC_THOLD_MAX, intclks_to_time_disp } } },
     { "H-PLL Pre-Coast",                        OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.pre_coast,   OPT_NOWRAP, 0, PLL_COAST_MAX, lines_disp } } },
     { "H-PLL Post-Coast",                       OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.post_coast,  OPT_NOWRAP, 0, PLL_COAST_MAX, lines_disp } } },
+    { "ADC PLL BW",                             OPT_AVCONFIG_SELECTION, { .sel = { &tc.adc_pll_bw,  OPT_WRAP,   SETTING_ITEM(pll_bw_desc) } } },
+    { "FPGA PLL BW",                            OPT_AVCONFIG_SELECTION, { .sel = { &tc.fpga_pll_bw, OPT_WRAP,   SETTING_ITEM(pll_bw_desc) } } },
 }))
 
 MENU(menu_output, P99_PROTECT({ \

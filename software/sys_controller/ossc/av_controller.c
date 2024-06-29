@@ -108,7 +108,14 @@ const pll_config_t pll_configs[] = { {{0x0d806000, 0x00402010, 0x08800020, 0x000
                                      {{0x0d806000, 0x00402004, 0x02800020, 0x00080002, 0x00000000}},    // 4x (~20-40MHz)
                                      {{0x0d806000, 0x00441c05, 0x01800020, 0x00080002, 0x00000000}},    // 5x (~20-40MHz)
                                      {{0x0d806000, 0x00301802, 0x01800020, 0x00080002, 0x00000000}},    // 6x (~20-40MHz)
-                                     {{0x0e406000, 0x00281407, 0x02800020, 0x00080002, 0x00000000}} };  // 2x (~75MHz)
+                                     {{0x0e406000, 0x00281407, 0x02800020, 0x00080002, 0x00000000}},    // 2x (~75MHz)
+                                     {{0x04004070, 0x21E0F018, 0x0C800020, 0x00080002, 0x00000000}},    // 1x lo-bw (default)
+                                     {{0x04004070, 0x21E0F00C, 0x06800020, 0x00080002, 0x00000000}},    // 2x lo-bw (~20-40MHz)
+                                     {{0x04004070, 0x21E0F008, 0x04800020, 0x00080002, 0x00000000}},    // 3x lo-bw (~20-40MHz)
+                                     {{0x04004070, 0x21E0F006, 0x03800020, 0x00080002, 0x00000000}},    // 4x lo-bw (~20-40MHz)
+                                     {{0x04004070, 0x2190C804, 0x02800020, 0x00080002, 0x00000000}},    // 5x lo-bw (~20-40MHz)
+                                     {{0x04004070, 0x21E0F004, 0x02800020, 0x00080002, 0x00000000}},    // 6x lo-bw (~20-40MHz)
+                                     {{0x040040F0, 0x61A0D004, 0x02800020, 0x00080002, 0x00000000}} };  // 2x lo-bw (~75MHz)
 
 volatile sc_regs *sc = (volatile sc_regs*)SC_CONFIG_0_BASE;
 volatile osd_regs *osd = (volatile osd_regs*)OSD_GENERATOR_0_BASE;
@@ -166,6 +173,7 @@ inline void SetupAudio(tx_mode_t mode)
         cts |= read_it2(0x36) << 4;
         cts |= read_it2(0x37) << 12;
         printf("CTS: %lu\n", cts);
+        Switch_HDMITX_Bank(0);
 #endif
     }
 }
@@ -199,39 +207,65 @@ inline void TX_enable(tx_mode_t mode)
     SetAVMute(FALSE);
 }
 
-void pll_reconfigure(alt_u8 id)
+int pll_reconfigure(uint8_t mult, uint32_t pclk_i_hz, uint8_t bwsel)
 {
-    if ((id < sizeof(pll_configs)/sizeof(pll_config_t)) && (id != pll_reconfig->pll_config_status.c_config_id)) {
-        memcpy((void*)pll_reconfig->pll_config_data.data, pll_configs[id].data, sizeof(pll_config_t));
-        pll_reconfig->pll_config_status.t_config_id = id;
+    uint8_t id;
+    int config_changed = 0;
 
-        printf("Reconfiguring PLL to config %u\n", id);
+    if ((mult > 1) || ((bwsel == 1) && (pclk_i_hz < 40000000UL)) || (cm.avinput == AV_TESTPAT)) {
+        if ((mult == 2) && (pclk_i_hz > 50000000UL))
+            id = ((bwsel+1)*7) - 1;
+        else
+            id = (bwsel*7) + (mult-1);
 
-        // Try switching to fixed reference clock as otherwise reconfig may hang or corrupt configuration
-        if (cm.avinput != AV_TESTPAT) {
-            sys_ctrl &= ~VIDGEN_OFF;
-            IOWR_ALTERA_AVALON_PIO_DATA(PIO_0_BASE, sys_ctrl);
-            usleep(10);
-        }
+        config_changed = !!(sys_ctrl & PLL_BYPASS);
 
-        // Do not reconfigure if clock switch failed
-        if ((IORD_ALTERA_AVALON_PIO_DATA(PIO_1_BASE) & PLL_ACTIVECLK_MASK) == 0) {
-            // reset state machine if previous reconfigure hanged (should not occur with stable refclk)
-            if (pll_reconfig->pll_config_status.busy) {
-                pll_reconfig->pll_config_status.reset = 1;
-                usleep(1);
+        pll_reconfig->pll_config_status.reset = 0;
+        sys_ctrl &= ~PLL_BYPASS;
+
+        if ((id < sizeof(pll_configs)/sizeof(pll_config_t)) && (id != pll_reconfig->pll_config_status.c_config_id)) {
+            memcpy((void*)pll_reconfig->pll_config_data.data, pll_configs[id].data, sizeof(pll_config_t));
+            pll_reconfig->pll_config_status.t_config_id = id;
+
+            printf("Reconfiguring FPGA PLL to config %u\n", id);
+
+            // Try switching to fixed reference clock as otherwise reconfig may hang or corrupt configuration
+            if (cm.avinput != AV_TESTPAT) {
+                sys_ctrl &= ~VIDGEN_OFF;
+                IOWR_ALTERA_AVALON_PIO_DATA(PIO_0_BASE, sys_ctrl);
+                usleep(10);
             }
 
-            pll_reconfig->pll_config_status.reset = 0;
-            pll_reconfig->pll_config_status.update = 1;
-            usleep(10);
-        }
+            // Do not reconfigure if clock switch failed
+            if ((IORD_ALTERA_AVALON_PIO_DATA(PIO_1_BASE) & PLL_ACTIVECLK_MASK) == 0) {
+                // reset state machine if previous reconfigure hanged (should not occur with stable refclk)
+                if (pll_reconfig->pll_config_status.busy) {
+                    pll_reconfig->pll_config_status.reset = 1;
+                    usleep(1);
+                }
 
-        if (cm.avinput != AV_TESTPAT) {
-            sys_ctrl |= VIDGEN_OFF;
-            IOWR_ALTERA_AVALON_PIO_DATA(PIO_0_BASE, sys_ctrl);
+                pll_reconfig->pll_config_status.reset = 0;
+                pll_reconfig->pll_config_status.update = 1;
+                usleep(10);
+            }
+
+            if (cm.avinput != AV_TESTPAT)
+                sys_ctrl |= VIDGEN_OFF;
+
+            config_changed = 1;
         }
+    } else {
+        config_changed = !(sys_ctrl & PLL_BYPASS);
+
+        pll_reconfig->pll_config_status.reset = 1;
+        sys_ctrl |= PLL_BYPASS;
+        printf("Bypassing FPGA PLL\n");
     }
+
+    IOWR_ALTERA_AVALON_PIO_DATA(PIO_0_BASE, sys_ctrl);
+
+    // TX PLL may occasionally lose lock during switchover, caller should reset it if config was changed
+    return config_changed;
 }
 
 void set_lpf(alt_u8 lpf)
@@ -336,9 +370,6 @@ status_t get_status(tvp_sync_input_t syncinput)
         }
 
         if (memcmp(&tc, &cm.cc, offsetof(avconfig_t, sl_mode)) || (update_cur_vm == 1))
-            status = (status < MODE_CHANGE) ? MODE_CHANGE : status;
-
-        if ((vm_conf.si_pclk_mult > 1) && (pll_reconfig->pll_config_status.c_config_id != 6) && (vm_conf.si_pclk_mult-1 != pll_reconfig->pll_config_status.c_config_id))
             status = (status < MODE_CHANGE) ? MODE_CHANGE : status;
 
         cm.totlines = totlines;
@@ -533,14 +564,14 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
 // Configure TVP7002 and scan converter logic based on the video mode
 void program_mode()
 {
-    int retval;
+    int retval, fpga_pll_config_changed;
     alt_u8 h_syncinlen, v_syncinlen, macrovis, hdmitx_pclk_level, osd_x_size, osd_y_size;
     alt_u32 h_hz, h_synclen_px, pclk_i_hz, dotclk_hz, pll_h_total;
 
     memset(&vmode_in, 0, sizeof(mode_data_t));
 
-    vmode_in.timings.v_hz_x100 = (100*27000000UL)/cm.pcnt_field;
-    h_hz = (100*27000000UL)/((100*cm.pcnt_field*(1+!cm.progressive))/cm.totlines);
+    vmode_in.timings.v_hz_x100 = (100*TVP_EXTCLK_HZ)/cm.pcnt_field;
+    h_hz = (100*TVP_EXTCLK_HZ)/((100*cm.pcnt_field*(1+!cm.progressive))/cm.totlines);
 
     printf("\nLines: %u %c\n", (unsigned)cm.totlines, cm.progressive ? 'p' : 'i');
     printf("Clocks per line: %u\n", (unsigned)cm.clkcnt);
@@ -613,7 +644,7 @@ void program_mode()
 
     tvp_source_setup(target_type,
                      pll_h_total,
-                     vmode_in.timings.h_total,
+                     cm.cc.adc_pll_bw ? pll_h_total : vmode_in.timings.h_total,
                      cm.clkcnt,
                      0,
                      (alt_u8)h_synclen_px,
@@ -623,18 +654,7 @@ void program_mode()
 
     set_sampler_phase(video_modes_plm[cm.id].sampler_phase, 0);
 
-    pll_reconfig->pll_config_status.reset = (vm_conf.si_pclk_mult <= 1);
-
-    if (vm_conf.si_pclk_mult > 1) {
-        if ((vm_conf.si_pclk_mult == 2) && (pclk_i_hz > 50000000UL))
-            pll_reconfigure(6);
-        else
-            pll_reconfigure(vm_conf.si_pclk_mult-1);
-        sys_ctrl &= ~PLL_BYPASS;
-    } else {
-        sys_ctrl |= PLL_BYPASS;
-    }
-    IOWR_ALTERA_AVALON_PIO_DATA(PIO_0_BASE, sys_ctrl);
+    fpga_pll_config_changed = pll_reconfigure(vm_conf.si_pclk_mult, pclk_i_hz, cm.cc.fpga_pll_bw);
 
     update_osd_size(&vmode_out);
 
@@ -652,7 +672,7 @@ void program_mode()
     printf("PCLK level: %u, PR: %u, IPR: %u, ITC: %u\n", hdmitx_pclk_level, vm_conf.tx_pixelrep, vm_conf.hdmitx_pixr_ifr, cm.cc.hdmi_itc);
 
     // Full TX initialization increases mode switch delay, use only when necessary
-    if (cm.cc.full_tx_setup || (cm.hdmitx_pclk_level != hdmitx_pclk_level)) {
+    if (cm.cc.full_tx_setup || fpga_pll_config_changed || (cm.hdmitx_pclk_level != hdmitx_pclk_level)) {
         cm.hdmitx_pclk_level = hdmitx_pclk_level;
         TX_enable(cm.cc.tx_mode);
     } else if (cm.cc.tx_mode!=TX_DVI) {
@@ -741,7 +761,7 @@ int init_hw()
 
     // Reload initial PLL config (needed after jtagm_reset_req if config has changed).
     // Note that test pattern gets restored only if pclk was active before jtagm_reset_req assertion.
-    pll_reconfigure(PLL_CONFIG_VG);
+    pll_reconfigure(1, TVP_EXTCLK_HZ, 0);
 
     //wait >500ms for SD card interface to be stable
     //over 200ms and LCD may be buggy?
