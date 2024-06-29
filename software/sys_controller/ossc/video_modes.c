@@ -353,6 +353,7 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
             vm_conf->x_rpt = vm_conf->h_skip = 2;
             vmode_hv_mult(vm_out, VM_OUT_XMULT, VM_OUT_YMULT);
             break;
+        case MODE_L3_240x360:
         case MODE_L3_320_COL:
         case MODE_L4_320_COL:
         case MODE_L5_384_COL:
@@ -369,10 +370,6 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
             break;
         case MODE_L5_256_COL:
             vm_conf->x_rpt = vm_conf->h_skip = 5;
-            vmode_hv_mult(vm_out, VM_OUT_XMULT, VM_OUT_YMULT);
-            break;
-        case MODE_L3_240x360:
-            vm_conf->x_rpt = vm_conf->h_skip = 7;
             vmode_hv_mult(vm_out, VM_OUT_XMULT, VM_OUT_YMULT);
             break;
         default:
@@ -393,10 +390,8 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
     else if (mindiff_lm & (MODE_L3_256_COL|MODE_L6_256_COL))
         vm_conf->x_rpt = cc->ar_256col ? 2 : 3;
 
-    if (mindiff_lm & (MODE_L3_320_COL|MODE_L2_240x360))
+    if (mindiff_lm & (MODE_L3_320_COL|MODE_L2_240x360|MODE_L3_240x360))
         vm_conf->x_rpt--;
-    else if (mindiff_lm & MODE_L3_240x360)
-        vm_conf->x_rpt -= 2;
 
     if (mindiff_lm == MODE_L2_240x360) {
         vm_out->timings.h_active += 80;
@@ -404,7 +399,7 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
     }
 
     // Force TX pixel-repeat for high bandwidth modes
-    if (((mindiff_lm == MODE_L5_GEN_4_3) && (mode_preset->group == GROUP_288P)) || (mindiff_lm >= MODE_L6_GEN_4_3))
+    if (((mindiff_lm == MODE_L5_GEN_4_3) && (mode_preset->group == GROUP_288P)) || (mindiff_lm == MODE_L3_240x360) || (mindiff_lm >= MODE_L6_GEN_4_3))
         vm_conf->tx_pixelrep = 1;
 
     sniprintf(vm_out->name, 11, "%s x%u", vm_in->name, vm_conf->y_rpt+1);
