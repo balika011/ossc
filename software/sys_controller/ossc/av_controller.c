@@ -646,7 +646,7 @@ void program_mode()
                      pll_h_total,
                      cm.cc.adc_pll_bw ? pll_h_total : vmode_in.timings.h_total,
                      cm.clkcnt,
-                     0,
+                     cm.cc.tvp_hpll2x && (pclk_i_hz < 50000000UL),
                      (alt_u8)h_synclen_px,
                      (alt_8)(cm.cc.clamp_offset-SIGNED_NUMVAL_ZERO));
     set_lpf(cm.cc.video_lpf);
