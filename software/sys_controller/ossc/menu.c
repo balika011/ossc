@@ -62,7 +62,7 @@ static const char *l5_fmt_desc[] = { "1920x1080", "1600x1200", "1920x1200" };
 static const char *pm_240p_desc[] = { LNG("Passthru","ﾊﾟｽｽﾙｰ"), "Line2x", "Line3x", "Line4x", "Line5x", "Line6x" };
 static const char *pm_480i_desc[] = { LNG("Passthru","ﾊﾟｽｽﾙｰ"), "Line2x (bob)", "Line3x (laced)", "Line4x (bob)" };
 static const char *pm_384p_desc[] = { LNG("Passthru","ﾊﾟｽｽﾙｰ"), "Line2x", "Line3x Generic", "Line2x 240x360", "Line3x 240x360" };
-static const char *pm_480p_desc[] = { LNG("Passthru","ﾊﾟｽｽﾙｰ"), "Line2x" };
+static const char *pm_480p_desc[] = { LNG("Passthru","ﾊﾟｽｽﾙｰ"), "Line2x", "Line3x Generic" };
 static const char *pm_1080i_desc[] = { LNG("Passthru","ﾊﾟｽｽﾙｰ"), "Line2x (bob)" };
 static const char *ar_256col_desc[] = { "Pseudo 4:3 DAR", "1:1 PAR" };
 static const char *tx_mode_desc[] = { "HDMI (RGB)", "HDMI (YCbCr444)", "DVI" };
@@ -80,8 +80,9 @@ static const char *auto_input_desc[] = { "Off", "Current input", "All inputs" };
 static const char *mask_color_desc[] = { "Black", "Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "White" };
 static const char *av3_alt_rgb_desc[] = { "Off", "AV1", "AV2" };
 static const char *shmask_mode_desc[] = { "Off", "A-Grille", "TV", "PVM" };
-static const char *lumacode_mode_desc[] = { "Off", "C64", "Spectrum", "Coleco/MSX" };
-static const char *pll_bw_desc[] = { "High", "Low" };
+static const char *lumacode_mode_desc[] = { "Off", "C64", "Spectrum", "Coleco/MSX", "NES" };
+static const char *adc_pll_bw_desc[] = { "High", "Medium", "Low", "Ultra low" };
+static const char *fpga_pll_bw_desc[] = { "High", "Low" };
 
 static void sync_vth_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d mV", (v*1127)/100); }
 static void intclks_to_time_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%.2u us", (unsigned)(((1000000U*v)/(TVP_INTCLK_HZ/1000))/1000), (unsigned)((((1000000U*v)/(TVP_INTCLK_HZ/1000))%1000)/10)); }
@@ -174,8 +175,8 @@ MENU(menu_sync, P99_PROTECT({ \
     { LNG("Vsync threshold","Vsyncｼｷｲﾁ"),       OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.vsync_thold, OPT_NOWRAP, VSYNC_THOLD_MIN, VSYNC_THOLD_MAX, intclks_to_time_disp } } },
     { "H-PLL Pre-Coast",                        OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.pre_coast,   OPT_NOWRAP, 0, PLL_COAST_MAX, lines_disp } } },
     { "H-PLL Post-Coast",                       OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.post_coast,  OPT_NOWRAP, 0, PLL_COAST_MAX, lines_disp } } },
-    { "ADC PLL BW",                             OPT_AVCONFIG_SELECTION, { .sel = { &tc.adc_pll_bw,  OPT_WRAP,   SETTING_ITEM(pll_bw_desc) } } },
-    { "FPGA PLL BW",                            OPT_AVCONFIG_SELECTION, { .sel = { &tc.fpga_pll_bw, OPT_WRAP,   SETTING_ITEM(pll_bw_desc) } } },
+    { "ADC PLL BW",                             OPT_AVCONFIG_SELECTION, { .sel = { &tc.adc_pll_bw,  OPT_WRAP,   SETTING_ITEM(adc_pll_bw_desc) } } },
+    { "FPGA PLL BW",                            OPT_AVCONFIG_SELECTION, { .sel = { &tc.fpga_pll_bw, OPT_WRAP,   SETTING_ITEM(fpga_pll_bw_desc) } } },
 }))
 
 MENU(menu_output, P99_PROTECT({ \
@@ -206,7 +207,9 @@ MENU(menu_scanlines, P99_PROTECT({ \
     { "Sl. alternating",                          OPT_AVCONFIG_SELECTION, { .sel = { &tc.sl_altern,   OPT_WRAP,   SETTING_ITEM(off_on_desc) } } },
     { LNG("Sl. alignment","ｽｷｬﾝﾗｲﾝﾎﾟｼﾞｼｮﾝ"),        OPT_AVCONFIG_SELECTION, { .sel = { &tc.sl_id,       OPT_WRAP,   SETTING_ITEM(sl_id_desc) } } },
     { LNG("Sl. type","ｽｷｬﾝﾗｲﾝﾙｲ"),                 OPT_AVCONFIG_SELECTION, { .sel = { &tc.sl_type,     OPT_WRAP,   SETTING_ITEM(sl_type_desc) } } },
+#ifndef DEBUG
     { "<  Custom Sl.  >",                         OPT_SUBMENU,            { .sub = { &menu_cust_sl, NULL, NULL } } },
+#endif
 }))
 
 MENU(menu_postproc, P99_PROTECT({ \

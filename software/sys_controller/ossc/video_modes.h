@@ -108,7 +108,7 @@ typedef enum {
 } mode_flags;
 
 typedef enum {
-    VMODE_480p = 23,
+    VMODE_480p = 24,
 } vmode_t;
 
 typedef struct {

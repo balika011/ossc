@@ -169,7 +169,7 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
                 break;
             case GROUP_480I:
             case GROUP_576I:
-                //fixed Line3x/4x mode for 480i
+                //fixed Line3x/4x mode for 480i and onwards
                 valid_lm[2] = MODE_L3_GEN_16_9;
                 valid_lm[3] = MODE_L4_GEN_4_3;
                 break;
@@ -399,7 +399,9 @@ int get_pure_lm_mode(avconfig_t *cc, mode_data_t *vm_in, mode_data_t *vm_out, vm
     }
 
     // Force TX pixel-repeat for high bandwidth modes
-    if (((mindiff_lm == MODE_L5_GEN_4_3) && (mode_preset->group == GROUP_288P)) || (mindiff_lm == MODE_L3_240x360) || (mindiff_lm >= MODE_L6_GEN_4_3))
+    if (((mindiff_lm == MODE_L5_GEN_4_3) && (mode_preset->group == GROUP_288P)) ||
+       ((mindiff_lm == MODE_L3_GEN_16_9) && ((mode_preset->group == GROUP_480P) || (mode_preset->group == GROUP_576P))) ||
+       (mindiff_lm == MODE_L3_240x360) || (mindiff_lm >= MODE_L6_GEN_4_3))
         vm_conf->tx_pixelrep = 1;
 
     sniprintf(vm_out->name, 11, "%s x%u", vm_in->name, vm_conf->y_rpt+1);

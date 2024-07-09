@@ -54,6 +54,7 @@ const mode_data_t video_modes_plm_default[] = {
     { "640x384",       HDMI_Unknown,     { 640,  384,   5500,   800, 0,  492,   48, 63,   96, 2,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_PC,                 GROUP_384P,   (MODE_PT | MODE_L2),                                                                        },
     /* ~525-line modes */
     { "480i",          HDMI_480i60,      { 720,  240,   5994,   858, 0,  525,   57, 15,   62, 3,  1},  DEF_PHASE,  {{ 0,  0}},  VIDEO_SDTV,               GROUP_480I,   (MODE_PT | MODE_L2 | MODE_L3_GEN_16_9 | MODE_L4_GEN_4_3),                                   },
+    { "1920x480",      HDMI_Unknown,     { 960,  480,   5994,  1287, 0,  525,  150, 30,   93, 6,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_EDTV,               GROUP_480P,   (MODE_L3_GEN_16_9),                                                                         },
     { "480p",          HDMI_480p60,      { 720,  480,   5994,   858, 0,  525,   60, 30,   62, 6,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_EDTV,               GROUP_480P,   (MODE_PT | MODE_L2),                                                                        },
     { "640x480_60",    HDMI_640x480p60,  { 640,  480,   6000,   800, 0,  525,   48, 33,   96, 2,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_PC,                 GROUP_480P,   (MODE_PT | MODE_L2),                                                                        },
      /* 480p PSP in-game */ \
@@ -62,6 +63,7 @@ const mode_data_t video_modes_plm_default[] = {
     { "640x512",       HDMI_Unknown,     { 640,  512,   6000,   800, 0,  568,   48, 34,   96, 6,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_PC,                 GROUP_480P,   (MODE_PT | MODE_L2),                                                                        },
     /* ~625-line modes */
     { "576i",          HDMI_576i50,      { 720,  288,   5000,   864, 0,  625,   69, 19,   63, 3,  1},  DEF_PHASE,  {{ 0,  0}},  VIDEO_SDTV,               GROUP_576I,   (MODE_PT | MODE_L2 | MODE_L3_GEN_16_9 | MODE_L4_GEN_4_3),                                   },
+    { "1920x480LB",    HDMI_Unknown,     { 960,  480,   5000,  1296, 0,  625,  162, 87,   96, 5,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_EDTV,               GROUP_576P,   (MODE_L3_GEN_16_9),                                                                         },
     { "576p",          HDMI_576p50,      { 720,  576,   5000,   864, 0,  625,   68, 39,   64, 5,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_EDTV,               GROUP_576P,   (MODE_PT | MODE_L2),                                                                        },
     { "800x600_60",    HDMI_Unknown,     { 800,  600,   6000,  1056, 0,  628,   88, 23,  128, 4,  0},  DEF_PHASE,  {{ 0,  0}},  VIDEO_PC,                 GROUP_NONE,   MODE_PT,                                                                                    },
     /* CEA 720p modes */
