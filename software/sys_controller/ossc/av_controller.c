@@ -564,7 +564,7 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
 // Configure TVP7002 and scan converter logic based on the video mode
 void program_mode()
 {
-    int retval, fpga_pll_config_changed;
+    int retval, fpga_pll_config_changed, vmode_changed;
     alt_u8 h_syncinlen, v_syncinlen, macrovis, hdmitx_pclk_level, osd_x_size, osd_y_size;
     alt_u32 h_hz, h_synclen_px, pclk_i_hz, dotclk_hz, pll_h_total;
 
@@ -599,6 +599,7 @@ void program_mode()
         vm_conf.si_pclk_mult = 0;
         return;
     }
+    vmode_changed = !(cm.id == retval);
     cm.id = retval;
     vm_sel = cm.id;
 
@@ -644,11 +645,12 @@ void program_mode()
 
     tvp_source_setup(target_type,
                      pll_h_total,
-                     cm.cc.adc_pll_bw ? pll_h_total : vmode_in.timings.h_total,
+                     (cm.cc.adc_pll_bw == 0) ? vmode_in.timings.h_total : pll_h_total<<(cm.cc.adc_pll_bw-1),
                      cm.clkcnt,
                      cm.cc.tvp_hpll2x && (pclk_i_hz < 50000000UL),
                      (alt_u8)h_synclen_px,
-                     (alt_8)(cm.cc.clamp_offset-SIGNED_NUMVAL_ZERO));
+                     (alt_8)(cm.cc.clamp_offset-SIGNED_NUMVAL_ZERO),
+                     vmode_changed);
     set_lpf(cm.cc.video_lpf);
     set_csc(cm.cc.ypbpr_cs);
 

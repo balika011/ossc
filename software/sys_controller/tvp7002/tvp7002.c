@@ -306,6 +306,8 @@ void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks
     cp_current = (40*Kvco[vco_range]+pixs_per_line/2) / pixs_per_line; //"+pixs_per_line/2" for fast rounding
     if (cp_current > 6)
         cp_current = 6;
+    else if (cp_current == 0)
+        cp_current = 1;
 
     printf("VCO range: %s\nCPC: %u\n", Kvco_str[vco_range], cp_current);
     tvp_writereg(TVP_HPLLCTRL, ((vco_range << 6) | (cp_current << 3)));
@@ -375,10 +377,14 @@ void tvp_set_alcfilt(alt_u8 nsv, alt_u8 nsh) {
     tvp_writereg(TVP_ALCFILT, (nsv<<3)|nsh);
 }
 
-void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2, alt_u8 h_synclen_px, alt_8 clamp_user_offset)
+void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2, alt_u8 h_synclen_px, alt_8 clamp_user_offset, alt_u8 vmode_changed)
 {
     // Due to short MVS width, clamp reference starts prematurely (at the end of MVS window). Adjust offset so that reference moves back to hsync trailing edge.
     alt_u8 clamp_ref_offset = h_synclen_px - (((30*h_samplerate)/refclks_per_line)+5)/10;
+
+    // Reset sync processing if mode changed to avoid occasional wobbling issue
+    if (vmode_changed)
+        tvp_writereg(TVP_MISCCTRL4, tvp_readreg(TVP_MISCCTRL4) | (1<<7));
 
     // Clamp and ALC
     tvp_set_clamp_alc(type, clamp_ref_offset, clamp_user_offset, 1);
