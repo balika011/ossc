@@ -1235,8 +1235,9 @@ int main()
         while (alt_timestamp() < start_ts + MAINLOOP_INTERVAL_US*(TIMER_0_FREQ/1000000)) {}
 
         // restart timer if past half-range
-        if (start_ts > 0x7fffffff) {
+        if ((start_ts > 0x7fffffff) && !SPI_Timer_Status()) {
             alt_timestamp_start();
+            SPI_Timer_Off();
             if (auto_input_timestamp > start_ts)
                 auto_input_timestamp -= start_ts;
             else

@@ -58,8 +58,7 @@ inline void SPI_Freq_Low (void) {
 
 int SPI_Timer_On (WORD ms) {
     if (!sd_timer_ts) {
-        sd_timer_ts = ms*(ALT_CPU_FREQ/1000);
-        alt_timestamp_start();
+        sd_timer_ts = alt_timestamp() + ms*(TIMER_0_FREQ/1000);
         return 0;
     }
     return 1;
