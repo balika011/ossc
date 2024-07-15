@@ -406,6 +406,13 @@ sys sys_inst(
     .pll_reconfig_0_pll_reconfig_if_scandone     (pll_scandone)
 );
 
+// These do not work in current Quartus version (23.1) and a patch file (scripts/qsys.patch) must be used after Qsys generation instead
+defparam
+    sys_inst.epcq_controller2_0.asmi2_inst_epcq_ctrl.xip_controller.avst_fifo_inst.USE_MEMORY_BLOCKS = 0,
+    sys_inst.epcq_controller2_0.asmi2_inst_epcq_ctrl.xip_controller.avst_fifo_inst.avst_fifo.USE_MEMORY_BLOCKS = 0,
+    sys_inst.master_0.fifo.USE_MEMORY_BLOCKS = 0,
+    sys_inst.onchip_memory2_0.the_altsyncram.MAXIMUM_DEPTH = 2048;
+
 scanconverter #(
     .EMIF_ENABLE(0),
     .NUM_LINE_BUFFERS(2)
