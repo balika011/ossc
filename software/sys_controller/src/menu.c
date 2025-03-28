@@ -111,7 +111,7 @@ static arg_info_t vm_arg_info = {&vm_sel, 0, vm_display_name};
 static const arg_info_t profile_arg_info = {&profile_sel_menu, MAX_PROFILE, profile_disp};
 static const arg_info_t lt_arg_info = {&lt_sel, (sizeof(lt_desc)/sizeof(char*))-1, lt_disp};
 
-
+#if 0
 MENU(menu_advtiming, P99_PROTECT({ \
     { LNG("H. samplerate","H. ｻﾝﾌﾟﾙﾚｰﾄ"),        OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_h_samplerate, H_TOTAL_MIN,   H_TOTAL_MAX, vm_tweak } } },
     { "H. s.rate frac",                           OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_h_samplerate_adj, 0,  H_TOTAL_ADJ_MAX, vm_tweak } } },
@@ -142,10 +142,12 @@ MENU(menu_cust_sl, P99_PROTECT({ \
     { "Sub-column 5 str",                     OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.sl_cust_c_str[4],      OPT_NOWRAP, 0, SCANLINESTR_MAX+1, sl_cust_str_disp } } },
     { "Sub-column 6 str",                     OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.sl_cust_c_str[5],      OPT_NOWRAP, 0, SCANLINESTR_MAX+1, sl_cust_str_disp } } },
 }))
+#endif
 
 
 MENU(menu_vinputproc, P99_PROTECT({ \
     { LNG("Video LPF","ﾋﾞﾃﾞｵ LPF"),             OPT_AVCONFIG_SELECTION, { .sel = { &tc.video_lpf,     OPT_WRAP,   SETTING_ITEM(video_lpf_desc) } } },
+#if 0
     { LNG("Reverse LPF","ｷﾞｬｸLPF"),             OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.reverse_lpf,  OPT_NOWRAP, 0, REVERSE_LPF_MAX, value_disp } } },
     { LNG("YPbPr in ColSpa","ｲﾛｸｳｶﾝﾆYPbPr"),    OPT_AVCONFIG_SELECTION, { .sel = { &tc.ypbpr_cs,      OPT_WRAP,   SETTING_ITEM(ypbpr_cs_desc) } } },
     { LNG("R/Pr offset","R/Pr ｵﾌｾｯﾄ"),          OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.col.r_f_off,   OPT_NOWRAP, 0, 0xFF, value_disp } } },
@@ -159,8 +161,10 @@ MENU(menu_vinputproc, P99_PROTECT({ \
     { "ALC V filter",                           OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.alc_v_filter,  OPT_NOWRAP, 0, ALC_V_FILTER_MAX, alc_v_filter_disp } } },
     { "ALC H filter",                           OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.alc_h_filter,  OPT_NOWRAP, 0, ALC_H_FILTER_MAX, alc_h_filter_disp } } },
     { "Lumacode",                              OPT_AVCONFIG_SELECTION, { .sel = { &tc.lumacode_mode,  OPT_WRAP,   SETTING_ITEM(lumacode_mode_desc) } } },
+#endif
 }))
 
+#if 0
 MENU(menu_sampling, P99_PROTECT({ \
     { LNG("480p in sampler","ｻﾝﾌﾟﾗｰﾃﾞ480p"),     OPT_AVCONFIG_SELECTION, { .sel = { &tc.s480p_mode,    OPT_WRAP, SETTING_ITEM(s480p_mode_desc) } } },
     { LNG("400p in sampler","ｻﾝﾌﾟﾗｰﾃﾞ400p"),     OPT_AVCONFIG_SELECTION, { .sel = { &tc.s400p_mode,    OPT_WRAP, SETTING_ITEM(s400p_mode_desc) } } },
@@ -256,10 +260,11 @@ MENU(menu_settings, P99_PROTECT({ \
     { LNG("<Fw. update    >","<ﾌｧｰﾑｳｪｱｱｯﾌﾟﾃﾞｰﾄ>"), OPT_FUNC_CALL,        { .fun = { fw_update, NULL } } },
 #endif
 }))
-
+#endif
 
 MENU(menu_main, P99_PROTECT({ \
     { LNG("Video in proc  >","ﾀｲｵｳｴｲｿﾞｳ     >"),  OPT_SUBMENU,            { .sub = { &menu_vinputproc, NULL, NULL } } },
+#if 0
     { LNG("Sampling opt.  >","ｻﾝﾌﾟﾘﾝｸﾞｵﾌﾟｼｮﾝ>"),  OPT_SUBMENU,            { .sub = { &menu_sampling, NULL, NULL } } },
     { LNG("Sync opt.      >","ﾄﾞｳｷｵﾌﾟｼｮﾝ    >"),  OPT_SUBMENU,            { .sub = { &menu_sync, NULL, NULL } } },
     { LNG("Output opt.    >","ｼｭﾂﾘｮｸｵﾌﾟｼｮﾝ  >"),  OPT_SUBMENU,            { .sub = { &menu_output, NULL, NULL } } },
@@ -268,6 +273,7 @@ MENU(menu_main, P99_PROTECT({ \
     { LNG("Compatibility  >","ｺﾞｶﾝｾｲ        >"),  OPT_SUBMENU,            { .sub = { &menu_compatibility, NULL, NULL } } },
     AUDIO_MENU
     { LNG("Settings opt   >","ｾｯﾃｲｶﾝﾘ       >"),  OPT_SUBMENU,            { .sub = { &menu_settings, NULL, NULL } } },
+#endif
 }))
 
 // Max 3 levels currently

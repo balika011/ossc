@@ -52,7 +52,9 @@ extern alt_u8 lcd_bl_timeout;
 extern alt_u8 vm_edit;
 extern volatile osd_regs *osd;
 
+#if 0
 extern menu_t menu_scanlines, menu_advtiming;
+#endif
 
 alt_u32 remote_code;
 alt_u8 remote_rpt, remote_rpt_prev;
@@ -173,6 +175,7 @@ int parse_control()
             break;
         case RC_SL_MODE:
             tc.sl_mode = (tc.sl_mode < SL_MODE_MAX) ? (tc.sl_mode + 1) : 0;
+#if 0
             if (!menu_active) {
                 strncpy((char*)osd->osd_array.data[0][0], menu_scanlines.items[0].name, OSD_CHAR_COLS);
                 strncpy((char*)osd->osd_array.data[1][0], menu_scanlines.items[0].sel.setting_str[tc.sl_mode], OSD_CHAR_COLS);
@@ -183,9 +186,11 @@ int parse_control()
             } else if (get_current_menunavi()->m == &menu_scanlines) {
                 render_osd_page();
             }
+#endif
             break;
         case RC_SL_TYPE:
-            tc.sl_type = (tc.sl_type < SL_TYPE_MAX) ? (tc.sl_type + 1) : 0;
+			tc.sl_type = (tc.sl_type < SL_TYPE_MAX) ? (tc.sl_type + 1) : 0;
+#if 0
             if (!menu_active) {
                 strncpy((char*)osd->osd_array.data[0][0], menu_scanlines.items[6].name, OSD_CHAR_COLS);
                 strncpy((char*)osd->osd_array.data[1][0], menu_scanlines.items[6].sel.setting_str[tc.sl_type], OSD_CHAR_COLS);
@@ -196,7 +201,8 @@ int parse_control()
             } else if (get_current_menunavi()->m == &menu_scanlines) {
                 render_osd_page();
             }
-            break;
+#endif
+			break;
         case RC_SL_MINUS:
         case RC_SL_PLUS:
             if (i == RC_SL_MINUS)
@@ -204,6 +210,7 @@ int parse_control()
             else
                 tc.sl_str = (tc.sl_str < SCANLINESTR_MAX) ? (tc.sl_str + 1) : SCANLINESTR_MAX;
 
+#if 0
             if (!menu_active) {
                 strncpy((char*)osd->osd_array.data[0][0], menu_scanlines.items[1].name, OSD_CHAR_COLS);
                 menu_scanlines.items[1].num.df(tc.sl_str);
@@ -214,8 +221,9 @@ int parse_control()
                 osd->osd_sec_enable[1].mask = 0;
             } else if (get_current_menunavi()->m == &menu_scanlines) {
                 render_osd_page();
-            }
-            break;
+			}
+#endif
+			break;
         case RC_LM_MODE:
             strncpy(menu_row1, "Linemult mode:", LCD_ROW_LEN+1);
             strncpy(menu_row2, "press 1-6", LCD_ROW_LEN+1);
@@ -266,6 +274,7 @@ int parse_control()
 
                 set_sampler_phase(video_modes_plm[cm.id].sampler_phase, 1);
 
+#if 0
                 if (!menu_active) {
                     strncpy((char*)osd->osd_array.data[0][0], menu_advtiming.items[10].name, OSD_CHAR_COLS);
                     sampler_phase_disp(video_modes_plm[cm.id].sampler_phase);
@@ -277,6 +286,7 @@ int parse_control()
                 } else if (get_current_menunavi()->m == &menu_advtiming) {
                     render_osd_page();
                 }
+#endif
             }
             break;
         case RC_PROF_HOTKEY:

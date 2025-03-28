@@ -798,10 +798,12 @@ int init_hw()
         pcm1862_active = 1;
     }
 
+#if 0
     if (init_flash() != 0) {
         printf("Error: could not find flash\n");
         return -1;
     }
+#endif
 
     // Set defaults
     set_default_avconfig();
@@ -812,8 +814,10 @@ int init_hw()
     init_menu();
 
     // Load initconfig and profile
+#if 0
     read_userdata(INIT_CONFIG_SLOT, 0);
     read_userdata(profile_sel, 0);
+#endif
 
     // Setup test pattern
     get_vmode(VMODE_480p, &vmode_in, &vmode_out, &vm_conf);
