@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="sys" kind="sys" version="1.0" fabric="QSYS">
  <!-- Format version 24.1 1077 (Future versions may contain additional information.) -->
- <!-- 2025.03.28.13:26:08 -->
+ <!-- 2025.03.28.13:28:57 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1743164768</value>
+  <value>1743164937</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -4707,7 +4707,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>s1</slaveName>
     <name>onchip_memory2_0.s1</name>
     <baseAddress>65536</baseAddress>
-    <span>41984</span>
+    <span>32768</span>
    </memoryBlock>
   </interface>
   <interface name="master_reset" kind="reset_source" version="24.1">
@@ -4833,7 +4833,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.SIZE_VALUE</name>
-   <value>41984</value>
+   <value>32768</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.WRITABLE</name>
@@ -4965,7 +4965,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="memorySize">
    <type>long</type>
-   <value>41984</value>
+   <value>32768</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -5104,7 +5104,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="derived_set_addr_width">
    <type>int</type>
-   <value>14</value>
+   <value>13</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -5112,7 +5112,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="derived_set_addr_width2">
    <type>int</type>
-   <value>14</value>
+   <value>13</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -5249,7 +5249,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="addressSpan">
     <type>java.math.BigInteger</type>
-    <value>41984</value>
+    <value>32768</value>
     <derived>true</derived>
     <enabled>true</enabled>
     <visible>false</visible>
@@ -5337,7 +5337,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="explicitAddressSpan">
     <type>java.math.BigInteger</type>
-    <value>41984</value>
+    <value>32768</value>
     <derived>false</derived>
     <enabled>true</enabled>
     <visible>true</visible>
@@ -5548,7 +5548,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>address</name>
     <direction>Input</direction>
-    <width>14</width>
+    <width>13</width>
     <role>address</role>
    </port>
    <port>
@@ -8964,7 +8964,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>s1</slaveName>
     <name>onchip_memory2_0.s1</name>
     <baseAddress>65536</baseAddress>
-    <span>41984</span>
+    <span>32768</span>
    </memoryBlock>
   </interface>
   <interface name="avalon_master_lsu" kind="avalon_master" version="24.1">
@@ -9391,7 +9391,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>s1</slaveName>
     <name>onchip_memory2_0.s1</name>
     <baseAddress>65536</baseAddress>
-    <span>41984</span>
+    <span>32768</span>
    </memoryBlock>
   </interface>
   <interface name="avalon_slave_debug" kind="avalon_slave" version="24.1">
