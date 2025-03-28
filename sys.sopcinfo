@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="sys" kind="sys" version="1.0" fabric="QSYS">
  <!-- Format version 24.1 1077 (Future versions may contain additional information.) -->
- <!-- 2025.03.28.13:28:57 -->
+ <!-- 2025.03.28.14:01:25 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1743164937</value>
+  <value>1743166885</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -374,9 +374,9 @@ parameters are a RESULT of the module parameters. -->
    </clockDomainMember>
    <clockDomainMember>
     <isBridge>false</isBridge>
-    <moduleName>pulpino_0</moduleName>
+    <moduleName>ibex_0</moduleName>
     <slaveName>clk_sink</slaveName>
-    <name>pulpino_0.clk_sink</name>
+    <name>ibex_0.clk_sink</name>
    </clockDomainMember>
    <clockDomainMember>
     <isBridge>false</isBridge>
@@ -4695,11 +4695,11 @@ parameters are a RESULT of the module parameters. -->
    </port>
    <memoryBlock>
     <isBridge>false</isBridge>
-    <moduleName>pulpino_0</moduleName>
-    <slaveName>avalon_slave_debug</slaveName>
-    <name>pulpino_0.avalon_slave_debug</name>
+    <moduleName>ibex_0</moduleName>
+    <slaveName>avalon_slave_dm</slaveName>
+    <name>ibex_0.avalon_slave_dm</name>
     <baseAddress>0</baseAddress>
-    <span>32768</span>
+    <span>4096</span>
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
@@ -8308,74 +8308,10 @@ parameters are a RESULT of the module parameters. -->
    </port>
   </interface>
  </module>
- <module name="pulpino_0" kind="pulpino" version="1.0" path="pulpino_0">
+ <module name="ibex_0" kind="ibex" version="1.0" path="ibex_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
-  <parameter name="AXI_ADDR_WIDTH">
-   <type>int</type>
-   <value>32</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="AXI_DATA_WIDTH">
-   <type>int</type>
-   <value>32</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="AXI_ID_MASTER_WIDTH">
-   <type>int</type>
-   <value>10</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="AXI_ID_SLAVE_WIDTH">
-   <type>int</type>
-   <value>10</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="AXI_USER_WIDTH">
-   <type>int</type>
-   <value>0</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="USE_ZERO_RISCY">
-   <type>boolean</type>
-   <value>true</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="RISCY_RV32F">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="ZERO_RV32M">
-   <type>boolean</type>
-   <value>true</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="ZERO_RV32E">
+  <parameter name="IBEX_RV32E">
    <type>boolean</type>
    <value>true</value>
    <derived>false</derived>
@@ -8409,6 +8345,51 @@ the requested settings for a module instance. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
+  <interface name="clk_sink" kind="clock_sink" version="24.1">
+   <!-- The connection points exposed by a module instance for the
+particular module parameters. Connection points and their
+parameters are a RESULT of the module parameters. -->
+   <parameter name="externallyDriven">
+    <type>boolean</type>
+    <value>false</value>
+    <derived>false</derived>
+    <enabled>true</enabled>
+    <visible>false</visible>
+    <valid>true</valid>
+   </parameter>
+   <parameter name="ptfSchematicName">
+    <type>java.lang.String</type>
+    <value></value>
+    <derived>false</derived>
+    <enabled>true</enabled>
+    <visible>false</visible>
+    <valid>true</valid>
+   </parameter>
+   <parameter name="deviceFamily">
+    <type>java.lang.String</type>
+    <value>UNKNOWN</value>
+    <derived>false</derived>
+    <enabled>true</enabled>
+    <visible>true</visible>
+    <valid>true</valid>
+   </parameter>
+   <parameter name="generateLegacySim">
+    <type>boolean</type>
+    <value>false</value>
+    <derived>false</derived>
+    <enabled>true</enabled>
+    <visible>true</visible>
+    <valid>true</valid>
+   </parameter>
+   <type>clock</type>
+   <isStart>false</isStart>
+   <port>
+    <name>clk_i</name>
+    <direction>Input</direction>
+    <width>1</width>
+    <role>clk</role>
+   </port>
+  </interface>
   <interface name="reset_sink" kind="reset_sink" version="24.1">
    <!-- The connection points exposed by a module instance for the
 particular module parameters. Connection points and their
@@ -8448,7 +8429,7 @@ parameters are a RESULT of the module parameters. -->
    <type>reset</type>
    <isStart>false</isStart>
    <port>
-    <name>rst_n</name>
+    <name>rst_ni</name>
     <direction>Input</direction>
     <width>1</width>
     <role>reset_n</role>
@@ -8493,73 +8474,16 @@ parameters are a RESULT of the module parameters. -->
    <type>conduit</type>
    <isStart>false</isStart>
    <port>
-    <name>testmode_i</name>
-    <direction>Input</direction>
-    <width>1</width>
-    <role>testmode_i</role>
-   </port>
-   <port>
-    <name>fetch_enable_i</name>
-    <direction>Input</direction>
-    <width>1</width>
-    <role>fetch_enable_i</role>
-   </port>
-   <port>
-    <name>clock_gating_i</name>
-    <direction>Input</direction>
-    <width>1</width>
-    <role>clock_gating_i</role>
-   </port>
-   <port>
     <name>boot_addr_i</name>
     <direction>Input</direction>
     <width>32</width>
     <role>boot_addr_i</role>
    </port>
-  </interface>
-  <interface name="clk_sink" kind="clock_sink" version="24.1">
-   <!-- The connection points exposed by a module instance for the
-particular module parameters. Connection points and their
-parameters are a RESULT of the module parameters. -->
-   <parameter name="externallyDriven">
-    <type>boolean</type>
-    <value>false</value>
-    <derived>false</derived>
-    <enabled>true</enabled>
-    <visible>false</visible>
-    <valid>true</valid>
-   </parameter>
-   <parameter name="ptfSchematicName">
-    <type>java.lang.String</type>
-    <value></value>
-    <derived>false</derived>
-    <enabled>true</enabled>
-    <visible>false</visible>
-    <valid>true</valid>
-   </parameter>
-   <parameter name="deviceFamily">
-    <type>java.lang.String</type>
-    <value>UNKNOWN</value>
-    <derived>false</derived>
-    <enabled>true</enabled>
-    <visible>true</visible>
-    <valid>true</valid>
-   </parameter>
-   <parameter name="generateLegacySim">
-    <type>boolean</type>
-    <value>false</value>
-    <derived>false</derived>
-    <enabled>true</enabled>
-    <visible>true</visible>
-    <valid>true</valid>
-   </parameter>
-   <type>clock</type>
-   <isStart>false</isStart>
    <port>
-    <name>clk</name>
-    <direction>Input</direction>
+    <name>core_sleep_o</name>
+    <direction>Output</direction>
     <width>1</width>
-    <role>clk</role>
+    <role>core_sleep_o</role>
    </port>
   </interface>
   <interface name="interrupt_receiver" kind="interrupt_receiver" version="24.1">
@@ -8625,9 +8549,9 @@ parameters are a RESULT of the module parameters. -->
    <type>interrupt</type>
    <isStart>true</isStart>
    <port>
-    <name>irq_i</name>
+    <name>irq_fast_i</name>
     <direction>Input</direction>
-    <width>32</width>
+    <width>15</width>
     <role>irq</role>
    </port>
    <interrupt>
@@ -8666,7 +8590,7 @@ parameters are a RESULT of the module parameters. -->
     <interruptNumber>1</interruptNumber>
    </interrupt>
   </interface>
-  <interface name="avalon_master_instr" kind="avalon_master" version="24.1">
+  <interface name="avalon_master_bus_instr" kind="avalon_master" version="24.1">
    <!-- The connection points exposed by a module instance for the
 particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
@@ -8929,31 +8853,31 @@ parameters are a RESULT of the module parameters. -->
    <type>avalon</type>
    <isStart>true</isStart>
    <port>
-    <name>instr_addr</name>
+    <name>bus_instr_addr</name>
     <direction>Output</direction>
     <width>32</width>
     <role>address</role>
    </port>
    <port>
-    <name>instr_rdata</name>
+    <name>bus_instr_rdata</name>
     <direction>Input</direction>
     <width>32</width>
     <role>readdata</role>
    </port>
    <port>
-    <name>instr_read</name>
+    <name>bus_instr_read</name>
     <direction>Output</direction>
     <width>1</width>
     <role>read</role>
    </port>
    <port>
-    <name>instr_rvalid</name>
+    <name>bus_instr_rvalid</name>
     <direction>Input</direction>
     <width>1</width>
     <role>readdatavalid</role>
    </port>
    <port>
-    <name>instr_busy</name>
+    <name>bus_instr_busy</name>
     <direction>Input</direction>
     <width>1</width>
     <role>waitrequest</role>
@@ -8967,7 +8891,7 @@ parameters are a RESULT of the module parameters. -->
     <span>32768</span>
    </memoryBlock>
   </interface>
-  <interface name="avalon_master_lsu" kind="avalon_master" version="24.1">
+  <interface name="avalon_master_bus_data" kind="avalon_master" version="24.1">
    <!-- The connection points exposed by a module instance for the
 particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
@@ -9230,61 +9154,61 @@ parameters are a RESULT of the module parameters. -->
    <type>avalon</type>
    <isStart>true</isStart>
    <port>
-    <name>lsu_addr</name>
+    <name>bus_data_addr</name>
     <direction>Output</direction>
     <width>32</width>
     <role>address</role>
    </port>
    <port>
-    <name>lsu_rdata</name>
+    <name>bus_data_rdata</name>
     <direction>Input</direction>
     <width>32</width>
     <role>readdata</role>
    </port>
    <port>
-    <name>lsu_read</name>
+    <name>bus_data_read</name>
     <direction>Output</direction>
     <width>1</width>
     <role>read</role>
    </port>
    <port>
-    <name>lsu_rvalid</name>
+    <name>bus_data_rvalid</name>
     <direction>Input</direction>
     <width>1</width>
     <role>readdatavalid</role>
    </port>
    <port>
-    <name>lsu_busy</name>
+    <name>bus_data_busy</name>
     <direction>Input</direction>
     <width>1</width>
     <role>waitrequest</role>
    </port>
    <port>
-    <name>lsu_write</name>
+    <name>bus_data_write</name>
     <direction>Output</direction>
     <width>1</width>
     <role>write</role>
    </port>
    <port>
-    <name>lsu_be</name>
+    <name>bus_data_be</name>
     <direction>Output</direction>
     <width>4</width>
     <role>byteenable</role>
    </port>
    <port>
-    <name>lsu_wdata</name>
+    <name>bus_data_wdata</name>
     <direction>Output</direction>
     <width>32</width>
     <role>writedata</role>
    </port>
    <port>
-    <name>lsu_resp</name>
+    <name>bus_data_resp</name>
     <direction>Input</direction>
     <width>2</width>
     <role>response</role>
    </port>
    <port>
-    <name>lsu_wrespvalid</name>
+    <name>bus_data_wrespvalid</name>
     <direction>Input</direction>
     <width>1</width>
     <role>writeresponsevalid</role>
@@ -9347,6 +9271,14 @@ parameters are a RESULT of the module parameters. -->
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
+    <moduleName>ibex_0</moduleName>
+    <slaveName>avalon_slave_dm</slaveName>
+    <name>ibex_0.avalon_slave_dm</name>
+    <baseAddress>0</baseAddress>
+    <span>4096</span>
+   </memoryBlock>
+   <memoryBlock>
+    <isBridge>false</isBridge>
     <moduleName>epcq_controller2_0</moduleName>
     <slaveName>avl_csr</slaveName>
     <name>epcq_controller2_0.avl_csr</name>
@@ -9394,7 +9326,7 @@ parameters are a RESULT of the module parameters. -->
     <span>32768</span>
    </memoryBlock>
   </interface>
-  <interface name="avalon_slave_debug" kind="avalon_slave" version="24.1">
+  <interface name="avalon_slave_dm" kind="avalon_slave" version="24.1">
    <!-- The connection points exposed by a module instance for the
 particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
@@ -9432,7 +9364,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="addressSpan">
     <type>java.math.BigInteger</type>
-    <value>32768</value>
+    <value>4096</value>
     <derived>true</derived>
     <enabled>true</enabled>
     <visible>false</visible>
@@ -9530,7 +9462,7 @@ parameters are a RESULT of the module parameters. -->
     <type>int</type>
     <value>0</value>
     <derived>false</derived>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <visible>true</visible>
     <valid>true</valid>
    </parameter>
@@ -9584,9 +9516,9 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="maximumPendingReadTransactions">
     <type>int</type>
-    <value>1</value>
+    <value>0</value>
     <derived>false</derived>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <visible>true</visible>
     <valid>true</valid>
    </parameter>
@@ -9618,7 +9550,7 @@ parameters are a RESULT of the module parameters. -->
     <type>int</type>
     <value>0</value>
     <derived>false</derived>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <visible>true</visible>
     <valid>true</valid>
    </parameter>
@@ -9634,7 +9566,7 @@ parameters are a RESULT of the module parameters. -->
     <type>int</type>
     <value>1</value>
     <derived>false</derived>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <visible>true</visible>
     <valid>true</valid>
    </parameter>
@@ -9658,7 +9590,7 @@ parameters are a RESULT of the module parameters. -->
     <type>int</type>
     <value>0</value>
     <derived>false</derived>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <visible>true</visible>
     <valid>true</valid>
    </parameter>
@@ -9666,7 +9598,7 @@ parameters are a RESULT of the module parameters. -->
     <type>com.altera.sopcmodel.avalon.TimingUnits</type>
     <value>Cycles</value>
     <derived>false</derived>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <visible>true</visible>
     <valid>true</valid>
    </parameter>
@@ -9706,7 +9638,7 @@ parameters are a RESULT of the module parameters. -->
     <type>int</type>
     <value>0</value>
     <derived>false</derived>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <visible>true</visible>
     <valid>true</valid>
    </parameter>
@@ -9729,46 +9661,40 @@ parameters are a RESULT of the module parameters. -->
    <type>avalon</type>
    <isStart>false</isStart>
    <port>
-    <name>debug_addr</name>
+    <name>dm_avalon_s_address</name>
     <direction>Input</direction>
-    <width>15</width>
+    <width>12</width>
     <role>address</role>
    </port>
    <port>
-    <name>debug_rdata</name>
+    <name>dm_avalon_s_readdata</name>
     <direction>Output</direction>
     <width>32</width>
     <role>readdata</role>
    </port>
    <port>
-    <name>debug_read</name>
+    <name>dm_avalon_s_read</name>
     <direction>Input</direction>
     <width>1</width>
     <role>read</role>
    </port>
    <port>
-    <name>debug_rvalid</name>
-    <direction>Output</direction>
-    <width>1</width>
-    <role>readdatavalid</role>
-   </port>
-   <port>
-    <name>debug_busy</name>
-    <direction>Output</direction>
-    <width>1</width>
-    <role>waitrequest</role>
-   </port>
-   <port>
-    <name>debug_write</name>
+    <name>dm_avalon_s_write</name>
     <direction>Input</direction>
     <width>1</width>
     <role>write</role>
    </port>
    <port>
-    <name>debug_wdata</name>
+    <name>dm_avalon_s_writedata</name>
     <direction>Input</direction>
     <width>32</width>
     <role>writedata</role>
+   </port>
+   <port>
+    <name>dm_avalon_s_byteenable</name>
+    <direction>Input</direction>
+    <width>4</width>
+    <role>byteenable</role>
    </port>
   </interface>
  </module>
@@ -11181,61 +11107,10 @@ parameters are a RESULT of the module parameters. -->
   </interface>
  </module>
  <connection
-   name="pulpino_0.avalon_master_instr/onchip_memory2_0.s1"
+   name="ibex_0.avalon_master_bus_data/jtag_uart_0.avalon_jtag_slave"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_instr"
-   end="onchip_memory2_0.s1">
-  <parameter name="arbitrationPriority">
-   <type>int</type>
-   <value>1</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="baseAddress">
-   <type>java.math.BigInteger</type>
-   <value>0x00010000</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="defaultConnection">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_instr</startConnectionPoint>
-  <endModule>onchip_memory2_0</endModule>
-  <endConnectionPoint>s1</endConnectionPoint>
- </connection>
- <connection
-   name="pulpino_0.avalon_master_lsu/jtag_uart_0.avalon_jtag_slave"
-   kind="avalon"
-   version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="jtag_uart_0.avalon_jtag_slave">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11277,16 +11152,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>jtag_uart_0</endModule>
   <endConnectionPoint>avalon_jtag_slave</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/sc_config_0.avalon_s"
+   name="ibex_0.avalon_master_bus_data/sc_config_0.avalon_s"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="sc_config_0.avalon_s">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11328,16 +11203,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>sc_config_0</endModule>
   <endConnectionPoint>avalon_s</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/osd_generator_0.avalon_s"
+   name="ibex_0.avalon_master_bus_data/osd_generator_0.avalon_s"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="osd_generator_0.avalon_s">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11379,16 +11254,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>osd_generator_0</endModule>
   <endConnectionPoint>avalon_s</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/pll_reconfig_0.avalon_s"
+   name="ibex_0.avalon_master_bus_data/pll_reconfig_0.avalon_s"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="pll_reconfig_0.avalon_s">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11430,16 +11305,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>pll_reconfig_0</endModule>
   <endConnectionPoint>avalon_s</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/hw_crc32_0.avalon_slave"
+   name="ibex_0.avalon_master_bus_data/hw_crc32_0.avalon_slave"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="hw_crc32_0.avalon_slave">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11481,16 +11356,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>hw_crc32_0</endModule>
   <endConnectionPoint>avalon_slave</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/i2c_opencores_0.avalon_slave_0"
+   name="ibex_0.avalon_master_bus_data/i2c_opencores_0.avalon_slave_0"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="i2c_opencores_0.avalon_slave_0">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11532,16 +11407,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>i2c_opencores_0</endModule>
   <endConnectionPoint>avalon_slave_0</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/i2c_opencores_1.avalon_slave_0"
+   name="ibex_0.avalon_master_bus_data/i2c_opencores_1.avalon_slave_0"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="i2c_opencores_1.avalon_slave_0">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11583,16 +11458,67 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>i2c_opencores_1</endModule>
   <endConnectionPoint>avalon_slave_0</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/epcq_controller2_0.avl_csr"
+   name="ibex_0.avalon_master_bus_data/ibex_0.avalon_slave_dm"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
+   end="ibex_0.avalon_slave_dm">
+  <parameter name="arbitrationPriority">
+   <type>int</type>
+   <value>1</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="baseAddress">
+   <type>java.math.BigInteger</type>
+   <value>0x0000</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="defaultConnection">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
+  <endModule>ibex_0</endModule>
+  <endConnectionPoint>avalon_slave_dm</endConnectionPoint>
+ </connection>
+ <connection
+   name="ibex_0.avalon_master_bus_data/epcq_controller2_0.avl_csr"
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_data"
    end="epcq_controller2_0.avl_csr">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11634,16 +11560,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>epcq_controller2_0</endModule>
   <endConnectionPoint>avl_csr</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/epcq_controller2_0.avl_mem"
+   name="ibex_0.avalon_master_bus_data/epcq_controller2_0.avl_mem"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="epcq_controller2_0.avl_mem">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11685,169 +11611,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>epcq_controller2_0</endModule>
   <endConnectionPoint>avl_mem</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.avalon_master_lsu/timer_0.s1"
+   name="ibex_0.avalon_master_bus_data/onchip_memory2_0.s1"
    kind="avalon"
    version="24.1"
-   start="pulpino_0.avalon_master_lsu"
-   end="timer_0.s1">
-  <parameter name="arbitrationPriority">
-   <type>int</type>
-   <value>1</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="baseAddress">
-   <type>java.math.BigInteger</type>
-   <value>0x00020000</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="defaultConnection">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
-  <endModule>timer_0</endModule>
-  <endConnectionPoint>s1</endConnectionPoint>
- </connection>
- <connection
-   name="pulpino_0.avalon_master_lsu/pio_0.s1"
-   kind="avalon"
-   version="24.1"
-   start="pulpino_0.avalon_master_lsu"
-   end="pio_0.s1">
-  <parameter name="arbitrationPriority">
-   <type>int</type>
-   <value>1</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="baseAddress">
-   <type>java.math.BigInteger</type>
-   <value>0x000210e0</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="defaultConnection">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
-  <endModule>pio_0</endModule>
-  <endConnectionPoint>s1</endConnectionPoint>
- </connection>
- <connection
-   name="pulpino_0.avalon_master_lsu/pio_1.s1"
-   kind="avalon"
-   version="24.1"
-   start="pulpino_0.avalon_master_lsu"
-   end="pio_1.s1">
-  <parameter name="arbitrationPriority">
-   <type>int</type>
-   <value>1</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="baseAddress">
-   <type>java.math.BigInteger</type>
-   <value>0x000210d0</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="defaultConnection">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
-  <endModule>pio_1</endModule>
-  <endConnectionPoint>s1</endConnectionPoint>
- </connection>
- <connection
-   name="pulpino_0.avalon_master_lsu/onchip_memory2_0.s1"
-   kind="avalon"
-   version="24.1"
-   start="pulpino_0.avalon_master_lsu"
+   start="ibex_0.avalon_master_bus_data"
    end="onchip_memory2_0.s1">
   <parameter name="arbitrationPriority">
    <type>int</type>
@@ -11889,17 +11662,221 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
-  <startConnectionPoint>avalon_master_lsu</startConnectionPoint>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
   <endModule>onchip_memory2_0</endModule>
   <endConnectionPoint>s1</endConnectionPoint>
  </connection>
  <connection
-   name="master_0.master/pulpino_0.avalon_slave_debug"
+   name="ibex_0.avalon_master_bus_data/timer_0.s1"
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_data"
+   end="timer_0.s1">
+  <parameter name="arbitrationPriority">
+   <type>int</type>
+   <value>1</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="baseAddress">
+   <type>java.math.BigInteger</type>
+   <value>0x00020000</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="defaultConnection">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
+  <endModule>timer_0</endModule>
+  <endConnectionPoint>s1</endConnectionPoint>
+ </connection>
+ <connection
+   name="ibex_0.avalon_master_bus_data/pio_0.s1"
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_data"
+   end="pio_0.s1">
+  <parameter name="arbitrationPriority">
+   <type>int</type>
+   <value>1</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="baseAddress">
+   <type>java.math.BigInteger</type>
+   <value>0x000210e0</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="defaultConnection">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
+  <endModule>pio_0</endModule>
+  <endConnectionPoint>s1</endConnectionPoint>
+ </connection>
+ <connection
+   name="ibex_0.avalon_master_bus_data/pio_1.s1"
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_data"
+   end="pio_1.s1">
+  <parameter name="arbitrationPriority">
+   <type>int</type>
+   <value>1</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="baseAddress">
+   <type>java.math.BigInteger</type>
+   <value>0x000210d0</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="defaultConnection">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_data</startConnectionPoint>
+  <endModule>pio_1</endModule>
+  <endConnectionPoint>s1</endConnectionPoint>
+ </connection>
+ <connection
+   name="ibex_0.avalon_master_bus_instr/onchip_memory2_0.s1"
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_instr"
+   end="onchip_memory2_0.s1">
+  <parameter name="arbitrationPriority">
+   <type>int</type>
+   <value>1</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="baseAddress">
+   <type>java.math.BigInteger</type>
+   <value>0x00010000</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="defaultConnection">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_instr</startConnectionPoint>
+  <endModule>onchip_memory2_0</endModule>
+  <endConnectionPoint>s1</endConnectionPoint>
+ </connection>
+ <connection
+   name="master_0.master/ibex_0.avalon_slave_dm"
    kind="avalon"
    version="24.1"
    start="master_0.master"
-   end="pulpino_0.avalon_slave_debug">
+   end="ibex_0.avalon_slave_dm">
   <parameter name="arbitrationPriority">
    <type>int</type>
    <value>1</value>
@@ -11942,8 +11919,8 @@ parameters are a RESULT of the module parameters. -->
   </parameter>
   <startModule>master_0</startModule>
   <startConnectionPoint>master</startConnectionPoint>
-  <endModule>pulpino_0</endModule>
-  <endConnectionPoint>avalon_slave_debug</endConnectionPoint>
+  <endModule>ibex_0</endModule>
+  <endConnectionPoint>avalon_slave_dm</endConnectionPoint>
  </connection>
  <connection
    name="master_0.master/onchip_memory2_0.s1"
@@ -12186,11 +12163,11 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>clk_sink</endConnectionPoint>
  </connection>
  <connection
-   name="clk_27.clk/pulpino_0.clk_sink"
+   name="clk_27.clk/ibex_0.clk_sink"
    kind="clock"
    version="24.1"
    start="clk_27.clk"
-   end="pulpino_0.clk_sink">
+   end="ibex_0.clk_sink">
   <parameter name="deviceFamily">
    <type>java.lang.String</type>
    <value>UNKNOWN</value>
@@ -12209,7 +12186,7 @@ parameters are a RESULT of the module parameters. -->
   </parameter>
   <startModule>clk_27</startModule>
   <startConnectionPoint>clk</startConnectionPoint>
-  <endModule>pulpino_0</endModule>
+  <endModule>ibex_0</endModule>
   <endConnectionPoint>clk_sink</endConnectionPoint>
  </connection>
  <connection
@@ -12375,10 +12352,10 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>clock_sink</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.interrupt_receiver/i2c_opencores_0.interrupt_sender"
+   name="ibex_0.interrupt_receiver/i2c_opencores_0.interrupt_sender"
    kind="interrupt"
    version="24.1"
-   start="pulpino_0.interrupt_receiver"
+   start="ibex_0.interrupt_receiver"
    end="i2c_opencores_0.interrupt_sender">
   <parameter name="irqNumber">
    <type>int</type>
@@ -12404,16 +12381,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
+  <startModule>ibex_0</startModule>
   <startConnectionPoint>interrupt_receiver</startConnectionPoint>
   <endModule>i2c_opencores_0</endModule>
   <endConnectionPoint>interrupt_sender</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.interrupt_receiver/i2c_opencores_1.interrupt_sender"
+   name="ibex_0.interrupt_receiver/i2c_opencores_1.interrupt_sender"
    kind="interrupt"
    version="24.1"
-   start="pulpino_0.interrupt_receiver"
+   start="ibex_0.interrupt_receiver"
    end="i2c_opencores_1.interrupt_sender">
   <parameter name="irqNumber">
    <type>int</type>
@@ -12439,16 +12416,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
+  <startModule>ibex_0</startModule>
   <startConnectionPoint>interrupt_receiver</startConnectionPoint>
   <endModule>i2c_opencores_1</endModule>
   <endConnectionPoint>interrupt_sender</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.interrupt_receiver/epcq_controller2_0.interrupt_sender"
+   name="ibex_0.interrupt_receiver/epcq_controller2_0.interrupt_sender"
    kind="interrupt"
    version="24.1"
-   start="pulpino_0.interrupt_receiver"
+   start="ibex_0.interrupt_receiver"
    end="epcq_controller2_0.interrupt_sender">
   <parameter name="irqNumber">
    <type>int</type>
@@ -12474,16 +12451,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
+  <startModule>ibex_0</startModule>
   <startConnectionPoint>interrupt_receiver</startConnectionPoint>
   <endModule>epcq_controller2_0</endModule>
   <endConnectionPoint>interrupt_sender</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.interrupt_receiver/timer_0.irq"
+   name="ibex_0.interrupt_receiver/timer_0.irq"
    kind="interrupt"
    version="24.1"
-   start="pulpino_0.interrupt_receiver"
+   start="ibex_0.interrupt_receiver"
    end="timer_0.irq">
   <parameter name="irqNumber">
    <type>int</type>
@@ -12509,16 +12486,16 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
+  <startModule>ibex_0</startModule>
   <startConnectionPoint>interrupt_receiver</startConnectionPoint>
   <endModule>timer_0</endModule>
   <endConnectionPoint>irq</endConnectionPoint>
  </connection>
  <connection
-   name="pulpino_0.interrupt_receiver/jtag_uart_0.irq"
+   name="ibex_0.interrupt_receiver/jtag_uart_0.irq"
    kind="interrupt"
    version="24.1"
-   start="pulpino_0.interrupt_receiver"
+   start="ibex_0.interrupt_receiver"
    end="jtag_uart_0.irq">
   <parameter name="irqNumber">
    <type>int</type>
@@ -12544,7 +12521,7 @@ parameters are a RESULT of the module parameters. -->
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
-  <startModule>pulpino_0</startModule>
+  <startModule>ibex_0</startModule>
   <startConnectionPoint>interrupt_receiver</startConnectionPoint>
   <endModule>jtag_uart_0</endModule>
   <endConnectionPoint>irq</endConnectionPoint>
@@ -12793,11 +12770,11 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>reset1</endConnectionPoint>
  </connection>
  <connection
-   name="clk_27.clk_reset/pulpino_0.reset_sink"
+   name="clk_27.clk_reset/ibex_0.reset_sink"
    kind="reset"
    version="24.1"
    start="clk_27.clk_reset"
-   end="pulpino_0.reset_sink">
+   end="ibex_0.reset_sink">
   <parameter name="deviceFamily">
    <type>java.lang.String</type>
    <value>UNKNOWN</value>
@@ -12816,7 +12793,7 @@ parameters are a RESULT of the module parameters. -->
   </parameter>
   <startModule>clk_27</startModule>
   <startConnectionPoint>clk_reset</startConnectionPoint>
-  <endModule>pulpino_0</endModule>
+  <endModule>ibex_0</endModule>
   <endConnectionPoint>reset_sink</endConnectionPoint>
  </connection>
  <connection
@@ -13033,6 +13010,30 @@ parameters are a RESULT of the module parameters. -->
  </plugin>
  <plugin>
   <instanceCount>1</instanceCount>
+  <name>ibex</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IModule</subtype>
+  <displayName>ibex</displayName>
+  <version>1.0</version>
+ </plugin>
+ <plugin>
+  <instanceCount>1</instanceCount>
+  <name>interrupt_receiver</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Interrupt Receiver</displayName>
+  <version>24.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>3</instanceCount>
+  <name>avalon_master</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Avalon Memory Mapped Master</displayName>
+  <version>24.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>1</instanceCount>
   <name>altera_avalon_jtag_uart</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
@@ -13045,14 +13046,6 @@ parameters are a RESULT of the module parameters. -->
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
   <displayName>JTAG to Avalon Master Bridge</displayName>
-  <version>24.1</version>
- </plugin>
- <plugin>
-  <instanceCount>3</instanceCount>
-  <name>avalon_master</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Avalon Memory Mapped Master</displayName>
   <version>24.1</version>
  </plugin>
  <plugin>
@@ -13097,22 +13090,6 @@ parameters are a RESULT of the module parameters. -->
  </plugin>
  <plugin>
   <instanceCount>1</instanceCount>
-  <name>pulpino</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IModule</subtype>
-  <displayName>pulpino</displayName>
-  <version>1.0</version>
- </plugin>
- <plugin>
-  <instanceCount>1</instanceCount>
-  <name>interrupt_receiver</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Interrupt Receiver</displayName>
-  <version>24.1</version>
- </plugin>
- <plugin>
-  <instanceCount>1</instanceCount>
   <name>sc_config</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
@@ -13128,7 +13105,7 @@ parameters are a RESULT of the module parameters. -->
   <version>24.1</version>
  </plugin>
  <plugin>
-  <instanceCount>16</instanceCount>
+  <instanceCount>17</instanceCount>
   <name>avalon</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IConnection</subtype>

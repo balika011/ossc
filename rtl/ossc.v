@@ -365,10 +365,8 @@ defparam
 sys sys_inst(
     .clk_clk                                (clk27),
     .reset_reset_n                          (sys_reset_n),
-    .pulpino_0_config_testmode_i            (1'b0),
-    .pulpino_0_config_fetch_enable_i        (1'b1),
-    .pulpino_0_config_clock_gating_i        (1'b0),
-    .pulpino_0_config_boot_addr_i           (32'h00010000),
+    .ibex_0_config_boot_addr_i              (32'h00010000),
+    .ibex_0_config_core_sleep_o             (),
     .master_0_master_reset_reset            (jtagm_reset_req),
     .i2c_opencores_0_export_scl_pad_io      (scl),
     .i2c_opencores_0_export_sda_pad_io      (sda),
