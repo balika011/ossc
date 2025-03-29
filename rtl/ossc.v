@@ -58,7 +58,12 @@ module ossc (
 
     output SD_CLK,
     inout SD_CMD,
-    inout [3:0] SD_DAT
+    inout [3:0] SD_DAT,
+
+	input altera_reserved_tms,
+	input altera_reserved_tck,
+	input altera_reserved_tdi,
+	output altera_reserved_tdo
 );
 
 
@@ -95,8 +100,7 @@ wire pclk_out = PCLK_sc;
 
 reg [7:0] po_reset_ctr = 0;
 reg po_reset_n = 1'b0;
-wire jtagm_reset_req;
-wire sys_reset_n = (po_reset_n & ~jtagm_reset_req);
+wire sys_reset_n = po_reset_n;
 
 reg [7:0] TVP_R, TVP_G, TVP_B;
 reg TVP_HS, TVP_VS, TVP_FID;
@@ -367,7 +371,11 @@ sys sys_inst(
     .reset_reset_n                          (sys_reset_n),
     .ibex_0_config_boot_addr_i              (32'h00010000),
     .ibex_0_config_core_sleep_o             (),
-    .master_0_master_reset_reset            (jtagm_reset_req),
+	.ibex_0_tck_clk							(tck),
+	.ibex_0_jtag_tdi						(tdi),
+	.ibex_0_jtag_tms						(tms),
+	.ibex_0_jtag_tdo						(tdo),
+	.ibex_0_jtag_trstn						(),
     .i2c_opencores_0_export_scl_pad_io      (scl),
     .i2c_opencores_0_export_sda_pad_io      (sda),
     .i2c_opencores_0_export_spi_miso_pad_i  (1'b0),
@@ -403,13 +411,6 @@ sys sys_inst(
     .pll_reconfig_0_pll_reconfig_if_scandata     (pll_scandata),
     .pll_reconfig_0_pll_reconfig_if_scandone     (pll_scandone)
 );
-
-// These do not work in current Quartus version (23.1) and a patch file (scripts/qsys.patch) must be used after Qsys generation instead
-defparam
-    sys_inst.epcq_controller2_0.asmi2_inst_epcq_ctrl.xip_controller.avst_fifo_inst.USE_MEMORY_BLOCKS = 0,
-    sys_inst.epcq_controller2_0.asmi2_inst_epcq_ctrl.xip_controller.avst_fifo_inst.avst_fifo.USE_MEMORY_BLOCKS = 0,
-    sys_inst.master_0.fifo.USE_MEMORY_BLOCKS = 0,
-    sys_inst.onchip_memory2_0.the_altsyncram.MAXIMUM_DEPTH = 2048;
 
 scanconverter #(
     .EMIF_ENABLE(0),
@@ -497,4 +498,56 @@ ir_rcv ir0 (
     .finished       (lt_finished)
 );*/
 
+logic tms, tck, tdi, tdo;
+
+cycloneive_jtag jtag_inst(
+	.tms(altera_reserved_tms),
+	.tck(altera_reserved_tck),
+	.tdi(altera_reserved_tdi),
+	.tdo(altera_reserved_tdo),
+	.tmsutap(tms),
+	.tckutap(tck),
+	.tdiutap(tdi),
+	.tdouser(tdo)
+);
+
 endmodule
+
+
+/*
+module  cycloneive_jtag (
+    tms, 
+    tck,
+    tdi, 
+    tdoutap,
+    tdouser,
+    tdo,
+    tmsutap,
+    tckutap,
+    tdiutap,
+    shiftuser,
+    clkdruser,
+    updateuser,
+    runidleuser,
+    usr1user);
+
+input tms;
+input tck;
+input tdi;
+input tdoutap;
+input tdouser;
+
+output tdo;
+output tmsutap;
+output tckutap;
+output tdiutap;
+output shiftuser;
+output clkdruser;
+output updateuser;
+output runidleuser;
+output usr1user;
+
+parameter lpm_type = "cycloneive_jtag";
+
+endmodule
+*/
