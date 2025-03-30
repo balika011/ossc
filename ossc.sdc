@@ -3,14 +3,17 @@
 create_clock -period 27MHz -name clk27 [get_ports clk27]
 
 set_input_delay -clock clk27 0 [get_ports {sda scl SD_CMD SD_DAT* *ALTERA_DATA0}]
+
+create_generated_clock -name sd_clock -source sys_inst|altpll_0|sd1|pll7|clk[0] -multiply_by 4 {sys:sys_inst|sdc_controller_top:sdc_controller_0|sdc_controller:sdc0|sd_clock_divider:clock_divider0|SD_CLK_O}
+
 set_false_path -from [get_ports {btn* cfg* ir_rx HDMI_TX_INT_N LED_R}]
 set_false_path -to {sys:sys_inst|sys_pio_1:pio_1|readdata*}
 
 
 ### Scanconverter clock constraints ###
 
-create_clock -period 165MHz -name pclk_tvp_high [get_ports TVP_PCLK_i]
-create_clock -period 33MHz -name pclk_tvp_low [get_ports TVP_PCLK_i] -add
+create_clock -period 165MHz -name pclk_tvp_high [get_ports TVP_PCLK]
+create_clock -period 33MHz -name pclk_tvp_low [get_ports TVP_PCLK] -add
 
 #derive_pll_clocks
 create_generated_clock -name pclk_5x -master_clock pclk_tvp_low -source {pll_pclk|altpll_component|auto_generated|pll1|inclk[1]} -multiply_by 5 -duty_cycle 50.00 {pll_pclk|altpll_component|auto_generated|pll1|clk[0]}
@@ -35,7 +38,7 @@ derive_clock_uncertainty
 # input delay constraints
 set TVP_dmin 0
 set TVP_dmax 1.5
-set critinputs [get_ports {TVP_R_i* TVP_G_i* TVP_B_i* TVP_HS_i TVP_SOG_i TVP_VSYNC_i}]
+set critinputs [get_ports {TVP_R* TVP_G* TVP_B* TVP_HS TVP_SOG TVP_VSYNC LED_R_OR_TVP_SOG LCD_BL_OR_TVP_SOG}]
 foreach_in_collection c [get_clocks "pclk_tvp*"] {
     set_input_delay -clock $c -min $TVP_dmin $critinputs -add_delay
     set_input_delay -clock $c -max $TVP_dmax $critinputs -add_delay
@@ -71,7 +74,7 @@ set_clock_groups -asynchronous -group \
 ### JTAG Signal Constraints ###
 
 #constrain the TCK port
-#create_clock -name tck -period "10MHz" [get_ports altera_reserved_tck]
+create_clock -name tck -period "10MHz" [get_ports altera_reserved_tck]
 #cut all paths to and from tck
 set_clock_groups -exclusive -group [get_clocks altera_reserved_tck]
 #constrain the TDI port

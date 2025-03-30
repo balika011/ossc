@@ -2,11 +2,9 @@ export PATH=$PATH:~/intelFPGA_standard/24.1std/quartus/bin:~/intelFPGA_standard/
 
 set -e
 
-touch software/sys_controller_bsp/bsp_timestamp
-
 gcc tools/bin2hex.c -o tools/bin2hex
 
-cd software/sys_controller
+cd software/rom
 make clean
 make HAS_SH1107=y generate_hex
 cd -
@@ -18,5 +16,3 @@ quartus_cpf --convert --frequency=2MHz --voltage=3.3V --operation=p output_files
 openocd -f scripts/openocd_load.cfg
 
 openocd -f scripts/openocd_gdb.cfg
-
-

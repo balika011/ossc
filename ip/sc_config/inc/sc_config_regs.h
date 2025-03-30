@@ -54,6 +54,22 @@ typedef union {
 
 typedef union {
     struct {
+		uint16_t ir_code;
+		uint8_t ir_cnt;
+		uint8_t btn1:1;
+		uint8_t btn2:1;
+		uint8_t hdmi_tx_mode0:1;
+		uint8_t is_1v8:1;
+		uint8_t pll_activeclk:1;
+		uint8_t vsync_flag:1;
+		uint8_t resync_indicator:1;
+		uint8_t reserved:1;
+	} __attribute__((packed, __may_alias__));
+    uint32_t data;
+} controls_reg;
+
+typedef union {
+    struct {
         uint16_t h_total:12;
         uint16_t h_active:12;
         uint16_t h_synclen:8;
@@ -149,12 +165,52 @@ typedef union {
     uint32_t data;
 } sl_config3_reg;
 
+typedef union {
+    struct {
+		uint8_t hw_reset:1;
+		uint8_t av_reset:1;
+		uint8_t enable_sc:1;
+		uint8_t lcd_bl_on:1;
+		uint8_t lcd_rs:1;
+		uint8_t lcd_cs_n:1;
+		uint8_t pll_bypass:1;
+		uint8_t vsync_type:1;
+		uint8_t led_g:1;
+		uint8_t led_r:1;
+		uint8_t reserved_1_3:1;
+		uint8_t reserved_1_4:1;
+		uint8_t reserved_1_5:1;
+		uint8_t reserved_1_6:1;
+		uint8_t reserved_1_7:1;
+		uint8_t reserved_1_8:1;
+		uint8_t reserved_2_1:1;
+		uint8_t reserved_2_2:1;
+		uint8_t reserved_2_3:1;
+		uint8_t reserved_2_4:1;
+		uint8_t reserved_2_5:1;
+		uint8_t reserved_2_6:1;
+		uint8_t reserved_2_7:1;
+		uint8_t reserved_2_8:1;
+		uint8_t reserved_3_1:1;
+		uint8_t reserved_3_2:1;
+		uint8_t reserved_3_3:1;
+		uint8_t reserved_3_4:1;
+		uint8_t reserved_3_5:1;
+		uint8_t reserved_3_6:1;
+		uint8_t remap_red_r:1;
+		uint8_t remap_lcd_bl:1;
+	} __attribute__((packed, __may_alias__));
+    uint32_t data;
+} sys_ctrl_reg;
+
 typedef struct {
     fe_status_reg fe_status;
     fe_status2_reg fe_status2;
     lt_status_reg lt_status;
-    hv_config_reg hv_in_config;
-    hv_config2_reg hv_in_config2;
+	controls_reg controls;
+
+	hv_config_reg hv_in_config;
+	hv_config2_reg hv_in_config2;
     hv_config3_reg hv_in_config3;
     hv_config_reg hv_out_config;
     hv_config2_reg hv_out_config2;
@@ -165,6 +221,7 @@ typedef struct {
     sl_config_reg sl_config;
     sl_config2_reg sl_config2;
     sl_config3_reg sl_config3;
+	sys_ctrl_reg sys_ctrl;
 } sc_regs;
 
 #endif //SC_CONFIG_REGS_H_

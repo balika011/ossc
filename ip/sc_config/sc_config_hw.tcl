@@ -100,7 +100,7 @@ set_interface_property avalon_s PORT_NAME_MAP ""
 set_interface_property avalon_s CMSIS_SVD_VARIABLES ""
 set_interface_property avalon_s SVD_ADDRESS_GROUP ""
 
-add_interface_port avalon_s avalon_s_address address Input 4
+add_interface_port avalon_s avalon_s_address address Input 5
 add_interface_port avalon_s avalon_s_writedata writedata Input 32
 add_interface_port avalon_s avalon_s_readdata readdata Output 32
 add_interface_port avalon_s avalon_s_byteenable byteenable Input 4
@@ -115,46 +115,45 @@ set_interface_assignment avalon_s embeddedsw.configuration.isPrintableDevice 0
 
 
 #
-# connection point bus
+# connection point sc_in
 #
-#add_sv_interface bus sc_if
+add_interface sc_in conduit end
+set_interface_property sc_in associatedClock ""
+set_interface_property sc_in associatedReset ""
+set_interface_property sc_in ENABLED true
+set_interface_property sc_in EXPORT_OF ""
+set_interface_property sc_in PORT_NAME_MAP ""
+set_interface_property sc_in CMSIS_SVD_VARIABLES ""
+set_interface_property sc_in SVD_ADDRESS_GROUP ""
 
-# Setting the parameter property to add SV interface parameters
-#set_parameter_property my_interface_parameter SV_INTERFACE_PARAMETER bus
-
-# Setting the port properties to add them to SV interface port set_port_property clk SV_INTERFACE_PORT bus #set_port_property p1 SV_INTERFACE_PORT bus
-#set_port_property p2 SV_INTERFACE_PORT bus
-#set_port_property p1 SV_INTERFACE_SIGNAL bus
-#set_port_property p2 SV_INTERFACE_SIGNAL bus
-
-#Adding the SV Interface File
-#add_fileset_file sc_if.sv SYSTEM_VERILOG PATH sc_if.sv SYSTEMVERILOG_INTERFACE
+add_interface_port sc_in fe_status_i fe_status_i Input 32
+add_interface_port sc_in fe_status2_i fe_status2_i Input 32
+add_interface_port sc_in lt_status_i lt_status_i Input 32
+add_interface_port sc_in controls_i controls_i Input 32
 
 
 #
-# connection point sc_if
+# connection point sc_out
 #
-add_interface sc_if conduit end
-set_interface_property sc_if associatedClock ""
-set_interface_property sc_if associatedReset ""
-set_interface_property sc_if ENABLED true
-set_interface_property sc_if EXPORT_OF ""
-set_interface_property sc_if PORT_NAME_MAP ""
-set_interface_property sc_if CMSIS_SVD_VARIABLES ""
-set_interface_property sc_if SVD_ADDRESS_GROUP ""
+add_interface sc_out conduit end
+set_interface_property sc_out associatedClock ""
+set_interface_property sc_out associatedReset ""
+set_interface_property sc_out ENABLED true
+set_interface_property sc_out EXPORT_OF ""
+set_interface_property sc_out PORT_NAME_MAP ""
+set_interface_property sc_out CMSIS_SVD_VARIABLES ""
+set_interface_property sc_out SVD_ADDRESS_GROUP ""
 
-add_interface_port sc_if fe_status_i fe_status_i Input 32
-add_interface_port sc_if fe_status2_i fe_status2_i Input 32
-add_interface_port sc_if lt_status_i lt_status_i Input 32
-add_interface_port sc_if hv_in_config_o hv_in_config_o Output 32
-add_interface_port sc_if hv_in_config2_o hv_in_config2_o Output 32
-add_interface_port sc_if hv_in_config3_o hv_in_config3_o Output 32
-add_interface_port sc_if hv_out_config_o hv_out_config_o Output 32
-add_interface_port sc_if hv_out_config2_o hv_out_config2_o Output 32
-add_interface_port sc_if hv_out_config3_o hv_out_config3_o Output 32
-add_interface_port sc_if xy_out_config_o xy_out_config_o Output 32
-add_interface_port sc_if xy_out_config2_o xy_out_config2_o Output 32
-add_interface_port sc_if misc_config_o misc_config_o Output 32
-add_interface_port sc_if sl_config_o sl_config_o Output 32
-add_interface_port sc_if sl_config2_o sl_config2_o Output 32
-add_interface_port sc_if sl_config3_o sl_config3_o Output 32
+add_interface_port sc_out hv_in_config_o hv_in_config_o Output 32
+add_interface_port sc_out hv_in_config2_o hv_in_config2_o Output 32
+add_interface_port sc_out hv_in_config3_o hv_in_config3_o Output 32
+add_interface_port sc_out hv_out_config_o hv_out_config_o Output 32
+add_interface_port sc_out hv_out_config2_o hv_out_config2_o Output 32
+add_interface_port sc_out hv_out_config3_o hv_out_config3_o Output 32
+add_interface_port sc_out xy_out_config_o xy_out_config_o Output 32
+add_interface_port sc_out xy_out_config2_o xy_out_config2_o Output 32
+add_interface_port sc_out misc_config_o misc_config_o Output 32
+add_interface_port sc_out sl_config_o sl_config_o Output 32
+add_interface_port sc_out sl_config2_o sl_config2_o Output 32
+add_interface_port sc_out sl_config3_o sl_config3_o Output 32
+add_interface_port sc_out sys_ctrl_o sys_ctrl_o Output 32

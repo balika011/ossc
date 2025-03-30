@@ -57,7 +57,7 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
 
 
 set_location_assignment PIN_25 -to clk27
-set_location_assignment PIN_99 -to hw_reset_n
+set_location_assignment PIN_99 -to av_reset_n
 set_location_assignment PIN_23 -to ir_rx
 set_location_assignment PIN_126 -to cfg[1]
 set_location_assignment PIN_127 -to cfg[0]
@@ -65,34 +65,34 @@ set_location_assignment PIN_127 -to cfg[0]
 #============================================================
 # TVP7002
 #============================================================
-set_location_assignment PIN_52 -to TVP_R_i[0]
-set_location_assignment PIN_53 -to TVP_R_i[1]
-set_location_assignment PIN_54 -to TVP_R_i[2]
-set_location_assignment PIN_55 -to TVP_R_i[3]
-set_location_assignment PIN_58 -to TVP_R_i[4]
-set_location_assignment PIN_59 -to TVP_R_i[5]
-set_location_assignment PIN_60 -to TVP_R_i[6]
-set_location_assignment PIN_61 -to TVP_R_i[7]
-set_location_assignment PIN_88 -to TVP_B_i[7]
-set_location_assignment PIN_87 -to TVP_B_i[6]
-set_location_assignment PIN_86 -to TVP_B_i[5]
-set_location_assignment PIN_85 -to TVP_B_i[4]
-set_location_assignment PIN_83 -to TVP_B_i[3]
-set_location_assignment PIN_80 -to TVP_B_i[2]
-set_location_assignment PIN_77 -to TVP_B_i[1]
-set_location_assignment PIN_89 -to TVP_PCLK_i
-set_location_assignment PIN_76 -to TVP_B_i[0]
-set_location_assignment PIN_90 -to TVP_HS_i
-set_location_assignment PIN_91 -to TVP_VSYNC_i
-set_location_assignment PIN_98 -to TVP_SOG_i
-set_location_assignment PIN_72 -to TVP_G_i[7]
-set_location_assignment PIN_71 -to TVP_G_i[6]
-set_location_assignment PIN_69 -to TVP_G_i[5]
-set_location_assignment PIN_68 -to TVP_G_i[4]
-set_location_assignment PIN_67 -to TVP_G_i[3]
-set_location_assignment PIN_66 -to TVP_G_i[2]
-set_location_assignment PIN_65 -to TVP_G_i[1]
-set_location_assignment PIN_64 -to TVP_G_i[0]
+set_location_assignment PIN_52 -to TVP_R[0]
+set_location_assignment PIN_53 -to TVP_R[1]
+set_location_assignment PIN_54 -to TVP_R[2]
+set_location_assignment PIN_55 -to TVP_R[3]
+set_location_assignment PIN_58 -to TVP_R[4]
+set_location_assignment PIN_59 -to TVP_R[5]
+set_location_assignment PIN_60 -to TVP_R[6]
+set_location_assignment PIN_61 -to TVP_R[7]
+set_location_assignment PIN_88 -to TVP_B[7]
+set_location_assignment PIN_87 -to TVP_B[6]
+set_location_assignment PIN_86 -to TVP_B[5]
+set_location_assignment PIN_85 -to TVP_B[4]
+set_location_assignment PIN_83 -to TVP_B[3]
+set_location_assignment PIN_80 -to TVP_B[2]
+set_location_assignment PIN_77 -to TVP_B[1]
+set_location_assignment PIN_89 -to TVP_PCLK
+set_location_assignment PIN_76 -to TVP_B[0]
+set_location_assignment PIN_90 -to TVP_HS
+set_location_assignment PIN_91 -to TVP_VSYNC
+set_location_assignment PIN_98 -to TVP_SOG
+set_location_assignment PIN_72 -to TVP_G[7]
+set_location_assignment PIN_71 -to TVP_G[6]
+set_location_assignment PIN_69 -to TVP_G[5]
+set_location_assignment PIN_68 -to TVP_G[4]
+set_location_assignment PIN_67 -to TVP_G[3]
+set_location_assignment PIN_66 -to TVP_G[2]
+set_location_assignment PIN_65 -to TVP_G[1]
+set_location_assignment PIN_64 -to TVP_G[0]
 
 #============================================================
 # HDMITX
@@ -141,7 +141,7 @@ set_location_assignment PIN_30 -to SD_DAT[3]
 # Leds
 #============================================================
 set_location_assignment PIN_44 -to LED_G
-set_location_assignment PIN_46 -to LED_R
+set_location_assignment PIN_46 -to LED_R_OR_TVP_SOG
 
 #============================================================
 # I2C
@@ -154,7 +154,7 @@ set_location_assignment PIN_50 -to scl
 #============================================================
 set_location_assignment PIN_42 -to LCD_RS
 set_location_assignment PIN_43 -to LCD_CS_N
-set_location_assignment PIN_51 -to LCD_BL
+set_location_assignment PIN_51 -to LCD_BL_OR_TVP_SOG
 
 #============================================================
 # Buttons
@@ -239,7 +239,7 @@ set_global_assignment -name VERILOG_FILE rtl/linebuf_top.v
 set_global_assignment -name VERILOG_FILE rtl/tvp7002_frontend.v
 set_global_assignment -name VERILOG_FILE rtl/lat_tester.v
 set_global_assignment -name QIP_FILE sys/synthesis/sys.qip
-set_global_assignment -name QIP_FILE software/sys_controller/mem_init/meminit.qip
+set_global_assignment -name QIP_FILE software/rom/mem_init/meminit.qip
 set_global_assignment -name QIP_FILE rtl/linebuf.qip
 set_global_assignment -name QIP_FILE rtl/char_rom.qip
 set_global_assignment -name QIP_FILE rtl/pll_2x.qip
