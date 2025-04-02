@@ -30,7 +30,7 @@ typedef union {
         uint32_t pll_reconfig_rsv:21;
         uint8_t c_config_id:4;
         uint8_t busy:1;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } pll_config_status_reg;
 
@@ -42,6 +42,6 @@ typedef struct {
 typedef struct {
     pll_config_status_reg pll_config_status;
     pll_config_data_regs pll_config_data;
-} __attribute__((packed, __may_alias__)) pll_reconfig_regs;
+} __attribute__((packed)) pll_reconfig_regs;
 
 #endif //OSD_GENERATOR_REGS_H_

@@ -178,7 +178,7 @@ typedef struct {
 
 extern mode_data_t video_modes_plm[VIDEO_MODE_COUNT];
 
-void set_default_vm_table();
+void vm_table_set_default();
 
 uint32_t estimate_dotclk(mode_data_t *vm_in, uint32_t h_hz);
 

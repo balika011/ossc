@@ -29,7 +29,7 @@ typedef union {
         uint8_t interlace_flag:1;
         uint8_t sync_active:1;
         uint32_t fe_rsv:19;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } fe_status_reg;
 
@@ -38,7 +38,7 @@ typedef union {
         uint32_t pcnt_field:20;
         uint8_t hsync_width:8;
         uint8_t fe_rsv:4;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } fe_status2_reg;
 
@@ -48,7 +48,7 @@ typedef union {
         uint16_t lt_stb_result:12;
         uint8_t lt_rsv:3;
         uint8_t lt_finished:1;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } lt_status_reg;
 
@@ -64,7 +64,7 @@ typedef union {
 		uint8_t vsync_flag:1;
 		uint8_t resync_indicator:1;
 		uint8_t reserved:1;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
     uint32_t data;
 } controls_reg;
 
@@ -73,7 +73,7 @@ typedef union {
         uint16_t h_total:12;
         uint16_t h_active:12;
         uint16_t h_synclen:8;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } hv_config_reg;
 
@@ -83,7 +83,7 @@ typedef union {
         uint16_t v_total:11;
         uint16_t v_active:11;
         uint8_t interlaced:1;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } hv_config2_reg;
 
@@ -94,7 +94,7 @@ typedef union {
         uint16_t v_startline:11;
         uint8_t h_skip:4;
         uint8_t h_sample_sel:4;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } hv_config3_reg;
 
@@ -103,7 +103,7 @@ typedef union {
         uint16_t x_size:12;
         uint16_t y_size:11;
         int16_t y_offset:9;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } xy_config_reg;
 
@@ -114,7 +114,7 @@ typedef union {
         int8_t y_start_lb:6;
         int8_t x_rpt:4;
         int8_t y_rpt:4;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } xy_config2_reg;
 
@@ -132,7 +132,7 @@ typedef union {
         uint8_t shmask_mode:2;
         uint8_t lumacode_mode:3;
         uint32_t misc_rsv:6;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } misc_config_reg;
 
@@ -142,14 +142,14 @@ typedef union {
         uint8_t sl_l_overlay:6;
         uint8_t sl_method:1;
         uint8_t sl_altern:1;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } sl_config_reg;
 
 typedef union {
     struct {
         uint32_t sl_c_str_arr_l;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } sl_config2_reg;
 
@@ -161,7 +161,7 @@ typedef union {
         uint8_t sl_iv_x:4;
         uint8_t sl_hybr_str:5;
         uint32_t sl_rsv:2;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } sl_config3_reg;
 
@@ -199,7 +199,7 @@ typedef union {
 		uint8_t reserved_3_6:1;
 		uint8_t remap_red_r:1;
 		uint8_t remap_lcd_bl:1;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
     uint32_t data;
 } sys_ctrl_reg;
 

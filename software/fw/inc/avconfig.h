@@ -155,7 +155,8 @@ typedef struct {
 } __attribute__((packed)) avconfig_t;
 
 extern avconfig_t tc;
+extern const avconfig_t tc_default;
 
-int set_default_avconfig();
+int avconfig_set_default();
 
 #endif

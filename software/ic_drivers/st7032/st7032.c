@@ -70,10 +70,10 @@ void st7032_write(char *row1, char *row2)
 	SC->sys_ctrl.lcd_rs = 1;
 
 	// ensure no empty row
-	rowlen = strnlen(row1, LCD_ROW_LEN);
+	rowlen = strlen(row1);
 	if (rowlen == 0)
 	{
-		strncpy(row1, " ", LCD_ROW_LEN + 1);
+		row1[0] = ' ';
 		rowlen++;
 	}
 
@@ -87,10 +87,10 @@ void st7032_write(char *row1, char *row2)
 	SC->sys_ctrl.lcd_rs = 1;
 
 	// ensure no empty row
-	rowlen = strnlen(row2, LCD_ROW_LEN);
+	rowlen = strlen(row2);
 	if (rowlen == 0)
 	{
-		strncpy(row2, " ", LCD_ROW_LEN + 1);
+		row2[0] = ' ';
 		rowlen++;
 	}
 

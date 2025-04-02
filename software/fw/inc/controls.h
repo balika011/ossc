@@ -24,7 +24,8 @@
 
 typedef enum
 {
-	RC_BTN1 = 0,
+	KEY_NONE = -1,
+	RC_BTN1,
 	RC_BTN2,
 	RC_BTN3,
 	RC_BTN4,
@@ -42,7 +43,7 @@ typedef enum
 	RC_LEFT,
 	RC_RIGHT,
 	RC_INFO,
-	RC_LCDBL,
+	RC_SUSPEND,
 	RC_SL_MODE,
 	RC_SL_TYPE,
 	RC_SL_PLUS,
@@ -51,11 +52,16 @@ typedef enum
 	RC_PHASE_PLUS,
 	RC_PHASE_MINUS,
 	RC_PROF_HOTKEY,
-	REMOTE_MAX_KEYS
-} rc_code_t;
+	REMOTE_MAX_KEYS,
+	FP_BTN1,
+	FP_BTN2
+} key_code_t;
 
+extern uint32_t remote_code;
 extern uint16_t rc_keymap[REMOTE_MAX_KEYS];
+extern uint32_t btn1, btn2;
 
+void controls_set_default();
 void controls_setup();
 int controls_parse();
 void controls_update();

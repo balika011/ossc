@@ -73,6 +73,7 @@ typedef struct {
     uint16_t B_Pr;
 } ypbpr_to_rgb_csc_t;
 
+extern const ypbpr_to_rgb_csc_t csc_coeffs[];
 
 inline uint32_t tvp_readreg(uint32_t regaddr);
 

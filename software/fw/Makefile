@@ -123,23 +123,7 @@ endif # COMSPEC
 ACTIVE_BUILD_CONFIG := default
 BUILD_CONFIGS := default
 
-# The following TYPE comment allows tools to identify the 'type' of target this
-# makefile is associated with.
-# TYPE: APP_MAKEFILE
-
-# This following VERSION comment indicates the version of the tool used to
-# generate this makefile. A makefile variable is provided for VERSION as well.
-# ACDS_VERSION: 14.1
-ACDS_VERSION := 14.1
-
-# This following BUILD_NUMBER comment indicates the build number of the tool
-# used to generate this makefile.
-# BUILD_NUMBER: 190
-
-# Define path to the application ELF.
-# It may be used by the makefile fragments so is defined before including them.
-#
-ELF := sys_controller.elf
+ELF := fw.elf
 
 # Paths to C, C++, and assembly source files.
 C_SRCS += crt0_ram.c
@@ -181,13 +165,7 @@ ASM_SRCS := crt0.S
 # Path to root of object file tree.
 OBJ_ROOT_DIR := obj
 
-# Options to control objdump.
-CREATE_OBJDUMP := 1
-OBJDUMP_INCLUDE_SOURCE := 1
-OBJDUMP_FULL_CONTENTS := 0
-
 # Options to enable/disable optional files.
-CREATE_ELF_DERIVED_FILES := 0
 CREATE_LINKER_MAP := 1
 
 # Common arguments for ALT_CFLAGSs
@@ -199,18 +177,16 @@ ifeq ($(HAS_SH1107),y)
 APP_CFLAGS_DEFINED_SYMBOLS += -DHAS_SH1107
 endif
 APP_CFLAGS_UNDEFINED_SYMBOLS :=
-APP_CFLAGS_OPTIMIZATION := -Os
+APP_CFLAGS_OPTIMIZATION := -O0
 APP_CFLAGS_DEBUG_LEVEL :=
-APP_CFLAGS_WARNINGS := -Wall -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function -Wno-packed-bitfield-compat
-APP_CFLAGS_USER_FLAGS := -fdata-sections -ffunction-sections -fshort-enums -fgnu89-inline -flto
+APP_CFLAGS_WARNINGS := -Wall -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function -Wno-packed-bitfield-compat -Wno-switch -Wno-multichar
+APP_CFLAGS_USER_FLAGS := -g -fdata-sections -ffunction-sections -fshort-enums -fgnu89-inline -flto
 
 APP_ASFLAGS_USER :=
-APP_LDFLAGS_USER := -Wl,--gc-sections
+APP_LDFLAGS_USER := -Wl,--gc-sections -g
 
-# Linker options that have default values assigned later if not
-# assigned here.
+
 LINKER_SCRIPT := link.riscv.ld
-CRT0 :=
 
 # Define path to the root of the BSP.
 BSP_ROOT_DIR := ../bsp/
@@ -233,13 +209,6 @@ BUILD_PRE_PROCESS :=
 BUILD_POST_PROCESS :=
 
 QUARTUS_PROJECT_DIR := ../../
-
-
-#END GENERATED
-
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#                            GENERATED SETTINGS END                           ^
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 #------------------------------------------------------------------------------
@@ -288,43 +257,8 @@ include $(BSP_INCLUDE_FILE)
 # out-of-date error during a BSP make
 ABS_BSP_INCLUDE_FILE := $(ABS_BSP_ROOT_DIR)/public.mk
 
-
-ifneq ($(WARNING.SMALL_STACK_SIZE),)
-# This WARNING is here to protect you from unknowingly using a very small stack
-# If the warning is set, increase your stack size or enable the BSP small stack
-# setting to eliminate the warning
-$(warning WARNING: $(WARNING.SMALL_STACK_SIZE))
-endif
-
-# If the BSP public.mk indicates that ALT_SIM_OPTIMIZE is set, rename the ELF
-# by prefixing it with RUN_ON_HDL_SIMULATOR_ONLY_.
-ifneq ($(filter -DALT_SIM_OPTIMIZE,$(ALT_CPPFLAGS)),)
-ELF := RUN_ON_HDL_SIMULATOR_ONLY_$(ELF)
-endif
-
-# If the BSP public.mk indicates that ALT_PROVIDE_GMON is set, add option to
-# download_elf target
-ifneq ($(filter -DALT_PROVIDE_GMON,$(ALT_CPPFLAGS)),)
-GMON_OUT_FILENAME := gmon.out
-WRITE_GMON_OPTION := --write-gmon $(GMON_OUT_FILENAME)
-endif
-
 # Name of ELF application.
 APP_NAME := $(basename $(ELF))
-
-# Set to defaults if variables not already defined in settings.
-ifeq ($(CRT0),)
-CRT0 := $(BSP_CRT0)
-endif
-
-OBJDUMP_NAME := $(APP_NAME).objdump
-OBJDUMP_FLAGS := --disassemble --syms --all-header
-ifeq ($(OBJDUMP_INCLUDE_SOURCE),1)
-OBJDUMP_FLAGS += --source
-endif
-ifeq ($(OBJDUMP_FULL_CONTENTS),1)
-OBJDUMP_FLAGS += --full-contents
-endif
 
 # Create list of linker dependencies (*.a files).
 APP_LDDEPS := $(ALT_LDDEPS) $(LDDEPS)
@@ -336,34 +270,7 @@ APP_ASM_INC_DIRS := $(addprefix $(ASM_INC_PREFIX), $(ALT_INCLUDE_DIRS) $(APP_INC
 APP_LIB_DIRS := $(addprefix -L, $(ALT_LIBRARY_DIRS) $(APP_LIBRARY_DIRS) $(LIB_DIRS))
 APP_LIBS := $(addprefix -l, $(ALT_LIBRARY_NAMES) $(APP_LIBRARY_NAMES) $(LIBS))
 
-ifneq ($(AVOID_NIOS2_GCC3_OPTIONS),)
-
-#
-# Avoid Nios II GCC 3.X options.
-#
-
-# Detect if small newlib C library is requested.
-# If yes, remove the -msmallc option because it is
-# now handled by other means.
-#ifneq ($(filter -msmallc,$(ALT_LDFLAGS)),)
-	#ALT_LDFLAGS := $(filter-out -msmallc,$(ALT_LDFLAGS))
-	#ALT_C_LIBRARY := smallc
-#else
-	#ALT_C_LIBRARY := c
-#endif
-
-# Put each BSP dependent library in a group to avoid circular dependencies.
-APP_BSP_DEP_LIBS := $(foreach l,$(ALT_BSP_DEP_LIBRARY_NAMES),-Wl,--start-group -l$(ALT_C_LIBRARY) -lgcc -l$(l) -Wl,--end-group)
-
-else # !AVOID_NIOS2_GCC3_OPTIONS
-
-#
-# Use Nios II GCC 3.X options.
-#
-#APP_BSP_DEP_LIBS := $(addprefix -msys-lib=, $(ALT_BSP_DEP_LIBRARY_NAMES))
 APP_BSP_DEP_LIBS := $(addprefix -l:, $(ALT_BSP_DEP_LIBRARY_NAMES))
-
-endif # !AVOID_NIOS2_GCC3_OPTIONS
 
 # Arguments for the C preprocessor, C/C++ compiler, assembler, and linker.
 APP_CFLAGS := $(APP_CFLAGS_DEFINED_SYMBOLS) \
@@ -397,17 +304,6 @@ ifneq ($(LINKER_SCRIPT),)
 APP_LDFLAGS += -T'$(LINKER_SCRIPT)'
 endif
 
-ifneq ($(AVOID_NIOS2_GCC3_OPTIONS),)
-
-# Avoid Nios II GCC 3.x options.
-ifneq ($(CRT0),)
-APP_LDFLAGS += $(CRT0)
-endif
-
-else # !AVOID_NIOS2_GCC3_OPTIONS
-
-endif # !AVOID_NIOS2_GCC3_OPTIONS
-
 APP_LDFLAGS += \
            $(APP_LIB_DIRS) \
            $(LDFLAGS)
@@ -416,50 +312,6 @@ LINKER_MAP_NAME := $(APP_NAME).map
 ifeq ($(CREATE_LINKER_MAP), 1)
 APP_LDFLAGS += -Wl,-Map=$(LINKER_MAP_NAME)
 endif
-
-# QUARTUS_PROJECT_DIR and SOPC_NAME need to be defined if you want the
-# mem_init_install target of the mem_init.mk (located in the associated BSP)
-# to know how to copy memory initialization files (e.g. .dat, .hex) into
-# directories required for Quartus compilation or RTL simulation.
-
-# Defining QUARTUS_PROJECT_DIR causes mem_init_install to copy memory
-# initialization files into your Quartus project directory. This is required
-# to provide the initial memory contents of FPGA memories that can be
-# initialized by the programming file (.sof) or Hardcopy ROMs. It is also used
-# for VHDL simulation of on-chip memories.
-
-# Defining SOPC_NAME causes the mem_init_install target to copy memory
-# initialization files into your RTL simulation directory.  This is required
-# to provide the initial memory contents of all memories that can be
-# initialized by RTL simulation. This variable should be set to the same name
-# as your SOPC Builder system name. For example, if you have a system called
-# "foo.sopc", this variable should be set to "foo".
-
-# If SOPC_NAME is not set and QUARTUS_PROJECT_DIR is set, then derive SOPC_NAME.
-ifeq ($(SOPC_NAME),)
-ifneq ($(QUARTUS_PROJECT_DIR),)
-SOPC_NAME := $(basename $(notdir $(wildcard $(QUARTUS_PROJECT_DIR)/*.sopcinfo)))
-endif
-endif
-
-# Defining JDI_FILE is required to specify the JTAG Debug Information File
-# path. This file is generated by Quartus, and is needed along with the
-# .sopcinfo file to resolve processor instance ID's from names in a multi-CPU
-# systems. For multi-CPU systems, the processor instance ID is used to select
-# from multiple CPU's during ELF download.
-
-# Both JDI_FILE and SOPCINFO_FILE are provided by the BSP if they found during
-# BSP creation. If JDI_FILE is not set and QUARTUS_PROJECT_DIR is set, then
-# derive JDI_FILE. We do not attempt to derive SOPCINFO_FILE since there may be
-# multiple .sopcinfo files in a Quartus project.
-ifeq ($(JDI_FILE),)
-ifneq ($(QUARTUS_PROJECT_DIR),)
-JDI_FILE := $(firstword $(wildcard $(QUARTUS_PROJECT_DIR)/output_files/*.jdi) $(wildcard $(QUARTUS_PROJECT_DIR)/*.jdi))
-endif
-endif
-
-# Path to root runtime directory used for hdl simulation
-RUNTIME_ROOT_DIR := $(CONFIG_OBJ_DIR)/runtime
 
 
 
@@ -581,36 +433,6 @@ APP_OBJS += $(OBJS)
 # Create list of dependancy files for each object file.
 APP_DEPS := $(APP_OBJS:.o=.d)
 
-# Patch the Elf file with system specific information
-
-# Patch the Elf with the name of the sopc system
-ifneq ($(SOPC_NAME),)
-ELF_PATCH_FLAG += --sopc_system_name $(SOPC_NAME)
-endif
-
-# Patch the Elf with the absolute path to the Quartus Project Directory
-ifneq ($(QUARTUS_PROJECT_DIR),)
-ABS_QUARTUS_PROJECT_DIR := $(call adjust-path-mixed,$(shell cd "$(QUARTUS_PROJECT_DIR)"; pwd))
-ELF_PATCH_FLAG += --quartus_project_dir "$(ABS_QUARTUS_PROJECT_DIR)"
-endif
-
-# Patch the Elf and download args with the JDI_FILE if specified
-ifneq ($(wildcard $(JDI_FILE)),)
-ELF_PATCH_FLAG += --jdi $(JDI_FILE)
-DOWNLOAD_JDI_FLAG := --jdi $(JDI_FILE)
-endif
-
-# Patch the Elf with the SOPCINFO_FILE if specified
-ifneq ($(wildcard $(SOPCINFO_FILE)),)
-ELF_PATCH_FLAG += --sopcinfo $(SOPCINFO_FILE)
-endif
-
-# Use the DOWNLOAD_CABLE variable to specify which JTAG cable to use.
-# This is not needed if you only have one cable.
-ifneq ($(DOWNLOAD_CABLE),)
-DOWNLOAD_CABLE_FLAG := --cable '$(DOWNLOAD_CABLE)'
-endif
-
 
 #------------------------------------------------------------------------------
 #                           BUILD PRE/POST PROCESS
@@ -637,21 +459,12 @@ ifeq ($(DEFAULT_CROSS_COMPILE),)
 DEFAULT_CROSS_COMPILE := riscv32-unknown-elf-
 endif
 
-ifeq ($(DEFAULT_STACKREPORT),)
-DEFAULT_STACKREPORT := riscv32-unknown-elf-size
-endif
-
 ifeq ($(DEFAULT_DOWNLOAD),)
 DEFAULT_DOWNLOAD := anios2-download
 endif
 
 ifeq ($(DEFAULT_FLASHPROG),)
 DEFAULT_FLASHPROG := anios2-flash-programmer
-endif
-
-DISABLE_ELFPATCH 		:= 1
-ifeq ($(DEFAULT_ELFPATCH),)
-DEFAULT_ELFPATCH := anios2-elf-insert
 endif
 
 ifeq ($(DEFAULT_RM),)
@@ -715,22 +528,12 @@ ifeq ($(OBJCOPY),)
 OBJCOPY := $(CROSS_COMPILE)objcopy
 endif
 
-ifeq ($(STACKREPORT),)
-STACKREPORT := $(DEFAULT_STACKREPORT)
-else
-DISABLE_STACKREPORT := 1
-endif
-
 ifeq ($(DOWNLOAD),)
 DOWNLOAD := $(DEFAULT_DOWNLOAD)
 endif
 
 ifeq ($(FLASHPROG),)
 FLASHPROG := $(DEFAULT_FLASHPROG)
-endif
-
-ifeq ($(ELFPATCH),)
-ELFPATCH := $(DEFAULT_ELFPATCH)
 endif
 
 ifeq ($(MKDIR),)
@@ -870,14 +673,7 @@ help :
 	@$(ECHO) "    libs              - All libraries (including BSP)"
 	@$(ECHO) "    flash             - All flash files"
 	@$(ECHO) "    mem_init_generate - All memory initialization files"
-ifeq ($(QSYS),1)
-	@$(ECHO) "    mem_init_install  - This target is deprecated for QSys Systems"
-	@$(ECHO) "                         --> Use the mem_init_generate target and then"
-	@$(ECHO) "                             add the generated meminit.qip file to your"
-	@$(ECHO) "                             Quartus II Project."
-else # if QSYS != 1
 	@$(ECHO) "    mem_init_install  - Copy memory initialization files to Quartus II project"
-endif # QSYS == 1
 	@$(ECHO)
 	@$(ECHO) "  Clean targets:"
 	@$(ECHO) "    clean_all         - Application and all libraries (including BSP)"
@@ -892,14 +688,6 @@ endif # QSYS == 1
 # Handy rule to skip making libraries and just make application.
 .PHONY : app
 app : $(ELF)
-
-ifeq ($(CREATE_OBJDUMP), 1)
-app : $(OBJDUMP_NAME)
-endif
-
-ifeq ($(CREATE_ELF_DERIVED_FILES),1)
-app : elf_derived_files
-endif
 
 .PHONY: elf_derived_files
 elf_derived_files: default_mem_init
@@ -947,12 +735,9 @@ $(ELF): $(wildcard $(addsuffix /$(FORCE_RELINK_DEP), $(CONFIG_OBJ_DIR) $(ALT_LIB
 
 # Clean just the application.
 .PHONY : clean
-ifeq ($(CREATE_ELF_DERIVED_FILES),1)
-clean : clean_elf_derived_files
-endif
 
 clean :
-	@$(RM) -r $(ELF) $(OBJDUMP_NAME) $(LINKER_MAP_NAME) $(OBJ_ROOT_DIR) $(RUNTIME_ROOT_DIR) $(FORCE_REBUILD_DEP_LIST) src/menu_sjis.c src/userdata_sjis.c
+	@$(RM) -r $(ELF) $(LINKER_MAP_NAME) $(OBJ_ROOT_DIR) $(FORCE_REBUILD_DEP_LIST) src/menu_sjis.c src/userdata_sjis.c
 	@$(ECHO) [$(APP_NAME) clean complete]
 
 # Clean just the BSP.
@@ -988,16 +773,6 @@ ifneq ($(firstword $(MAKECMDGOALS)),clean_all)
 endif
 endif
 
-.PHONY : download-elf
-download-elf : $(ELF)
-	@if [ "$(DOWNLOAD)" = "none" ]; \
-	then \
-		$(ECHO) Downloading $(ELF) not supported; \
-	else \
-		$(ECHO) Info: Downloading $(ELF); \
-		$(DOWNLOAD) --go --cpu_name=$(CPU_NAME) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) $(DOWNLOAD_JDI_FLAG) $(WRITE_GMON_OPTION) $(ELF); \
-	fi
-
 # Delete the target of a rule if it has changed and its commands exit
 # with a nonzero exit status.
 .DELETE_ON_ERROR:
@@ -1027,78 +802,13 @@ $(PROGRAM_FLASH_TARGET) : flash
 	fi
 
 
-# Rules for simulating with an HDL Simulator [QSYS only]
-ifeq ($(QSYS),1)
-IP_MAKE_SIMSCRIPT := ip-make-simscript
-
-ifeq ($(VSIM),)
-VSIM_EXE := "$(if $(VSIM_DIR),$(VSIM_DIR)/,)vsim"
-ifeq ($(ENABLE_VSIM_GUI),1)
-VSIM := $(VSIM_EXE) -gui
-else
-VSIM := $(VSIM_EXE) -c
-endif # ENABLE_VSIM_GUI == 1
-endif # VSIM not set
-
-ifeq ($(SPD),)
-ifneq ($(ABS_QUARTUS_PROJECT_DIR),)
-ifneq ($(SOPC_NAME),)
-SPD_LOCATION = $(ABS_QUARTUS_PROJECT_DIR)/$(SOPC_NAME)_tb/$(SOPC_NAME)_tb/$(SOPC_NAME)_tb.spd
-LEGACY_SPD_LOCATION = $(ABS_QUARTUS_PROJECT_DIR)/$(SOPC_NAME)_tb.spd
-SPD = $(if $(wildcard $(SPD_LOCATION)),$(SPD_LOCATION),$(LEGACY_SPD_LOCATION))
-endif # SOPC_NAME set
-endif # ABS_QUARTUS_PROJECT_DIR set
-endif # SPD == empty string
-
-ifeq ($(MSIM_SCRIPT),)
-SIM_SCRIPT_DIR := $(RUNTIME_ROOT_DIR)/sim
-MSIM_SCRIPT := $(SIM_SCRIPT_DIR)/mentor/msim_setup.tcl
-endif # MSIM_SCRIPT == empty string
-
-ifeq ($(MAKE_VERSION),3.81)
-ABS_MEM_INIT_DESCRIPTOR_FILE := $(abspath $(MEM_INIT_DESCRIPTOR_FILE))
-else
-ABS_MEM_INIT_DESCRIPTOR_FILE := $(call adjust-path-mixed,$(shell pwd))/$(MEM_INIT_DESCRIPTOR_FILE)
-endif
-
-$(MSIM_SCRIPT): $(SPD) $(MEM_INIT_DESCRIPTOR_FILE)
-ifeq ($(SPD),)
-	$(error No SPD file specified. Ensure QUARTUS_PROJECT_DIR variable is set)
-endif
-	@$(MKDIR) $(SIM_SCRIPT_DIR)
-	$(IP_MAKE_SIMSCRIPT) --spd=$(SPD) --spd=$(MEM_INIT_DESCRIPTOR_FILE) --output-directory=$(SIM_SCRIPT_DIR)
-
-VSIM_COMMAND = \
-	cd $(dir $(MSIM_SCRIPT)) && \
-	$(VSIM) -do "do $(notdir $(MSIM_SCRIPT)); ld; $(if $(VSIM_RUN_TIME),run ${VSIM_RUN_TIME};quit;)"
-
-.PHONY: sim
-sim: $(MSIM_SCRIPT) mem_init_generate
-ifeq ($(MSIM_SCRIPT),)
-	$(error MSIM_SCRIPT not set)
-endif
-	$(VSIM_COMMAND)
-
-endif # QSYS == 1
-
-
 #------------------------------------------------------------------------------
 #                         ELF TARGET RULE
 #------------------------------------------------------------------------------
 # Rule for constructing the executable elf file.
 $(ELF) : $(APP_OBJS) $(LINKER_SCRIPT) $(APP_LDDEPS)
 	@$(ECHO) Info: Linking $@
-	$(LD) $(APP_LDFLAGS) $(APP_CFLAGS) -o $@ $(filter-out $(CRT0),$(APP_OBJS)) $(APP_LIBS) $(APP_BSP_DEP_LIBS)
-ifneq ($(DISABLE_ELFPATCH),1)
-	$(ELFPATCH) $@ $(ELF_PATCH_FLAG)
-endif
-ifneq ($(DISABLE_STACKREPORT),1)
-	@bash -c "$(STACKREPORT) $@"
-endif
-
-$(OBJDUMP_NAME) : $(ELF)
-	@$(ECHO) Info: Creating $@
-	$(OBJDUMP) $(OBJDUMP_FLAGS) $< >$@
+	$(LD) $(APP_LDFLAGS) $(APP_CFLAGS) -o $@ $(APP_OBJS) $(APP_LIBS) $(APP_BSP_DEP_LIBS)
 
 # Rule for printing the name of the elf file
 .PHONY: print-elf-name
@@ -1115,7 +825,7 @@ src/menu_sjis.c: src/menu.c
 src/userdata_sjis.c: src/userdata.c
 	iconv -f UTF-8 -t SHIFT-JIS src/userdata.c > src/userdata_sjis.c
 
-mem_init/flash.bin: sys_controller.elf
+mem_init/flash.bin: fw.elf
 	$(RV_OBJCOPY) --change-addresses -0x10000 -O binary --gap-fill 0 $< mem_init/flash.bin
 
 .PHONY: mem_init_generate_new

@@ -25,8 +25,6 @@
 
 #define DEFAULT_ON              1
 
-extern uint8_t update_cur_vm;
-
 // Target configuration
 avconfig_t tc;
 
@@ -62,13 +60,13 @@ const avconfig_t tc_default = {
     .link_av = AV_LAST,
 };
 
-int set_default_avconfig()
+int avconfig_set_default()
 {
     memcpy(&tc, &tc_default, sizeof(avconfig_t));
 
 	tc.tx_mode = SC->controls.hdmi_tx_mode ? TX_DVI : TX_HDMI_RGB;
 
-    set_default_vm_table();
+    vm_table_set_default();
     update_cur_vm = 1;
 
     return 0;

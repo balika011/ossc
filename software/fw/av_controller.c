@@ -50,15 +50,6 @@
 // Current mode
 avmode_t cm;
 
-extern mode_data_t video_modes_plm[];
-extern ypbpr_to_rgb_csc_t csc_coeffs[];
-extern uint16_t rc_keymap[REMOTE_MAX_KEYS];
-extern uint16_t rc_keymap_default[REMOTE_MAX_KEYS];
-extern uint32_t remote_code;
-extern avconfig_t tc, tc_default;
-extern uint8_t vm_sel;
-extern char target_profile_name[PROFILE_NAME_LEN+1];
-
 tvp_input_t target_tvp;
 tvp_sync_input_t target_tvp_sync;
 uint8_t target_type;
@@ -70,7 +61,6 @@ uint8_t auto_input, auto_av1_ypbpr, auto_av2_ypbpr = 1, auto_av3_ypbpr;
 
 char row1[LCD_ROW_LEN+1], row2[LCD_ROW_LEN+1], menu_row1[LCD_ROW_LEN+1], menu_row2[LCD_ROW_LEN+1];
 
-extern uint8_t menu_active;
 avinput_t target_input;
 
 uint8_t pcm1862_active;
@@ -81,6 +71,8 @@ uint32_t read_it2(uint32_t regaddr);
 
 mode_data_t vmode_in, vmode_out;
 vm_proc_config_t vm_conf;
+
+uint8_t in_suspend;
 
 // Manually (see cyiv-51005.pdf) or automatically (MIF/HEX from PLL megafunction) generated config may not
 // provide fully correct scan chain data (e.g. mismatches in C3) and lead to incorrect PLL configuration.
@@ -114,17 +106,20 @@ void ui_disp_menu(uint8_t osd_mode)
 {
 	uint8_t menu_page;
 
-    if ((osd_mode == 1) || (osd_enable == 2)) {
-        strncpy((char*)OSD->osd_array.data[0][0], menu_row1, OSD_CHAR_COLS);
-        strncpy((char*)OSD->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
-        OSD->osd_row_color.mask = 0;
-        OSD->osd_sec_enable[0].mask = 3;
-        OSD->osd_sec_enable[1].mask = 0;
-    } else if (osd_mode == 2) {
-        menu_page = get_current_menunavi()->mp;
-        strncpy((char*)OSD->osd_array.data[menu_page][1], menu_row2, OSD_CHAR_COLS);
-        OSD->osd_sec_enable[1].mask |= (1<<menu_page);
-    }
+	if ((osd_mode == 1) || (osd_enable == 2))
+	{
+		strncpy((char *)OSD->osd_array.data[0][0], menu_row1, OSD_CHAR_COLS);
+		strncpy((char *)OSD->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
+		OSD->osd_row_color.mask = 0;
+		OSD->osd_sec_enable[0].mask = menu_row2[0] ? 3 : 1;
+		OSD->osd_sec_enable[1].mask = 0;
+	}
+	else if (osd_mode == 2)
+	{
+		menu_page = get_current_menunavi()->mp;
+		strncpy((char *)OSD->osd_array.data[menu_page][1], menu_row2, OSD_CHAR_COLS);
+		OSD->osd_sec_enable[1].mask |= (1 << menu_page);
+	}
 
 	lcd_write(menu_row1, menu_row2);
 }
@@ -489,15 +484,15 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
             }
         }
     }
-    for (i=0; i<10; i++) {
+    for (i = 0; i < 10; i++) {
         if (avconfig->sl_type == 3) {
-            if (i<8)
+            if (i < 8)
                 sl_config2.sl_c_str_arr_l |= ((avconfig->sl_cust_c_str[i]-1)&0xf)<<(4*i);
             else
                 sl_config3.sl_c_str_arr_h |= ((avconfig->sl_cust_c_str[i]-1)&0xf)<<(4*(i-8));
             sl_config3.sl_c_overlay |= (avconfig->sl_cust_c_str[i]!=0)<<i;
         } else {
-            if (i<8)
+            if (i < 8)
                 sl_config2.sl_c_str_arr_l |= avconfig->sl_str<<(4*i);
             else
                 sl_config3.sl_c_str_arr_h |= avconfig->sl_str<<(4*(i-8));
@@ -681,8 +676,8 @@ void set_sampler_phase(uint8_t sampler_phase, uint8_t update_sc) {
 int load_profile() {
     int retval;
 
-    retval = userdata_load(profile_sel_menu, 0);
-    if (retval == 0) {
+	retval = userdata_load_profile(profile_sel_menu, 0);
+	if (retval == 0) {
         profile_sel = profile_sel_menu;
 
         // Change the input if the new profile demands it.
@@ -691,8 +686,8 @@ int load_profile() {
 
         // Update profile link (also prevents the change of input from inducing a profile load).
         input_profiles[profile_link ? target_input : AV_TESTPAT] = profile_sel;
-        userdata_save(INIT_CONFIG_SLOT);
-    }
+		userdata_save_initconfig();
+	}
 
     return retval;
 }
@@ -700,13 +695,13 @@ int load_profile() {
 int save_profile() {
     int retval;
 
-    retval = userdata_save(profile_sel_menu);
-    if (retval == 0) {
+	retval = userdata_save_profile(profile_sel_menu);
+	if (retval == 0) {
         profile_sel = profile_sel_menu;
 
         input_profiles[profile_link ? cm.avinput : AV_TESTPAT] = profile_sel;
-        userdata_save(INIT_CONFIG_SLOT);
-    }
+		userdata_save_initconfig();
+	}
 
     return retval;
 }
@@ -714,9 +709,6 @@ int save_profile() {
 // Initialize hardware
 int init_hw()
 {
-	// Start system timer
-	alt_timestamp_start();
-
 	if (!SC->controls.is_1_8)
 	{
 #ifndef HAS_SH1107
@@ -769,14 +761,16 @@ int init_hw()
 	strcpy(prow2, fwver);
 	ui_disp_status(1);
 
-	if (!ths_init()) {
+	if (!ths_init())
+	{
         printf("Error: could not read from THS7353\n");
         return -2;
     }
 
     /* check if TVP is found */
 	uint32_t chiprev = tvp_readreg(TVP_CHIPREV);
-    if (chiprev == 0xff) {
+    if (chiprev == 0xff)
+	{
         printf("Error: could not read from TVP7002\n");
         return -3;
 	}
@@ -784,7 +778,8 @@ int init_hw()
 	tvp_init();
 
     chiprev = HDMITX_ReadI2C_Byte(IT_DEVICEID);
-    if (chiprev != 0x13) {
+    if (chiprev != 0x13)
+	{
         printf("Error: could not read from IT6613\n");
         return -4;
 	}
@@ -797,19 +792,6 @@ int init_hw()
 	}
 
 	sdcard_init();
-
-	// Set defaults
-	set_default_avconfig();
-	memcpy(&cm.cc, &tc_default, sizeof(avconfig_t));
-	memcpy(rc_keymap, rc_keymap_default, sizeof(rc_keymap));
-
-	// Init menu
-	init_menu();
-
-	// Load initconfig and profile
-	set_default_vm_table();
-	userdata_load(INIT_CONFIG_SLOT, 0);
-	userdata_load(profile_sel, 0);
 
 	// Setup test pattern
     get_vmode(VMODE_480p, &vmode_in, &vmode_out, &vm_conf);
@@ -826,9 +808,9 @@ void print_vm_stats() {
 
     if (!menu_active) {
         memset((void*)OSD->osd_array.data, 0, sizeof(osd_char_array));
-        userdata_load(profile_sel, 1);
+		userdata_load_profile(profile_sel, 1);
 
-        sniprintf((char*)OSD->osd_array.data[row][0], OSD_CHAR_COLS, "Mode preset:");
+		sniprintf((char*)OSD->osd_array.data[row][0], OSD_CHAR_COLS, "Mode preset:");
         sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%s", vmode_out.name);
         sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "Refresh rate:");
         sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%u.%.2uHz", vmode_out.timings.v_hz_x100/100, vmode_out.timings.v_hz_x100%100);
@@ -858,273 +840,308 @@ void print_vm_stats() {
     }
 }
 
+void enter_suspend()
+{
+	in_suspend = 1;
+	SC->sys_ctrl.lcd_bl_on = 0;
+	SC->sys_ctrl.led_g = 0;
+	SC->sys_ctrl.led_r = 1;
+	SC->sys_ctrl.av_reset_n = 0;
+}
+
+void exit_suspend()
+{
+	in_suspend = 0;
+	SC->sys_ctrl.lcd_bl_on = 1;
+	SC->sys_ctrl.led_g = 1;
+	SC->sys_ctrl.led_r = 0;
+	init_hw();
+}
+
 int main()
 {
-	ths_input_t target_ths = 0;
-	pcm_input_t target_pcm = 0;
-    video_format target_format = 0;
+	// Start system timer
+	alt_timestamp_start();
 
-    status_t status;
+	// Set defaults
+	avconfig_set_default();
+	controls_set_default();
 
-    alt_timestamp_type start_ts;
-    alt_timestamp_type auto_input_timestamp = 0;
-    uint8_t auto_input_changed = 0;
-    uint8_t auto_input_ctr = 0;
-    uint8_t auto_input_current_ctr = AUTO_CURRENT_MAX_COUNT;
-    uint8_t auto_input_keep_current = 0;
+	memcpy(&cm.cc, &tc, sizeof(avconfig_t));
 
-	int init_stat, man_input_change;
+	// Init menu
+	init_menu();
 
-	init_stat = init_hw();
+	// Load initconfig and profile
+	userdata_load_initconfig();
+	userdata_load_profile(profile_sel, 0);
+
+	controls_update();
+	uint8_t enter_controls_setup = btn2;
+
+	int init_stat = init_hw();
 	if (init_stat < 0)
 	{
-		sniprintf(row1, LCD_ROW_LEN + 1, "Init error  %d", init_stat);
-		strncpy(row2, "", LCD_ROW_LEN + 1);
+		sniprintf(row1, sizeof(row1), "Init error  %d", init_stat);
+		strncpy(row2, "", sizeof(row2));
 		ui_disp_status(1);
-		while (1)
-		{
-		}
+		while (1);
 	}
 	printf("### DIY VIDEO DIGITIZER / SCANCONVERTER INIT OK ###\n\n");
 
-	usleep(500000);
+	alt_timestamp_type start_ts = alt_timestamp();
+	while (alt_timestamp() < start_ts + 500000 * (TIMER_0_FREQ / 1000000))
+	{
+		controls_update();
+		enter_controls_setup |= btn2;
+	}
 
-	// Setup remote keymap
-	if (SC->controls.btn2)
+	if (enter_controls_setup)
 		controls_setup();
 
 	// Mainloop
-    while(1) {
-        start_ts = alt_timestamp();
+	alt_timestamp_type auto_input_timestamp = 0;
+	uint8_t auto_input_changed = 0;
+	uint8_t auto_input_ctr = 0;
+	uint8_t auto_input_current_ctr = AUTO_CURRENT_MAX_COUNT;
+	uint8_t auto_input_keep_current = 0;
+	while(1)
+	{
+		alt_timestamp_type start_ts = alt_timestamp();
 
 		controls_update();
 
-		// Auto input switching
-		if ((auto_input != AUTO_OFF) && (cm.avinput != AV_TESTPAT) && !cm.sync_active && !menu_active && (alt_timestamp() >= auto_input_timestamp + 300 * (alt_timestamp_freq() >> 10)) && (auto_input_ctr < AUTO_MAX_COUNT))
+		if (!in_suspend)
 		{
-			// Keep switching on the same physical input when set to Current input or a short time after losing sync.
-            auto_input_keep_current = (auto_input == AUTO_CURRENT_INPUT || auto_input_current_ctr < AUTO_CURRENT_MAX_COUNT);
+			// Auto input switching
+			if ((auto_input != AUTO_OFF) && (cm.avinput != AV_TESTPAT) && !cm.sync_active && !menu_active && (alt_timestamp() >= auto_input_timestamp + 300 * (alt_timestamp_freq() >> 10)) && (auto_input_ctr < AUTO_MAX_COUNT))
+			{
+				// Keep switching on the same physical input when set to Current input or a short time after losing sync.
+				auto_input_keep_current = (auto_input == AUTO_CURRENT_INPUT || auto_input_current_ctr < AUTO_CURRENT_MAX_COUNT);
 
-            switch(cm.avinput) {
-            case AV1_RGBs:
-                target_input = auto_av1_ypbpr ? AV1_YPBPR : AV1_RGsB;
-                break;
-            case AV1_RGsB:
-            case AV1_YPBPR:
-                target_input = auto_input_keep_current ? AV1_RGBs : (auto_av2_ypbpr ? AV2_YPBPR : AV2_RGsB);
-                break;
-            case AV2_YPBPR:
-            case AV2_RGsB:
-                target_input = auto_input_keep_current ? target_input : AV3_RGBHV;
-                break;
-            case AV3_RGBHV:
-                target_input = AV3_RGBs;
-                break;
-            case AV3_RGBs:
-                target_input = auto_av3_ypbpr ? AV3_YPBPR : AV3_RGsB;
-                break;
-            case AV3_RGsB:
-            case AV3_YPBPR:
-                target_input = auto_input_keep_current ? AV3_RGBHV : AV1_RGBs;
-                break;
-            default:
-                break;
-            }
+				switch(cm.avinput) {
+				case AV1_RGBs:
+					target_input = auto_av1_ypbpr ? AV1_YPBPR : AV1_RGsB;
+					break;
+				case AV1_RGsB:
+				case AV1_YPBPR:
+					target_input = auto_input_keep_current ? AV1_RGBs : (auto_av2_ypbpr ? AV2_YPBPR : AV2_RGsB);
+					break;
+				case AV2_YPBPR:
+				case AV2_RGsB:
+					target_input = auto_input_keep_current ? target_input : AV3_RGBHV;
+					break;
+				case AV3_RGBHV:
+					target_input = AV3_RGBs;
+					break;
+				case AV3_RGBs:
+					target_input = auto_av3_ypbpr ? AV3_YPBPR : AV3_RGsB;
+					break;
+				case AV3_RGsB:
+				case AV3_YPBPR:
+					target_input = auto_input_keep_current ? AV3_RGBHV : AV1_RGBs;
+					break;
+				}
 
-            auto_input_ctr++;
+				auto_input_ctr++;
 
-            if (auto_input_current_ctr < AUTO_CURRENT_MAX_COUNT)
-                auto_input_current_ctr++;
+				if (auto_input_current_ctr < AUTO_CURRENT_MAX_COUNT)
+					auto_input_current_ctr++;
 
-            // For input linked profile loading below
-            auto_input_changed = 1;
+				// For input linked profile loading below
+				auto_input_changed = 1;
 
-            // set auto_input_timestamp
-            auto_input_timestamp = alt_timestamp();
+				// set auto_input_timestamp
+				auto_input_timestamp = alt_timestamp();
+			}
 		}
 
-		man_input_change = controls_parse();
+		int man_input_change = controls_parse();
 
-		if (menu_active)
-            display_menu(0);
+		if (!in_suspend)
+		{
+			if (menu_active)
+				display_menu(0);
 
-        // Only auto load profile when input is manually changed or when sync is active after automatic switch.
-        if ((target_input != cm.avinput && man_input_change) || (auto_input_changed && cm.sync_active))  {
-            // The input changed, so load the appropriate profile if
-            // input->profile link is enabled
-            if (profile_link && (profile_sel != input_profiles[target_input])) {
-                profile_sel = input_profiles[target_input];
-                userdata_load(profile_sel, 0);
-            }
+			// Only auto load profile when input is manually changed or when sync is active after automatic switch.
+			if ((target_input != cm.avinput && man_input_change) || (auto_input_changed && cm.sync_active))  {
+				// The input changed, so load the appropriate profile if
+				// input->profile link is enabled
+				if (profile_link && (profile_sel != input_profiles[target_input])) {
+					profile_sel = input_profiles[target_input];
+					userdata_load_profile(profile_sel, 0);
+				}
 
-            auto_input_changed = 0;
-        }
+				auto_input_changed = 0;
+			}
 
-        if ((target_input != cm.avinput) || ((target_tvp_sync >= TVP_HV_A) && ((tc.av3_alt_rgb != cm.cc.av3_alt_rgb)))) {
+			if ((target_input != cm.avinput) || ((target_tvp_sync >= TVP_HV_A) && ((tc.av3_alt_rgb != cm.cc.av3_alt_rgb))))
+			{
+				ths_input_t target_ths;
+				pcm_input_t target_pcm;
 
-            target_tvp = TVP_INPUT1;
-            target_tvp_sync = TVP_SOG1;
+				target_tvp = TVP_INPUT1;
+				target_tvp_sync = TVP_SOG1;
 
-            if ((target_input <= AV1_YPBPR) || (tc.av3_alt_rgb==1 && ((target_input == AV3_RGBHV) || (target_input == AV3_RGBs)))) {
-                target_ths = THS_INPUT_B;
-                target_pcm = PCM_INPUT4;
-            } else if ((target_input <= AV2_RGsB) || (tc.av3_alt_rgb==2 && ((target_input == AV3_RGBHV) || (target_input == AV3_RGBs)))) {
-                target_ths = THS_INPUT_A;
-                target_pcm = PCM_INPUT3;
-            } else  { // if (target_input <= AV3_YPBPR) {
-                target_tvp = TVP_INPUT3;
-                target_ths = THS_STANDBY;
-                target_pcm = PCM_INPUT2;
-            }
+				if ((target_input <= AV1_YPBPR) || (tc.av3_alt_rgb==1 && ((target_input == AV3_RGBHV) || (target_input == AV3_RGBs)))) {
+					target_ths = THS_INPUT_B;
+					target_pcm = PCM_INPUT4;
+				} else if ((target_input <= AV2_RGsB) || (tc.av3_alt_rgb==2 && ((target_input == AV3_RGBHV) || (target_input == AV3_RGBs)))) {
+					target_ths = THS_INPUT_A;
+					target_pcm = PCM_INPUT3;
+				} else  { // if (target_input <= AV3_YPBPR) {
+					target_tvp = TVP_INPUT3;
+					target_ths = THS_STANDBY;
+					target_pcm = PCM_INPUT2;
+				}
 
-            switch (target_input) {
-            case AV1_RGBs:
-            case AV3_RGBs:
-                target_format = FORMAT_RGBS;
-                break;
-            case AV1_RGsB:
-            case AV2_RGsB:
-            case AV3_RGsB:
-                target_format = FORMAT_RGsB;
-                break;
-            case AV1_YPBPR:
-            case AV2_YPBPR:
-            case AV3_YPBPR:
-                target_format = FORMAT_YPbPr;
-                break;
-            case AV3_RGBHV:
-                target_format = FORMAT_RGBHV;
-                break;
-            default:
-                break;
-            }
+				video_format target_format;
+				switch (target_input) {
+				case AV1_RGBs:
+				case AV3_RGBs:
+					target_format = FORMAT_RGBS;
+					break;
+				case AV1_RGsB:
+				case AV2_RGsB:
+				case AV3_RGsB:
+					target_format = FORMAT_RGsB;
+					break;
+				case AV1_YPBPR:
+				case AV2_YPBPR:
+				case AV3_YPBPR:
+					target_format = FORMAT_YPbPr;
+					break;
+				case AV3_RGBHV:
+					target_format = FORMAT_RGBHV;
+					break;
+				}
 
-            switch (target_input) {
-            case AV1_RGBs:
-                target_tvp_sync = TVP_SOG2;
-                break;
-            case AV3_RGBHV:
-                target_tvp_sync = TVP_HV_A;
-                break;
-            case AV3_RGBs:
-                target_tvp_sync = TVP_CS_A;
-                break;
-            case AV3_RGsB:
-            case AV3_YPBPR:
-                target_tvp_sync = TVP_SOG3;
-                break;
-            default:
-                break;
-            }
+				switch (target_input) {
+				case AV1_RGBs:
+					target_tvp_sync = TVP_SOG2;
+					break;
+				case AV3_RGBHV:
+					target_tvp_sync = TVP_HV_A;
+					break;
+				case AV3_RGBs:
+					target_tvp_sync = TVP_CS_A;
+					break;
+				case AV3_RGsB:
+				case AV3_YPBPR:
+					target_tvp_sync = TVP_SOG3;
+					break;
+				default:
+					break;
+				}
 
-            printf("### SWITCH MODE TO %s ###\n", avinput_str[target_input]);
+				printf("### SWITCH MODE TO %s ###\n", avinput_str[target_input]);
 
-            cm.avinput = target_input;
-            cm.sync_active = 0;
-            ths_source_sel(target_ths, (cm.cc.video_lpf > 1) ? (VIDEO_LPF_MAX-cm.cc.video_lpf) : THS_LPF_BYPASS);
-            tvp_powerdown();
-            DisableAudioOutput();
-            if (pcm1862_active)
-                pcm_source_sel(target_pcm);
-            tvp_source_sel(target_tvp, target_tvp_sync, target_format);
-            cm.clkcnt = 0; //TODO: proper invalidate
-			SC->sys_ctrl.vsync_type = target_format == FORMAT_RGBHV;
-            strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
-            strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
-            ui_disp_status(1);
-            if (man_input_change) {
-                // record last input if it was selected manually
-                if (def_input == AV_LAST)
-                    userdata_save(INIT_CONFIG_SLOT);
-                // Set auto_input_timestamp when input is manually changed
-                auto_input_ctr = 0;
-                auto_input_timestamp = alt_timestamp();
-            }
-            // Avoid detection of initial vsync pulses after auto mode switch
-            if (auto_input_changed)
-                usleep(120000);
-        }
+				cm.avinput = target_input;
+				cm.sync_active = 0;
+				ths_source_sel(target_ths, (cm.cc.video_lpf > 1) ? (VIDEO_LPF_MAX-cm.cc.video_lpf) : THS_LPF_BYPASS);
+				tvp_powerdown();
+				DisableAudioOutput();
+				if (pcm1862_active)
+					pcm_source_sel(target_pcm);
+				tvp_source_sel(target_tvp, target_tvp_sync, target_format);
+				cm.clkcnt = 0; //TODO: proper invalidate
+				SC->sys_ctrl.vsync_type = target_format == FORMAT_RGBHV;
+				strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
+				strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
+				ui_disp_status(1);
+				if (man_input_change) {
+					// record last input if it was selected manually
+					if (def_input == AV_LAST)
+						userdata_save_initconfig();
+					// Set auto_input_timestamp when input is manually changed
+					auto_input_ctr = 0;
+					auto_input_timestamp = alt_timestamp();
+				}
+				// Avoid detection of initial vsync pulses after auto mode switch
+				if (auto_input_changed)
+					usleep(120000);
+			}
 
-        // Check here to enable regardless of input
-        if (tc.tx_mode != cm.cc.tx_mode) {
-            HDMITX_SetAVIInfoFrame(vmode_out.vic, F_MODE_RGB444, 0, 0, 0, 0);
-            TX_enable(tc.tx_mode);
-            cm.cc.tx_mode = tc.tx_mode;
-            cm.clkcnt = 0; //TODO: proper invalidate
-        }
-        if (tc.tx_mode != TX_DVI) {
-            if (tc.hdmi_itc != cm.cc.hdmi_itc) {
-                //EnableAVIInfoFrame(FALSE, NULL);
-                printf("setting ITC to %d\n", tc.hdmi_itc);
-                HDMITX_SetAVIInfoFrame(vmode_out.vic, (tc.tx_mode == TX_HDMI_RGB) ? F_MODE_RGB444 : F_MODE_YUV444, 0, 0, tc.hdmi_itc, vm_conf.hdmitx_pixr_ifr);
-                cm.cc.hdmi_itc = tc.hdmi_itc;
-            }
-            if (tc.hdmi_hdr != cm.cc.hdmi_hdr) {
-                printf("setting HDR flag to %d\n", tc.hdmi_hdr);
-                HDMITX_SetHDRInfoFrame(tc.hdmi_hdr ? 3 : 0);
-                cm.cc.hdmi_hdr = tc.hdmi_hdr;
-            }
-            if (tc.hdmi_vrr != cm.cc.hdmi_vrr) {
-                printf("setting VRR flag to %d\n", tc.hdmi_vrr);
-                HDMITX_SetVRRInfoFrame(tc.hdmi_vrr);
-                cm.cc.hdmi_vrr = tc.hdmi_vrr;
-            }
-        }
-        if (tc.av3_alt_rgb != cm.cc.av3_alt_rgb) {
-            printf("Changing AV3 RGB source\n");
-            cm.cc.av3_alt_rgb = tc.av3_alt_rgb;
-        }
-        if ((!!osd_enable != OSD->osd_config.enable) || (osd_status_timeout != OSD->osd_config.status_timeout)) {
-            OSD->osd_config.enable = !!osd_enable;
-            OSD->osd_config.status_timeout = osd_status_timeout;
-            if (menu_active) {
-                remote_code = 0;
-                render_osd_page();
-                display_menu(1);
-            }
-        }
+			// Check here to enable regardless of input
+			if (tc.tx_mode != cm.cc.tx_mode) {
+				HDMITX_SetAVIInfoFrame(vmode_out.vic, F_MODE_RGB444, 0, 0, 0, 0);
+				TX_enable(tc.tx_mode);
+				cm.cc.tx_mode = tc.tx_mode;
+				cm.clkcnt = 0; //TODO: proper invalidate
+			}
+			if (tc.tx_mode != TX_DVI) {
+				if (tc.hdmi_itc != cm.cc.hdmi_itc) {
+					//EnableAVIInfoFrame(FALSE, NULL);
+					printf("setting ITC to %d\n", tc.hdmi_itc);
+					HDMITX_SetAVIInfoFrame(vmode_out.vic, (tc.tx_mode == TX_HDMI_RGB) ? F_MODE_RGB444 : F_MODE_YUV444, 0, 0, tc.hdmi_itc, vm_conf.hdmitx_pixr_ifr);
+					cm.cc.hdmi_itc = tc.hdmi_itc;
+				}
+				if (tc.hdmi_hdr != cm.cc.hdmi_hdr) {
+					printf("setting HDR flag to %d\n", tc.hdmi_hdr);
+					HDMITX_SetHDRInfoFrame(tc.hdmi_hdr ? 3 : 0);
+					cm.cc.hdmi_hdr = tc.hdmi_hdr;
+				}
+				if (tc.hdmi_vrr != cm.cc.hdmi_vrr) {
+					printf("setting VRR flag to %d\n", tc.hdmi_vrr);
+					HDMITX_SetVRRInfoFrame(tc.hdmi_vrr);
+					cm.cc.hdmi_vrr = tc.hdmi_vrr;
+				}
+			}
+			if (tc.av3_alt_rgb != cm.cc.av3_alt_rgb) {
+				printf("Changing AV3 RGB source\n");
+				cm.cc.av3_alt_rgb = tc.av3_alt_rgb;
+			}
+			if ((!!osd_enable != OSD->osd_config.enable) || (osd_status_timeout != OSD->osd_config.status_timeout)) {
+				OSD->osd_config.enable = !!osd_enable;
+				OSD->osd_config.status_timeout = osd_status_timeout;
+				if (menu_active) {
+					remote_code = 0;
+					render_osd_page();
+					display_menu(1);
+				}
+			}
 
-        if (cm.avinput != AV_TESTPAT) {
-            status = get_status(target_tvp_sync);
+			if (cm.avinput != AV_TESTPAT)
+			{
+				status_t status = get_status(target_tvp_sync);
 
-            switch (status) {
-            case ACTIVITY_CHANGE:
-                if (cm.sync_active) {
-                    printf("Sync up\n");
-					SC->sys_ctrl.enable_sc = 1;
-                    tvp_powerup();
-                    program_mode();
-                    SetupAudio(cm.cc.tx_mode);
-                } else {
-                    printf("Sync lost\n");
-                    cm.clkcnt = 0; //TODO: proper invalidate
-                    tvp_powerdown();
-                    //ths_source_sel(THS_STANDBY, 0);
-                    strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
-                    strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
-                    ui_disp_status(1);
-                    // Set auto_input_timestamp
-                    auto_input_timestamp = alt_timestamp();
-                    auto_input_ctr = 0;
-                    auto_input_current_ctr = 0;
-                }
-                break;
-            case MODE_CHANGE:
-                if (cm.sync_active) {
-                    printf("Mode change\n");
-                    program_mode();
-                }
-                break;
-            case SC_CONFIG_CHANGE:
-                if (cm.sync_active) {
-                    printf("Scanconverter config change\n");
-                    update_sc_config(&vmode_in, &vmode_out, &vm_conf, &cm.cc);
-                }
-                break;
-            default:
-                break;
-            }
-        }
+				switch (status) {
+				case ACTIVITY_CHANGE:
+					if (cm.sync_active) {
+						printf("Sync up\n");
+						SC->sys_ctrl.enable_sc = 1;
+						tvp_powerup();
+						program_mode();
+						SetupAudio(cm.cc.tx_mode);
+					} else {
+						printf("Sync lost\n");
+						cm.clkcnt = 0; //TODO: proper invalidate
+						tvp_powerdown();
+						//ths_source_sel(THS_STANDBY, 0);
+						strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
+						strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
+						ui_disp_status(1);
+						// Set auto_input_timestamp
+						auto_input_timestamp = alt_timestamp();
+						auto_input_ctr = 0;
+						auto_input_current_ctr = 0;
+					}
+					break;
+				case MODE_CHANGE:
+					if (cm.sync_active) {
+						printf("Mode change\n");
+						program_mode();
+					}
+					break;
+				case SC_CONFIG_CHANGE:
+					if (cm.sync_active) {
+						printf("Scanconverter config change\n");
+						update_sc_config(&vmode_in, &vmode_out, &vm_conf, &cm.cc);
+					}
+					break;
+				}
+			}
+		}
 
         while (alt_timestamp() < start_ts + MAINLOOP_INTERVAL_US*(TIMER_0_FREQ/1000000)) {}
     }

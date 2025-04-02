@@ -105,6 +105,7 @@ struct menustruct {
 
 #define SETTING_ITEM(x) 0, sizeof(x)/sizeof(char*)-1, x
 #define MENU(X, Y) menuitem_t X##_items[] = Y; const menu_t X = { sizeof(X##_items)/sizeof(menuitem_t), X##_items };
+#define MENU_DYN(X, Y) menuitem_t X##_items[] = Y; menu_t X = { sizeof(X##_items)/sizeof(menuitem_t), X##_items };
 #define P99_PROTECT(...) __VA_ARGS__
 
 typedef enum {
@@ -121,6 +122,11 @@ typedef struct {
     const menu_t *m;
     uint8_t mp;
 } menunavi;
+
+extern uint16_t tc_sampler_phase;
+extern uint8_t vm_sel, vm_edit;
+extern menu_t menu_scanlines, menu_advtiming;
+extern uint8_t menu_active;
 
 menunavi* get_current_menunavi();
 void init_menu();

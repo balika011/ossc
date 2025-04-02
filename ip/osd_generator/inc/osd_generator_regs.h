@@ -38,7 +38,7 @@ typedef union {
         uint8_t y_size:2;
         uint8_t border_color:2;
         uint32_t osd_rsv:15;
-    } __attribute__((packed, __may_alias__));
+    } __attribute__((packed));
     uint32_t data;
 } osd_config_reg;
 
@@ -56,6 +56,6 @@ typedef struct {
     osd_config_reg osd_config;
     osd_enable_color_reg osd_sec_enable[OSD_CHAR_SECTIONS];
     osd_enable_color_reg osd_row_color;
-} __attribute__((packed, __may_alias__)) osd_regs;
+} __attribute__((packed)) osd_regs;
 
 #endif //OSD_GENERATOR_REGS_H_

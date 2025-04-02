@@ -961,8 +961,6 @@ size_t mmc_write_blocks(struct mmc *mmc, size_t start, size_t blkcnt, const void
 size_t mmc_bwrite(struct mmc *mmc, size_t start, size_t blkcnt, const void *src)
 {
 	size_t cur, blocks_todo = blkcnt;
-
-	//struct mmc *mmc = find_mmc_device(dev_num);
 	if (!mmc)
 		return 0;
 

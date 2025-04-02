@@ -29,14 +29,14 @@ typedef union {
 		uint32_t reserved : 3;
 		uint32_t chip_select : 4;
 		uint32_t addressing_mode : 1;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_ctrl_t;
 
 typedef union {
 	struct {
 		uint32_t divisor : 4;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_baud_rate_t;
 
@@ -45,14 +45,14 @@ typedef union {
 		uint32_t cs_assert : 4;
 		uint32_t cs_deassert : 4;
 		uint32_t cs_hold : 4; // tSHSL
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_cs_delay_t;
 
 typedef union {
 	struct {
 		uint32_t read_delay : 4;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_read_capture_t;
 
@@ -67,7 +67,7 @@ typedef union {
 		uint32_t read_address_transfer_mode : 2; // 0 standard, 1 dual, 2 quad
 		uint32_t reserved_4 : 2;
 		uint32_t read_data_transfer_mode : 2; // 0 standard, 1 dual, 2 quad
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_oper_mode_t;
 
@@ -75,7 +75,7 @@ typedef union {
 	struct {
 		uint32_t opcode : 8;
 		uint32_t dummy_cycles : 5;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_read_instr_t;
 
@@ -83,7 +83,7 @@ typedef union {
 	struct {
 		uint32_t write_opcode : 8;
 		uint32_t poll_opcode : 8;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_write_instr_t;
 
@@ -94,14 +94,14 @@ typedef union {
 		uint32_t data_type : 1; // 0 write, 1 read
 		uint32_t data_bytes : 4;
 		uint32_t dummy_cycles : 5;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_flash_cmd_cfg_t;
 
 typedef union {
 	struct {
 		uint32_t start : 1;
-	} __attribute__((packed, __may_alias__));
+	} __attribute__((packed));
 	uint32_t data;
 } flash_flash_cmd_ctrl_t;
 
@@ -163,9 +163,6 @@ gen_flash_if_regs *flash_csr = (gen_flash_if_regs *) FLASH_CSR_BASE;
 
 void __attribute__((noinline, __section__(".rtext"))) flash_write_protect(int enable)
 {
-	// FLUSH
-	*(volatile uint32_t *) FLASH_MEM_BASE;
-
 	// Write enable
 	flash_flash_cmd_cfg_t flash_cmd_cfg;
 	flash_cmd_cfg.opcode = CMD_WRITE_ENABLE;

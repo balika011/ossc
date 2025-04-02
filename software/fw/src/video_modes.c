@@ -96,7 +96,7 @@ static const mode_data_t video_modes_plm_default[VIDEO_MODE_COUNT] = {
 
 mode_data_t video_modes_plm[VIDEO_MODE_COUNT];
 
-void set_default_vm_table() {
+void vm_table_set_default() {
     memcpy(video_modes_plm, video_modes_plm_default, sizeof(video_modes_plm_default));
 }
 

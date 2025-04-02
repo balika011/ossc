@@ -70,12 +70,15 @@ extern avmode_t cm;
 extern avinput_t target_input;
 extern uint8_t update_cur_vm;
 extern uint8_t input_profiles[AV_LAST];
-extern uint8_t profile_sel;
+extern uint8_t profile_sel, profile_sel_menu;
 extern uint8_t def_input, profile_link;
 extern uint8_t lcd_bl_timeout;
 extern uint8_t auto_input, auto_av1_ypbpr, auto_av2_ypbpr, auto_av3_ypbpr;
 extern uint8_t osd_enable, osd_status_timeout, phase_hotkey_enable;
-extern char menu_row1[LCD_ROW_LEN + 1], menu_row2[LCD_ROW_LEN + 1];
+extern char row1[LCD_ROW_LEN + 1], row2[LCD_ROW_LEN + 1], menu_row1[LCD_ROW_LEN + 1], menu_row2[LCD_ROW_LEN + 1];
+extern uint8_t lt_sel;
+extern uint8_t sl_def_iv_x, sl_def_iv_y;
+extern uint8_t in_suspend;
 
 void ui_disp_menu(uint8_t osd_mode);
 void ui_disp_status(uint8_t refresh_osd_timer);
@@ -86,5 +89,8 @@ int load_profile();
 int save_profile();
 
 void print_vm_stats();
+
+void enter_suspend();
+void exit_suspend();
 
 #endif
