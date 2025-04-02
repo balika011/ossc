@@ -23,7 +23,7 @@
 #include "i2c_opencores.h"
 #include "pcm1862.h"
 
-inline alt_u32 pcm1862_readreg(alt_u8 regaddr)
+inline uint32_t pcm1862_readreg(uint8_t regaddr)
 {
     //Phase 1
     I2C_start(I2CA_BASE, PCM1862_BASE, 0);
@@ -34,7 +34,7 @@ inline alt_u32 pcm1862_readreg(alt_u8 regaddr)
     return I2C_read(I2CA_BASE,1);
 }
 
-inline void pcm1862_writereg(alt_u8 regaddr, alt_u8 data)
+inline void pcm1862_writereg(uint8_t regaddr, uint8_t data)
 {
     I2C_start(I2CA_BASE, PCM1862_BASE, 0);
     I2C_write(I2CA_BASE, regaddr, 0);
@@ -42,7 +42,7 @@ inline void pcm1862_writereg(alt_u8 regaddr, alt_u8 data)
 }
 
 void pcm_source_sel(pcm_input_t input) {
-    alt_u8 adc_ch = 1<<input;
+    uint8_t adc_ch = 1<<input;
 
     pcm1862_writereg(PCM1862_ADC1L, (1<<6)|adc_ch);
     pcm1862_writereg(PCM1862_ADC1R, (1<<6)|adc_ch);
@@ -83,8 +83,8 @@ void pcm_set_stereo_mode(int mono_enable) {
     pcm1862_writereg(PCM1862_PAGESEL, 0);
 }
 
-void pcm_set_gain(alt_8 db_gain) {
-    alt_8 gain_val = 2*db_gain;
+void pcm_set_gain(int8_t db_gain) {
+    int8_t gain_val = 2*db_gain;
 
     pcm1862_writereg(PCM1862_PGA1L, gain_val);
     pcm1862_writereg(PCM1862_PGA1R, gain_val);

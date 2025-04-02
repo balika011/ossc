@@ -590,7 +590,7 @@
   <parameter name="ecc_enabled" value="false" />
   <parameter name="enPRInitMode" value="false" />
   <parameter name="enableDiffWidth" value="false" />
-  <parameter name="initMemContent" value="true" />
+  <parameter name="initMemContent" value="false" />
   <parameter name="initializationFileName" value="onchip_mem.hex" />
   <parameter name="instanceID" value="NONE" />
   <parameter name="memorySize" value="32768" />
@@ -899,6 +899,15 @@
    kind="avalon"
    version="24.1"
    start="ibex_0.avalon_master_bus_instr"
+   end="intel_generic_serial_flash_interface_top_0.avl_mem">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x10000000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_instr"
    end="onchip_memory2_0.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x10200000" />
@@ -1026,11 +1035,6 @@
    kind="reset"
    version="24.1"
    start="reset_bridge_0.out_reset"
-   end="ibex_0.reset_sink" />
- <connection
-   kind="reset"
-   version="24.1"
-   start="reset_bridge_0.out_reset"
    end="sc_config_0.reset_sink" />
  <connection
    kind="reset"
@@ -1047,6 +1051,11 @@
    version="24.1"
    start="reset_bridge_0.out_reset"
    end="sdc_controller_0.reset_sink" />
+ <connection
+   kind="reset"
+   version="24.1"
+   start="reset_bridge_0.out_reset"
+   end="ibex_0.reset_sink" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="false" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />

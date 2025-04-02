@@ -30,6 +30,7 @@
 * file be used in conjunction or combination with any other product.          *
 ******************************************************************************/
 
+#include <stdint.h>
 #include <string.h>
 
 #include "system.h"
@@ -37,8 +38,6 @@
 
 #include "altera_avalon_timer.h"
 #include "altera_avalon_timer_regs.h"
-
-#include "alt_types.h"
 
 /*
  * These functions are only available if a timestamp device has been selected
@@ -63,9 +62,9 @@
 
 int alt_timestamp_start(void)
 {
-  void* base = altera_avalon_timer_ts_base;
+  void* base = (void *) TIMER_0_BASE;
 
-  if (!altera_avalon_timer_ts_freq)
+  if (!TIMER_0_FREQ)
   {
     return -1;
   }
@@ -74,7 +73,7 @@ int alt_timestamp_start(void)
     if(ALT_TIMESTAMP_COUNTER_SIZE == 64) {
         IOWR_ALTERA_AVALON_TIMER_CONTROL (base,ALTERA_AVALON_TIMER_CONTROL_STOP_MSK);
         IOWR_ALTERA_AVALON_TIMER_PERIOD_0 (base, 0xFFFF);
-        IOWR_ALTERA_AVALON_TIMER_PERIOD_1 (base, 0xFFFF);;
+        IOWR_ALTERA_AVALON_TIMER_PERIOD_1 (base, 0xFFFF);
         IOWR_ALTERA_AVALON_TIMER_PERIOD_2 (base, 0xFFFF);
         IOWR_ALTERA_AVALON_TIMER_PERIOD_3 (base, 0xFFFF);
         IOWR_ALTERA_AVALON_TIMER_CONTROL (base, ALTERA_AVALON_TIMER_CONTROL_START_MSK);
@@ -100,9 +99,9 @@ int alt_timestamp_start(void)
 alt_timestamp_type __attribute__((noinline, __section__(".rtext"))) alt_timestamp(void)
 {
 
-  void* base = altera_avalon_timer_ts_base;
+  void* base = (void *) TIMER_0_BASE;
 
-  if (!altera_avalon_timer_ts_freq)
+  if (!TIMER_0_FREQ)
   {
 #if (ALT_TIMESTAMP_COUNTER_SIZE == 64)
         return 0xFFFFFFFFFFFFFFFFULL;
@@ -135,9 +134,9 @@ alt_timestamp_type __attribute__((noinline, __section__(".rtext"))) alt_timestam
  * timestamp device has been registered.
  */
 
-alt_u32 alt_timestamp_freq(void)
+uint32_t alt_timestamp_freq(void)
 {
-  return altera_avalon_timer_ts_freq;
+  return TIMER_0_FREQ;
 }
 
 #endif /* timestamp available */

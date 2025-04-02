@@ -78,27 +78,26 @@ generate
 	for (i=HV_IN_CONFIG_REGNUM; i <= SYS_CTRL_REGNUM; i++) begin : gen_reg
 		always @(posedge clk_i or posedge rst_i) begin
 			if (rst_i) begin
-				config_reg[i] <= 0;
-			end else begin
-				if (avalon_s_chipselect && avalon_s_write && (avalon_s_address==i)) begin
-					if (avalon_s_byteenable[3])
-						config_reg[i][31:24] <= avalon_s_writedata[31:24];
-					if (avalon_s_byteenable[2])
-						config_reg[i][23:16] <= avalon_s_writedata[23:16];
-					if (avalon_s_byteenable[1])
-						config_reg[i][15:8] <= avalon_s_writedata[15:8];
-					if (avalon_s_byteenable[0])
-						config_reg[i][7:0] <= avalon_s_writedata[7:0];
+				if (i == SYS_CTRL_REGNUM) begin
+					config_reg[i] <= 'h100; // Turn on the red led by default
+				end else begin
+					config_reg[i] <= 0;
 				end
+			end else if (avalon_s_chipselect && avalon_s_write && (avalon_s_address == i)) begin
+				if (avalon_s_byteenable[3])
+					config_reg[i][31:24] <= avalon_s_writedata[31:24];
+				if (avalon_s_byteenable[2])
+					config_reg[i][23:16] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					config_reg[i][15:8] <= avalon_s_writedata[15:8];
+				if (avalon_s_byteenable[0])
+					config_reg[i][7:0] <= avalon_s_writedata[7:0];
 			end
 		end
 	end
 endgenerate
 
 
-// no readback for config regs -> unused bits optimized out
-genvar j;
-generate
 always @(*) begin
 	if (avalon_s_chipselect && avalon_s_read) begin
 		case (avalon_s_address)
@@ -125,7 +124,6 @@ always @(*) begin
 		avalon_s_readdata = 32'h00000000;
 	end
 end
-endgenerate
 
 assign hv_in_config_o = config_reg[HV_IN_CONFIG_REGNUM];
 assign hv_in_config2_o = config_reg[HV_IN_CONFIG2_REGNUM];

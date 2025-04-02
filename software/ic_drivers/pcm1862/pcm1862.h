@@ -34,7 +34,7 @@ void pcm_source_sel(pcm_input_t input);
 
 void pcm_set_stereo_mode(int mono_enable);
 
-void pcm_set_gain(alt_8 db_gain);
+void pcm_set_gain(int8_t db_gain);
 
 int pcm1862_init();
 

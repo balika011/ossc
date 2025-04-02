@@ -19,19 +19,11 @@ create_clock -period 33MHz -name pclk_tvp_low [get_ports TVP_PCLK] -add
 create_generated_clock -name pclk_5x -master_clock pclk_tvp_low -source {pll_pclk|altpll_component|auto_generated|pll1|inclk[1]} -multiply_by 5 -duty_cycle 50.00 {pll_pclk|altpll_component|auto_generated|pll1|clk[0]}
 create_generated_clock -name pclk_27mhz -master_clock clk27 -source {pll_pclk|altpll_component|auto_generated|pll1|inclk[0]} -multiply_by 1 -duty_cycle 50.00 {pll_pclk|altpll_component|auto_generated|pll1|clk[0]} -add
 
-# retrieve post-mapping clkmux output pin
-set clkmux_output [get_pins clkctrl1|outclk]
-
-# specify postmux clocks which clock postprocess pipeline
-create_generated_clock -name pclk_1x_postmux -master_clock pclk_tvp_high -source [get_pins clkctrl1|inclk[0]] -multiply_by 1 $clkmux_output
-create_generated_clock -name pclk_5x_postmux -master_clock pclk_5x -source [get_pins clkctrl1|inclk[2]] -multiply_by 1 $clkmux_output -add
-create_generated_clock -name pclk_27mhz_postmux -master_clock pclk_27mhz -source [get_pins clkctrl1|inclk[2]] -multiply_by 1 $clkmux_output -add
-
 # specify output clocks that drive PCLK output pin
 set pclk_out_port [get_ports HDMI_TX_PCLK]
-create_generated_clock -name pclk_1x_out -master_clock pclk_1x_postmux -source $clkmux_output -multiply_by 1 $pclk_out_port
-create_generated_clock -name pclk_5x_out -master_clock pclk_5x_postmux -source $clkmux_output -multiply_by 1 $pclk_out_port -add
-create_generated_clock -name pclk_27mhz_out -master_clock pclk_27mhz_postmux -source $clkmux_output -multiply_by 1 $pclk_out_port -add
+create_generated_clock -name pclk_1x_out -master_clock pclk_tvp_high -source [get_pins pll_pclk|c0] -multiply_by 1 $pclk_out_port
+create_generated_clock -name pclk_5x_out -master_clock pclk_5x -source [get_pins pll_pclk|c0] -multiply_by 1 $pclk_out_port -add
+create_generated_clock -name pclk_27mhz_out -master_clock pclk_27mhz -source [get_pins pll_pclk|c0] -multiply_by 1 $pclk_out_port -add
 
 derive_clock_uncertainty
 
@@ -66,9 +58,8 @@ set_clock_groups -asynchronous -group \
                             {clk27} \
                             {pclk_27mhz pclk_27mhz_postmux pclk_27mhz_out} \
                             {pclk_tvp_low} \
-                            {pclk_tvp_high} \
-                            {pclk_1x_postmux pclk_1x_out} \
-                            {pclk_5x pclk_5x_postmux pclk_5x_out}
+                            {pclk_tvp_high pclk_1x_out} \
+                            {pclk_5x pclk_5x_out}
 
 
 ### JTAG Signal Constraints ###

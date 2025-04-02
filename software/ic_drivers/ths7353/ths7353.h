@@ -55,8 +55,8 @@ typedef enum {
 
 int ths_init();
 
-void ths_set_lpf(alt_u8 val);
+void ths_set_lpf(uint8_t val);
 
-void ths_source_sel(ths_input_t input, alt_u8 lpf);
+void ths_source_sel(ths_input_t input, uint8_t lpf);
 
 #endif /* THS7353_H_ */

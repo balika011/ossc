@@ -87,11 +87,9 @@ wire clk_reset_n;
 wire [31:0] sys_ctrl;
 wire remap_lcd_bl_to_tvp_sog = sys_ctrl[31];
 wire remap_led_r_to_tvp_sog = sys_ctrl[30];
-
-wire LED_R = sys_ctrl[9];
-assign LED_G = sys_ctrl[8];
-wire TVP_VS_type = sys_ctrl[7];
-wire pll_bypass = sys_ctrl[6];
+wire LED_R = sys_ctrl[8];
+assign LED_G = sys_ctrl[7];
+wire TVP_VS_type = sys_ctrl[6];
 assign LCD_CS_N = sys_ctrl[5];
 assign LCD_RS = sys_ctrl[4];
 wire LCD_BL = sys_ctrl[3];
@@ -110,7 +108,7 @@ sys sys_inst(
 	.clk_clk(clk27),
 	.clk_27_clk_reset_reset_n(clk_reset_n),
 	.reset_bridge_0_in_reset_reset_n(clk_reset_n),
-	.ibex_0_config_boot_addr_i(32'h10200000),
+	.ibex_0_config_boot_addr_i(32'h10080000),
 	.ibex_0_tck_clk(tck),
 	.ibex_0_jtag_tdi(tdi),
 	.ibex_0_jtag_tms(tms),
@@ -126,8 +124,8 @@ sys sys_inst(
 	.sdc_controller_0_sd_sd_dat_dat_i(SD_DAT),
 	.sdc_controller_0_sd_sd_dat_out_o(sd_dat_out_o),
 	.sdc_controller_0_sd_sd_dat_oe_o(sd_dat_oe_o),
-	.sc_config_0_sc_in_fe_status_i({19'h0, TVP_sync_active, TVP_fe_interlace, TVP_fe_vtotal}),
-	.sc_config_0_sc_in_fe_status2_i({4'h0, TVP_hsync_width, TVP_fe_pcnt_field}),
+	.sc_config_0_sc_in_fe_status_i({ 19'h0, TVP_sync_active, TVP_fe_interlace, TVP_fe_vtotal }),
+	.sc_config_0_sc_in_fe_status2_i({ 4'h0, TVP_hsync_width, TVP_fe_pcnt_field }),
 	.sc_config_0_sc_in_lt_status_i(32'h00000000),
 	.sc_config_0_sc_in_controls_i(controls),
 	.sc_config_0_sc_out_hv_in_config_o(hv_in_config),
@@ -210,25 +208,6 @@ pll_2x pll_pclk (
 
 
 
-wire clkmux_clkout;
-
-cycloneive_clkctrl clkctrl1 ( 
-// synopsys translate_off
-	.clkselect(pll_bypass ? 2'h0 : 2'h2),
-	.ena(1'b1),
-	.inclk({1'b0, pll_clkout, 1'b0, TVP_PCLK}), // fitter forbids using both clk27 and pclk_1x here since they're on opposite sides
-	.outclk(clkmux_clkout),
-	.devclrn(1'b1),
-	.devpor(1'b1)
-// synopsys translate_on
-);
-defparam
-	clkctrl1.clock_type = "Global Clock",
-	clkctrl1.ena_register_mode = "falling edge",
-	clkctrl1.lpm_type = "cycloneive_clkctrl";
-
-
-
 
 reg [7:0] TVP_R_L, TVP_G_L, TVP_B_L;
 reg TVP_HS_L, TVP_VS_L, TVP_FID;
@@ -237,7 +216,7 @@ reg TVP_SOG_SELECTED_PCLK_L, TVP_SOG_SELECTED_PCLK_LL, TVP_SOG_SELECTED_PCLK_LLL
 reg TVP_SOG_SELECTED_CLK27_L, TVP_SOG_SELECTED_CLK27_LL;
 reg TVP_VS_CLK27_L, TVP_VS_CLK27_LL;
 wire [7:0] TVP_R_L_post, TVP_G_L_post, TVP_B_L_post;
-wire TVP_HSYNC_post, TVP_VS_post, TVP_DE_post, TVP_FID_post, TVP_datavalid_post;
+wire TVP_HS_post, TVP_VS_post, TVP_DE_post, TVP_FID_post, TVP_datavalid_post;
 wire TVP_fe_interlace, TVP_fe_frame_change, TVP_sof_scaler, TVP_sync_active;
 wire [19:0] TVP_fe_pcnt_field;
 wire [7:0] TVP_hsync_width;
@@ -267,7 +246,7 @@ tvp7002_frontend u_tvp_frontend (
 	.R_o(TVP_R_L_post),
 	.G_o(TVP_G_L_post),
 	.B_o(TVP_B_L_post),
-	.HSYNC_o(TVP_HSYNC_post),
+	.HSYNC_o(TVP_HS_post),
 	.VSYNC_o(TVP_VS_post),
 	.DE_o(TVP_DE_post),
 	.FID_o(TVP_FID_post),
@@ -298,12 +277,12 @@ scanconverter #(
 	.NUM_LINE_BUFFERS(2)
   ) scanconverter_inst (
 	.PCLK_CAP_i(TVP_PCLK),
-	.PCLK_OUT_i(clkmux_clkout),
+	.PCLK_OUT_i(pll_clkout),
 	.reset_n(av_reset_n),
 	.R_i(TVP_R_L_post),
 	.G_i(TVP_G_L_post),
 	.B_i(TVP_B_L_post),
-	.HSYNC_i(TVP_HSYNC_post),
+	.HSYNC_i(TVP_HS_post),
 	.VSYNC_i(TVP_VS_post),
 	.DE_i(TVP_DE_post),
 	.FID_i(TVP_FID_post),
@@ -432,14 +411,14 @@ always @(posedge TVP_PCLK) begin
 	TVP_G_L <= TVP_G;
 	TVP_B_L <= TVP_B;
 	TVP_HS_L <= TVP_HS;
-	TVP_VS_L <= TVP_VS;  // TODO: VERIFY!
+	TVP_VS_L <= TVP_VS;
 
 	// sync to pclk
 	TVP_SOG_SELECTED_PCLK_L <= TVP_SOG_SELECTED;
 	TVP_SOG_SELECTED_PCLK_LL <= TVP_SOG_SELECTED_PCLK_L;
 	TVP_SOG_SELECTED_PCLK_LLL <= TVP_SOG_SELECTED_PCLK_LL;
 
-	TVP_VS_PCLK_L <= TVP_VS;  // TODO: VERIFY!
+	TVP_VS_PCLK_L <= TVP_VS;
 	TVP_VS_PCLK_LL <= TVP_VS_PCLK_L;
 end
 

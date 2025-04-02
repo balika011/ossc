@@ -20,20 +20,38 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/param.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
 
-#define HDR_SIZE 512
-#define BUF_SIZE 1024
 #define MAX_FILENAME 32
 
-#define FW_KEY_SIZE 4
+#define HDR_SIZE 512
 #define FW_SUFFIX_MAX_SIZE 8
 
-#define FW_HDR_LEN 26
+#pragma pack(push, 1)
+
+typedef union {
+	struct
+	{
+		uint32_t magic;
+		uint8_t version_major;
+		uint8_t version_minor;
+		char version_suffix[FW_SUFFIX_MAX_SIZE];
+		uint32_t hdr_len;
+		uint32_t rbf_len;
+		uint32_t rbf_crc;
+		uint32_t fw_len;
+		uint32_t fw_crc;
+	} params;
+	struct
+	{
+		uint8_t buf[HDR_SIZE - 4];
+		uint32_t hdr_crc;
+	} raw;
+	/* data */
+} fw_hdr;
+
+#pragma pack(pop)
 
 static uint32_t crc32_tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -96,97 +114,94 @@ uint32_t crc32(uint32_t crc, const void *buf, size_t size)
 
 int main(int argc, char **argv)
 {
-    unsigned char block;
-    
-    int fd_i, fd_o;
-    struct stat fileinfo;
-    char fw_bin_name[MAX_FILENAME];
-    char hdrbuf[HDR_SIZE];
-    char rdbuf[BUF_SIZE];
-    unsigned fw_version_major;
-    unsigned fw_version_minor;
-    uint32_t hdr_crc;
-    uint32_t crc = 0;
-    
-    unsigned int i, bytes_read, bytes_written, tot_bytes_read = 0;
-    
-    if ((argc < 3) || (argc > 4)) {
-        printf("Usege: %s rbf version [version_suffix]\n", argv[0]);
-        return -1;  
-    }
-    
-    if ((fd_i = open(argv[1], O_RDONLY)) == -1 || fstat(fd_i, &fileinfo) == -1) {
-        printf("Couldn't open input file\n");
-        return -1;
-    }
-    
-    snprintf(fw_bin_name, MAX_FILENAME-1, "ossc_%s%s%s.bin", argv[2], (argc == 4) ? "-" : "", (argc == 4) ? argv[3] : "");
-    
-    if ((fd_o = open(fw_bin_name, O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR)) == -1) {
-        printf("Couldn't open output file\n");
-        return -1;
-    }
+	if (argc < 4 || argc > 5)
+	{
+		printf("Usage: %s <rbf> <fw> <version> [version_suffix]\n", argv[0]);
+		return -1;
+	}
 
-    if ((sscanf(argv[2], "%u.%u", &fw_version_major, &fw_version_minor) != 2) || (fw_version_major > 255) || (fw_version_minor > 255)) {
-        printf("Invalid version format specified\n");
-        return -1;
-    }
-    //printf("%s, %u.%u\n", argv[2], fw_version_major, (uint8_t)fw_version_minor);
+	unsigned fw_version_major;
+	unsigned fw_version_minor;
+	if ((sscanf(argv[3], "%u.%u", &fw_version_major, &fw_version_minor) != 2) || (fw_version_major > 255) || (fw_version_minor > 255))
+	{
+		printf("Invalid version format specified\n");
+		return -1;
+	}
 
-    memset(hdrbuf, 0x00, HDR_SIZE);
-    snprintf(hdrbuf, FW_KEY_SIZE+1, "OSSC");
-    hdrbuf[4] = (uint8_t)fw_version_major;
-    hdrbuf[5] = (uint8_t)fw_version_minor;
-    snprintf(hdrbuf+6, FW_SUFFIX_MAX_SIZE+1, (argc == 4) ? argv[3] : "");
-    *((uint32_t*)(hdrbuf+6+FW_SUFFIX_MAX_SIZE)) = htonl(FW_HDR_LEN);
-    *((uint32_t*)(hdrbuf+6+FW_SUFFIX_MAX_SIZE+4)) = htonl((uint32_t)fileinfo.st_size);
+	FILE *rbf = fopen(argv[1], "rb");
+	if (!rbf)
+	{
+		printf("Failed to open rbf\n");
+		return -1;
+	}
 
-    // data CRC
-    while ((bytes_read = read(fd_i, rdbuf, BUF_SIZE)) > 0) {
-        crc = crc32(crc, rdbuf, bytes_read);
-        tot_bytes_read += bytes_read;
-    }
-    *((uint32_t*)(hdrbuf+6+FW_SUFFIX_MAX_SIZE+8)) = htonl(crc);
+	fseek(rbf, 0, SEEK_END);
+	uint32_t rbf_len = ftell(rbf);
+	fseek(rbf, 0, SEEK_SET);
+	uint8_t *rbf_buf = malloc(rbf_len);
+	fread(rbf_buf, 1, rbf_len, rbf);
+	fclose(rbf);
 
-    // header CRC
-    hdr_crc = crc32(0, hdrbuf, FW_HDR_LEN);
-    *((uint32_t*)(hdrbuf+HDR_SIZE-4)) = htonl(hdr_crc);
+	FILE *fw = fopen(argv[2], "rb");
+	if (!fw)
+	{
+		printf("Failed to open fw\n");
+		free(rbf_buf);
+		return -1;
+	}
 
-    if (tot_bytes_read != fileinfo.st_size) {
-        printf("Incorrect size output file\n");
-        return -1; 
-    }
+	fseek(fw, 0, SEEK_END);
+	uint32_t fw_len = ftell(fw);
+	fseek(fw, 0, SEEK_SET);
+	uint8_t *fw_buf = malloc(fw_len);
+	fread(fw_buf, 1, fw_len, fw);
+	fclose(fw);
 
-    printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", hdrbuf+6, fileinfo.st_size);
-    printf("Header CRC32: %.8x\n", hdr_crc);
-    printf("Data CRC32: %.8x\n", crc);
+	char version_suffix[FW_SUFFIX_MAX_SIZE + 1];
+	memset(version_suffix, 0, sizeof(version_suffix));
+	if (argc == 5)
+		strncpy(version_suffix, argv[4], sizeof(version_suffix));
 
-    bytes_written = write(fd_o, hdrbuf, HDR_SIZE);    
-    if (bytes_written != HDR_SIZE) {
-        printf("Couldn't write output file\n");
-        return -1;
-    }
+	fw_hdr hdr;
+	memset(&hdr, 0, sizeof(hdr));
+	hdr.params.magic = htonl('OSSC');
+	hdr.params.version_major = fw_version_major;
+	hdr.params.version_minor = fw_version_minor;
+	memcpy(hdr.params.version_suffix, version_suffix, sizeof(hdr.params.version_suffix));
+	hdr.params.hdr_len = htonl(sizeof(hdr.params));
+	hdr.params.rbf_len = htonl(rbf_len);
+	hdr.params.rbf_crc = htonl(crc32(0, rbf_buf, rbf_len));
+	hdr.params.fw_len = htonl(fw_len);
+	hdr.params.fw_crc = htonl(crc32(0, fw_buf, fw_len));
+	hdr.raw.hdr_crc = htonl(crc32(0, &hdr, sizeof(hdr.params)));
 
-    tot_bytes_read = 0;
-    lseek(fd_i, 0, SEEK_SET);
-    while ((bytes_read = read(fd_i, rdbuf, BUF_SIZE)) > 0) {
-        bytes_written = write(fd_o, rdbuf, bytes_read);
-        if (bytes_written != bytes_read) {
-            printf("Couldn't write output file\n");
-            return -1;
-        }
-        tot_bytes_read += bytes_read;
-    }
+	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", version_suffix, rbf_len);
+	printf("Header CRC32: %.8x\n", hdr.raw.hdr_crc);
+	printf("RBF CRC32: %.8x\n", hdr.params.rbf_crc);
+	printf("FW CRC32: %.8x\n", hdr.params.fw_crc);
 
-    if (tot_bytes_read != fileinfo.st_size) {
-        printf("Incorrect size output file\n");
-        return -1; 
-    }
+	char bin_name[MAX_FILENAME];
+	snprintf(bin_name, sizeof(bin_name), "ossc_%s%s%s.bin", argv[3], (argc == 5) ? "-" : "", (argc == 5) ? argv[4] : "");
 
-    printf("Firmware image written to %s\n", fw_bin_name);
-    
-    close(fd_o);
-    close(fd_i);
-    
-    return 0;
+	FILE *bin = fopen(bin_name, "wb");
+	if (!bin)
+	{
+		printf("Failed to open bin\n");
+		free(fw_buf);
+		free(rbf_buf);
+		return -1;
+	}
+	fwrite(&hdr, 1, sizeof(hdr), bin);
+	fseek(bin, HDR_SIZE, SEEK_SET);
+	fwrite(rbf_buf, 1, rbf_len, bin);
+	fseek(bin, (HDR_SIZE + rbf_len + 0x1FF) & ~0x1FF, SEEK_SET);
+	fwrite(fw_buf, 1, fw_len, bin);
+	fclose(bin);
+
+	free(fw_buf);
+	free(rbf_buf);
+
+	printf("Firmware image written to %s\n", bin_name);
+
+	return 0;
 }

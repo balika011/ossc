@@ -45,7 +45,6 @@
 #include <string.h>
 
 #include "system.h"
-#include "alt_types.h"
 
 #include "priv/alt_busy_sleep.h"
 

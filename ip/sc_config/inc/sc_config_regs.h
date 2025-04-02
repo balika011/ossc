@@ -58,8 +58,8 @@ typedef union {
 		uint8_t ir_cnt;
 		uint8_t btn1:1;
 		uint8_t btn2:1;
-		uint8_t hdmi_tx_mode0:1;
-		uint8_t is_1v8:1;
+		uint8_t hdmi_tx_mode:1;
+		uint8_t is_1_8:1;
 		uint8_t pll_activeclk:1;
 		uint8_t vsync_flag:1;
 		uint8_t resync_indicator:1;
@@ -168,15 +168,15 @@ typedef union {
 typedef union {
     struct {
 		uint8_t hw_reset:1;
-		uint8_t av_reset:1;
+		uint8_t av_reset_n:1;
 		uint8_t enable_sc:1;
 		uint8_t lcd_bl_on:1;
 		uint8_t lcd_rs:1;
 		uint8_t lcd_cs_n:1;
-		uint8_t pll_bypass:1;
 		uint8_t vsync_type:1;
 		uint8_t led_g:1;
 		uint8_t led_r:1;
+		uint8_t reserved_1_2:1;
 		uint8_t reserved_1_3:1;
 		uint8_t reserved_1_4:1;
 		uint8_t reserved_1_5:1;

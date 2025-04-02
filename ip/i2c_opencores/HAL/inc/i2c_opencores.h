@@ -1,8 +1,7 @@
 #ifndef __I2C_OPENCORES_H__
 #define __I2C_OPENCORES_H__
 
-
-#include "alt_types.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -12,12 +11,12 @@ extern "C"
 #define SCL_MIN_CLKDIV 10
 
 
-void I2C_init(alt_u32 base,alt_u32 clk,alt_u32 speed);
-int I2C_start(alt_u32 base, alt_u32 add, alt_u32 read);
-alt_u32 I2C_read(alt_u32 base,alt_u32 last);
-alt_u32 I2C_write(alt_u32 base,alt_u8 data, alt_u32 last);
-void SPI_read(alt_u32 base, alt_u8 *rdata, int len);
-void SPI_write(alt_u32 base, const alt_u8 *wdata, int len);
+void I2C_init(uint32_t base,uint32_t clk,uint32_t speed);
+int I2C_start(uint32_t base, uint32_t add, uint32_t read);
+uint32_t I2C_read(uint32_t base,uint32_t last);
+uint32_t I2C_write(uint32_t base, uint8_t data, uint32_t last);
+void SPI_read(uint32_t base, uint8_t *rdata, int len);
+void SPI_write(uint32_t base, const uint8_t *wdata, int len);
 #define I2C_OK (0)
 #define I2C_ACK (0)
 #define I2C_NOACK (1)

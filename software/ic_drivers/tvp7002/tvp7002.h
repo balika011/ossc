@@ -62,21 +62,21 @@ typedef enum {
 
 typedef struct {
     const char *name;
-    alt_u16 R_Y;
-    alt_u16 R_Pb;
-    alt_u16 R_Pr;
-    alt_u16 G_Y;
-    alt_u16 G_Pb;
-    alt_u16 G_Pr;
-    alt_u16 B_Y;
-    alt_u16 B_Pb;
-    alt_u16 B_Pr;
+    uint16_t R_Y;
+    uint16_t R_Pb;
+    uint16_t R_Pr;
+    uint16_t G_Y;
+    uint16_t G_Pb;
+    uint16_t G_Pr;
+    uint16_t B_Y;
+    uint16_t B_Pb;
+    uint16_t B_Pr;
 } ypbpr_to_rgb_csc_t;
 
 
-inline alt_u32 tvp_readreg(alt_u32 regaddr);
+inline uint32_t tvp_readreg(uint32_t regaddr);
 
-inline void tvp_writereg(alt_u32 regaddr, alt_u8 data);
+inline void tvp_writereg(uint32_t regaddr, uint8_t data);
 
 inline void tvp_reset();
 
@@ -88,36 +88,36 @@ inline void tvp_powerdown();
 
 inline void tvp_powerup();
 
-inline void tvp_set_hpllcoast(alt_u8 pre, alt_u8 post);
+inline void tvp_set_hpllcoast(uint8_t pre, uint8_t post);
 
-inline void tvp_set_linelen_tol(alt_u8 val);
+inline void tvp_set_linelen_tol(uint8_t val);
 
-inline void tvp_set_ssthold(alt_u8 vsdetect_thold);
+inline void tvp_set_ssthold(uint8_t vsdetect_thold);
 
 void tvp_init();
 
 void tvp_set_gain_offset(color_setup_t *col);
 
-void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2);
+void tvp_setup_hpll(uint16_t h_samplerate, uint16_t pixs_per_line, uint16_t refclks_per_line, uint8_t plldivby2);
 
 void tvp_sel_csc(const ypbpr_to_rgb_csc_t *csc);
 
-void tvp_set_lpf(alt_u8 val);
+void tvp_set_lpf(uint8_t val);
 
-void tvp_set_sync_lpf(alt_u8 val);
+void tvp_set_sync_lpf(uint8_t val);
 
-void tvp_set_clp_lpf(alt_u8 val);
+void tvp_set_clp_lpf(uint8_t val);
 
-void tvp_set_hpll_phase(alt_u8 val);
+void tvp_set_hpll_phase(uint8_t val);
 
-void tvp_set_sog_thold(alt_u8 val);
+void tvp_set_sog_thold(uint8_t val);
 
-void tvp_set_alcfilt(alt_u8 nsv, alt_u8 nsh);
+void tvp_set_alcfilt(uint8_t nsv, uint8_t nsh);
 
-void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2, alt_u8 h_synclen_px, alt_8 clamp_user_offset, alt_u8 vmode_changed);
+void tvp_source_setup(video_type type, uint16_t h_samplerate, uint16_t pixs_per_line, uint16_t refclks_per_line, uint8_t plldivby2, uint8_t h_synclen_px, int8_t clamp_user_offset, uint8_t vmode_changed);
 
 void tvp_source_sel(tvp_input_t input, tvp_sync_input_t syncinput, video_format fmt);
 
-alt_u8 tvp_check_sync(tvp_sync_input_t syncinput);
+uint8_t tvp_check_sync(tvp_sync_input_t syncinput);
 
 #endif /* TVP7002_H_ */

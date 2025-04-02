@@ -34,10 +34,10 @@
 ******************************************************************************/
 
 #include <string.h>
+#include <stdint.h>
 
-#include "alt_types.h"
-#include "sys/alt_dev.h"
-#include "sys/alt_warning.h"
+// #include "sys/alt_dev.h"
+// #include "sys/alt_warning.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -52,15 +52,15 @@ extern "C"
 #define ALT_TIMESTAMP_COUNTER_SIZE _ALT_COUNTER_SIZE(ALT_TIMESTAMP_CLK)
 
 #if (ALT_SYS_CLK_COUNTER_SIZE == 64)
-#define alt_sysclk_type alt_u64
+#define alt_sysclk_type uint64_t
 #else
-#define alt_sysclk_type alt_u32
+#define alt_sysclk_type uint32_t
 #endif
 
 #if (ALT_TIMESTAMP_COUNTER_SIZE == 64)
-#define alt_timestamp_type alt_u64
+#define alt_timestamp_type uint64_t
 #else
-#define alt_timestamp_type alt_u32
+#define alt_timestamp_type uint32_t
 #endif
 
 /*
@@ -69,8 +69,8 @@ extern "C"
  * the system clock regestration function, alt_sysclk_init().
  */
 
-extern void alt_avalon_timer_sc_init (void* base, alt_u32 irq_controller_id, 
-                                      alt_u32 irq, alt_u32 freq);
+extern void alt_avalon_timer_sc_init (void* base, uint32_t irq_controller_id, 
+                                      uint32_t irq, uint32_t freq);
 
 /*
  * Variables used to store the timestamp parameters, when the device is to be
@@ -78,7 +78,7 @@ extern void alt_avalon_timer_sc_init (void* base, alt_u32 irq_controller_id,
  */
 
 extern void*   altera_avalon_timer_ts_base;
-extern alt_u32 altera_avalon_timer_ts_freq;
+extern uint32_t altera_avalon_timer_ts_freq;
 
 /*
  * ALTERA_AVALON_TIMER_INSTANCE is the macro used by alt_sys_init() to 

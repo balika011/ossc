@@ -1,14 +1,13 @@
-
-#include "alt_types.h"
+#include <stdint.h>
 #include "i2c_opencores_regs.h"
 #include "i2c_opencores.h"
 
 // #define I2C_DEBUG
-//int I2C_init(alt_u32 base,alt_u32 clk, alt_u32 speed)
-//int I2C_start(alt_u32 base, alt_u32 add, alt_u32 write);
-//alt_u32 I2C_read(alt_u32 base);
-//int I2C_write(alt_u32 base, alt_u8 data);
-//int I2C_stop(alt_u32 base);
+//int I2C_init(uint32_t base,uint32_t clk, uint32_t speed)
+//int I2C_start(uint32_t base, uint32_t add, uint32_t write);
+//uint32_t I2C_read(uint32_t base);
+//int I2C_write(uint32_t base, uint8_t data);
+//int I2C_stop(uint32_t base);
 
 /* these functions are polled only.  */
 /* all functions wait until the I2C is done before exiting */
@@ -25,9 +24,9 @@ inputs
       speed = SCL speed ie 100K, 400K ...            (in Hz)
 15-OCT-07 initial release
 *****************************************************************/
-void I2C_init(alt_u32 base,alt_u32 clk,alt_u32 speed)
+void I2C_init(uint32_t base,uint32_t clk,uint32_t speed)
 {
-  alt_u32 prescale = (clk/( 5 * speed))-1;
+  uint32_t prescale = (clk/( 5 * speed))-1;
 #ifdef  I2C_DEBUG
         printf(" Initializing  I2C at 0x%x, \n\twith clock speed 0x%x \n\tand SCL speed 0x%x \n\tand prescale 0x%x\n",base,clk,speed,prescale);
 #endif
@@ -56,7 +55,7 @@ return value
        1 if address was not acknowledged
 15-OCT-07 initial release
 *****************************************************************/
-int I2C_start(alt_u32 base, alt_u32 add, alt_u32 read)
+int I2C_start(uint32_t base, uint32_t add, uint32_t read)
 {
 #ifdef  I2C_DEBUG
         printf(" Start  I2C at 0x%x, \n\twith address 0x%x \n\tand read 0x%x \n\tand prescale 0x%x\n",base,add,read);
@@ -102,7 +101,7 @@ return value
        byte read back.
 15-OCT-07 initial release
 *****************************************************************/
-alt_u32 I2C_read(alt_u32 base,alt_u32 last)
+uint32_t I2C_read(uint32_t base,uint32_t last)
 {
 #ifdef  I2C_DEBUG
         printf(" Read I2C at 0x%x, \n\twith last0x%x\n",base,last);
@@ -142,7 +141,7 @@ return value
        1 if address was not acknowledged
 15-OCT-07 initial release
 *****************************************************************/
-alt_u32 I2C_write(alt_u32 base,alt_u8 data, alt_u32 last)
+uint32_t I2C_write(uint32_t base,uint8_t data, uint32_t last)
 {
   #ifdef  I2C_DEBUG
         printf(" Read I2C at 0x%x, \n\twith data 0x%x,\n\twith last0x%x\n",base,data,last);
@@ -182,7 +181,7 @@ alt_u32 I2C_write(alt_u32 base,alt_u8 data, alt_u32 last)
 
 }
 
-void SPI_read(alt_u32 base, alt_u8 *rdata, int len)
+void SPI_read(uint32_t base, uint8_t *rdata, int len)
 {
     int i;
 
@@ -197,7 +196,7 @@ void SPI_read(alt_u32 base, alt_u8 *rdata, int len)
     }
 }
 
-void SPI_write(alt_u32 base, const alt_u8 *wdata, int len)
+void SPI_write(uint32_t base, const uint8_t *wdata, int len)
 {
     int i;
 

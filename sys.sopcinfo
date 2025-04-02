@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="sys" kind="sys" version="1.0" fabric="QSYS">
  <!-- Format version 24.1 1077 (Future versions may contain additional information.) -->
- <!-- 2025.03.30.03:19:53 -->
+ <!-- 2025.04.02.00:25:53 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1743297593</value>
+  <value>1743546352</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -3592,6 +3592,14 @@ parameters are a RESULT of the module parameters. -->
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
+    <moduleName>intel_generic_serial_flash_interface_top_0</moduleName>
+    <slaveName>avl_mem</slaveName>
+    <name>intel_generic_serial_flash_interface_top_0.avl_mem</name>
+    <baseAddress>268435456</baseAddress>
+    <span>2097152</span>
+   </memoryBlock>
+   <memoryBlock>
+    <isBridge>false</isBridge>
     <moduleName>onchip_memory2_0</moduleName>
     <slaveName>s1</slaveName>
     <name>onchip_memory2_0.s1</name>
@@ -6070,7 +6078,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.INIT_MEM_CONTENT</name>
-   <value>1</value>
+   <value>0</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.INSTANCE_ID</name>
@@ -6198,7 +6206,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="initMemContent">
    <type>boolean</type>
-   <value>true</value>
+   <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -6216,7 +6224,7 @@ the requested settings for a module instance. -->
    <type>boolean</type>
    <value>false</value>
    <derived>false</derived>
-   <enabled>true</enabled>
+   <enabled>false</enabled>
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
@@ -6296,7 +6304,7 @@ the requested settings for a module instance. -->
    <type>boolean</type>
    <value>false</value>
    <derived>false</derived>
-   <enabled>true</enabled>
+   <enabled>false</enabled>
    <visible>true</visible>
    <valid>true</valid>
   </parameter>
@@ -13486,6 +13494,57 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>avalon_slave_dm</endConnectionPoint>
  </connection>
  <connection
+   name="ibex_0.avalon_master_bus_instr/intel_generic_serial_flash_interface_top_0.avl_mem"
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_instr"
+   end="intel_generic_serial_flash_interface_top_0.avl_mem">
+  <parameter name="arbitrationPriority">
+   <type>int</type>
+   <value>1</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="baseAddress">
+   <type>java.math.BigInteger</type>
+   <value>0x10000000</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="defaultConnection">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_instr</startConnectionPoint>
+  <endModule>intel_generic_serial_flash_interface_top_0</endModule>
+  <endConnectionPoint>avl_mem</endConnectionPoint>
+ </connection>
+ <connection
    name="ibex_0.avalon_master_bus_instr/onchip_memory2_0.s1"
    kind="avalon"
    version="24.1"
@@ -14225,33 +14284,6 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>reset1</endConnectionPoint>
  </connection>
  <connection
-   name="reset_bridge_0.out_reset/ibex_0.reset_sink"
-   kind="reset"
-   version="24.1"
-   start="reset_bridge_0.out_reset"
-   end="ibex_0.reset_sink">
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>reset_bridge_0</startModule>
-  <startConnectionPoint>out_reset</startConnectionPoint>
-  <endModule>ibex_0</endModule>
-  <endConnectionPoint>reset_sink</endConnectionPoint>
- </connection>
- <connection
    name="reset_bridge_0.out_reset/sc_config_0.reset_sink"
    kind="reset"
    version="24.1"
@@ -14357,6 +14389,33 @@ parameters are a RESULT of the module parameters. -->
   <startModule>reset_bridge_0</startModule>
   <startConnectionPoint>out_reset</startConnectionPoint>
   <endModule>sdc_controller_0</endModule>
+  <endConnectionPoint>reset_sink</endConnectionPoint>
+ </connection>
+ <connection
+   name="reset_bridge_0.out_reset/ibex_0.reset_sink"
+   kind="reset"
+   version="24.1"
+   start="reset_bridge_0.out_reset"
+   end="ibex_0.reset_sink">
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>reset_bridge_0</startModule>
+  <startConnectionPoint>out_reset</startConnectionPoint>
+  <endModule>ibex_0</endModule>
   <endConnectionPoint>reset_sink</endConnectionPoint>
  </connection>
  <plugin>
@@ -14568,7 +14627,7 @@ parameters are a RESULT of the module parameters. -->
   <version>24.1</version>
  </plugin>
  <plugin>
-  <instanceCount>28</instanceCount>
+  <instanceCount>29</instanceCount>
   <name>avalon</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IConnection</subtype>

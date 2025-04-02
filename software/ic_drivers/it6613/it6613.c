@@ -4,16 +4,16 @@
 #include "i2c_opencores.h"
 #include "it6613.h"
 
-volatile alt_u8 cur_bank;
+volatile uint8_t cur_bank;
 
-inline void select_bank_it(alt_u8 bank) {
+inline void select_bank_it(uint8_t bank) {
 	cur_bank = bank;
 	I2C_start(I2CA_BASE, IT_BASE, 0);
 	I2C_write(I2CA_BASE, IT_CURBANK, 0);
 	I2C_write(I2CA_BASE, cur_bank, 1);
 }
 
-inline alt_u32 read_it(alt_u32 regaddr) {
+inline uint32_t read_it(uint32_t regaddr) {
 	if ((regaddr > 0xFF) && (cur_bank == 0))
 		select_bank_it(1);
 	else if ((regaddr <= 0xFF) && (cur_bank == 1))
@@ -25,7 +25,7 @@ inline alt_u32 read_it(alt_u32 regaddr) {
 	return I2C_read(I2CA_BASE,1);
 }
 
-inline void write_it(alt_u32 regaddr, alt_u8 data) {
+inline void write_it(uint32_t regaddr, uint8_t data) {
 	if ((regaddr > 0xFF) && (cur_bank == 0))
 		select_bank_it(1);
 	else if ((regaddr <= 0xFF) && (cur_bank == 1))
@@ -37,8 +37,8 @@ inline void write_it(alt_u32 regaddr, alt_u8 data) {
 }
 
 int init_it() {
-	alt_u32 vendor_id, device_id;
-	alt_u32 i;
+	uint32_t vendor_id, device_id;
+	uint32_t i;
 
 	cur_bank = 0;
 	select_bank_it(cur_bank);

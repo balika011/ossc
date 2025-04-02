@@ -68,40 +68,6 @@ ABS_BSP_ROOT := $(call adjust-path-mixed,$(shell pwd))
 OBJ_DIR := ./obj
 
 
-#------------------------------------------------------------------------------
-#                              MANAGED CONTENT
-#
-# All content between the lines "START MANAGED" and "END MANAGED" below is
-# generated based on variables in the BSP settings file when the
-# nios2-bsp-generate-files command is invoked. If you wish to persist any
-# information pertaining to the build process, it is recomended that you
-# utilize the BSP settings mechanism to do so.
-#
-# Note that most variable assignments in this section have a corresponding BSP
-# setting that can be changed by using the nios2-bsp-create-settings or  
-# nios2-bsp-update-settings command before nios2-bsp-generate-files; if you 
-# want any variable set to a specific value when this Makefile is re-generated 
-# (to prevent hand-edits from being over-written), use the BSP settings 
-# facilities above.
-#------------------------------------------------------------------------------
-
-#START MANAGED
-
-# The following TYPE comment allows tools to identify the 'type' of target this 
-# makefile is associated with. 
-# TYPE: BSP_PRIVATE_MAKEFILE
-
-# This following VERSION comment indicates the version of the tool used to 
-# generate this makefile. A makefile variable is provided for VERSION as well. 
-# ACDS_VERSION: 17.1
-ACDS_VERSION := 17.1
-
-# This following BUILD_NUMBER comment indicates the build number of the tool 
-# used to generate this makefile. 
-# BUILD_NUMBER: 590
-
-SOPC_FILE := ../../sys.sopcinfo
-
 #-------------------------------------------------------------------------------
 #                             TOOL & COMMAND DEFINITIONS
 # 
@@ -121,10 +87,6 @@ AS = riscv32-unknown-elf-gcc
 # reason for this is that GNU Make assumes some default content in ARFLAGS. 
 # This setting defines the value of BSP_ARFLAGS in Makefile. 
 BSP_ARFLAGS = -src
-
-# Custom flags only passed to the assembler. This setting defines the value of 
-# BSP_ASFLAGS in Makefile. 
-BSP_ASFLAGS = -Wa,-gdwarf2
 
 # C/C++ compiler optimization level. "-O0" = no optimization,"-O2" = "normal" 
 # optimization, etc. "-O0" is recommended for code that you want to debug since 
@@ -148,46 +110,6 @@ RM = rm -f
 
 
 #-------------------------------------------------------------------------------
-#                         BUILD PRE & POST PROCESS COMMANDS
-# 
-# The following variables are treated as shell commands in the rule
-# definitions for each file-type associated with the BSP build, as well as
-# commands run at the beginning and end of the entire BSP build operation.
-# Pre-process commands are executed before the relevant command (for example,
-# a command defined in the "CC_PRE_PROCESS" variable executes before the C
-# compiler for building .c files), while post-process commands are executed
-# immediately afterwards.
-# 
-# You can view each pre/post-process command in the "Build Rules: All &
-# Clean", "Pattern Rules to Build Objects", and "Library Rules" sections of
-# this Makefile.
-#-------------------------------------------------------------------------------
-
-
-#-------------------------------------------------------------------------------
-#                     BSP SOURCE BUILD SETTINGS (FLAG GENERATION)
-# 
-# Software build settings such as compiler optimization, debug level, warning
-# flags, etc., may be defined in the following variables. The variables below
-# are concatenated together in the 'Flags' section of this Makefile to form
-# final variables of flags passed to the build tools.
-# 
-# These settings are considered private to the BSP and apply to all library &
-# driver files in it; they do NOT automatically propagate to, for example, the
-# build settings for an application.
-# # For additional detail and syntax requirements, please refer to GCC help
-# (example: "nios2-elf-gcc --help --verbose").
-# 
-# Unless indicated otherwise, multiple entries in each variable should be
-# space-separated.
-#-------------------------------------------------------------------------------
-
-# Altera HAL alt_sys_init.c generated source file 
-GENERATED_C_FILES := $(ABS_BSP_ROOT)/alt_sys_init.c
-GENERATED_C_LIB_SRCS += alt_sys_init.c
-
-
-#-------------------------------------------------------------------------------
 #                            BSP SOURCE FILE LISTING
 # 
 # All source files that comprise the BSP are listed here, along with path 
@@ -201,92 +123,59 @@ GENERATED_C_LIB_SRCS += alt_sys_init.c
 # used to build each file.
 #-------------------------------------------------------------------------------
 
-# altera_avalon_jtag_uart_driver sources root 
-altera_avalon_jtag_uart_driver_SRCS_ROOT := drivers
-
-# altera_avalon_jtag_uart_driver sources 
-altera_avalon_jtag_uart_driver_C_LIB_SRCS := \
-	$(altera_avalon_jtag_uart_driver_SRCS_ROOT)/src/altera_avalon_jtag_uart_init.c \
-	$(altera_avalon_jtag_uart_driver_SRCS_ROOT)/src/altera_avalon_jtag_uart_read.c \
-	$(altera_avalon_jtag_uart_driver_SRCS_ROOT)/src/altera_avalon_jtag_uart_write.c \
-	$(altera_avalon_jtag_uart_driver_SRCS_ROOT)/src/altera_avalon_jtag_uart_ioctl.c \
-	$(altera_avalon_jtag_uart_driver_SRCS_ROOT)/src/altera_avalon_jtag_uart_fd.c
-
-# altera_avalon_pio_driver sources root 
-altera_avalon_pio_driver_SRCS_ROOT := drivers
-
-# altera_avalon_pio_driver sources 
-# altera_avalon_timer_driver sources root 
-altera_avalon_timer_driver_SRCS_ROOT := drivers
-
-# altera_avalon_timer_driver sources 
 altera_avalon_timer_driver_C_LIB_SRCS := \
-	$(altera_avalon_timer_driver_SRCS_ROOT)/src/altera_avalon_timer_ts.c \
-	$(altera_avalon_timer_driver_SRCS_ROOT)/src/altera_avalon_timer_vars.c
+	drivers/src/altera_avalon_timer_ts.c
 
-# altera_nios2_gen2_hal_driver sources root 
-altera_nios2_gen2_hal_driver_SRCS_ROOT := HAL
-
-# altera_nios2_gen2_hal_driver sources 
 altera_nios2_gen2_hal_driver_C_LIB_SRCS := \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_usleep.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_printf.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_putchar.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_putstr.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_busy_sleep.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_ecc_fatal_exception.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_instruction_exception_entry.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_remap_cached.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_remap_uncached.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_uncached_free.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_uncached_malloc.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_do_ctors.c \
-	$(altera_nios2_gen2_hal_driver_SRCS_ROOT)/src/alt_do_dtors.c
+	HAL/src/alt_usleep.c \
+	HAL/src/alt_busy_sleep.c
 
-# hal sources root 
-hal_SRCS_ROOT := HAL
+#	HAL/src/alt_printf.c \
+	HAL/src/alt_putchar.c \
+	HAL/src/alt_putstr.c \
+	HAL/src/alt_ecc_fatal_exception.c \
+	HAL/src/alt_instruction_exception_entry.c \
+	HAL/src/alt_remap_cached.c \
+	HAL/src/alt_remap_uncached.c \
+	HAL/src/alt_uncached_free.c \
+	HAL/src/alt_uncached_malloc.c \
+	HAL/src/alt_do_ctors.c \
+	HAL/src/alt_do_dtors.c
 
-# hal sources 
 hal_C_LIB_SRCS := \
-	$(hal_SRCS_ROOT)/src/alt_dev_llist_insert.c \
-	$(hal_SRCS_ROOT)/src/alt_errno.c \
-	$(hal_SRCS_ROOT)/src/alt_flash_dev.c \
-	$(hal_SRCS_ROOT)/src/alt_main.c
+	HAL/src/alt_dev_llist_insert.c \
+	HAL/src/alt_errno.c \
+	HAL/src/alt_flash_dev.c \
+	HAL/src/alt_main.c
 
-# i2c_opencores_driver sources root 
-i2c_opencores_driver_SRCS_ROOT := drivers
-
-# i2c_opencores_driver sources 
 i2c_opencores_driver_C_LIB_SRCS := \
-	$(i2c_opencores_driver_SRCS_ROOT)/src/i2c_opencores.c
+	drivers/src/i2c_opencores.c
 
-# nios2_hw_crc32_driver sources root 
-nios2_hw_crc32_driver_SRCS_ROOT := drivers
-
-# sdc_controller
-sdc_controller_SRCS_ROOT := drivers
 sdc_controller_SRCS := \
-	$(sdc_controller_SRCS_ROOT)/src/mmc.c \
-	$(sdc_controller_SRCS_ROOT)/src/ocsdc.c
+	drivers/src/mmc.c \
+	drivers/src/ocsdc.c
 
 # Assemble all component C source files 
 COMPONENT_C_LIB_SRCS += \
-	$(altera_avalon_jtag_uart_driver_C_LIB_SRCS) \
 	$(altera_avalon_timer_driver_C_LIB_SRCS) \
 	$(altera_nios2_gen2_hal_driver_C_LIB_SRCS) \
-	$(hal_C_LIB_SRCS) \
 	$(i2c_opencores_driver_C_LIB_SRCS) \
-	$(nios2_hw_crc32_driver_C_LIB_SRCS) \
 	$(sdc_controller_SRCS)
+
+
+#	$(altera_avalon_jtag_uart_driver_C_LIB_SRCS) \
+#	$(altera_avalon_timer_driver_C_LIB_SRCS) \
+#	$(altera_nios2_gen2_hal_driver_C_LIB_SRCS) \
+#	$(hal_C_LIB_SRCS) \
+#	$(i2c_opencores_driver_C_LIB_SRCS) \
+#	$(nios2_hw_crc32_driver_C_LIB_SRCS) \
+#	$(sdc_controller_SRCS)
 
 # Assemble all component assembly source files 
 COMPONENT_ASM_LIB_SRCS += \
-	$(altera_nios2_gen2_hal_driver_ASM_LIB_SRCS)
 
 # Assemble all component C++ source files 
 COMPONENT_CPP_LIB_SRCS += \
-
-#END MANAGED
 
 #------------------------------------------------------------------------------
 #                                 PUBLIC.MK

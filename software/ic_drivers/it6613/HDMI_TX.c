@@ -36,7 +36,7 @@ INSTANCE InitInstanceData =
 
 bool HDMITX_ChipVerify(void){
     bool bPass = FALSE;
-    alt_u8 szID[4];
+    uint8_t szID[4];
     int i;
 
 
@@ -78,12 +78,12 @@ bool HDMITX_HPD(void){
 }
 
 
-void HDMITX_SetAVIInfoFrame(alt_u8 VIC, alt_u8 OutputColorMode, bool b16x9, bool ITU709, bool ITC, alt_u8 pixelrep)
+void HDMITX_SetAVIInfoFrame(uint8_t VIC, uint8_t OutputColorMode, bool b16x9, bool ITU709, bool ITC, uint8_t pixelrep)
 {
     AVI_InfoFrame AviInfo;
 
-    //OS_PRINTF("HDMITX_SetAVIInfoFrame: VIC=%d, ColorMode=%d, Aspect-Ratio=%s, ITU709=%s, ITC=%s, pixelrep=%u\n",
-    //    VIC, OutputColorMode, b16x9?"16:9":"4:3", ITU709?"Yes":"No", ITC?"Yes":"No", pixelrep);
+    OS_PRINTF("HDMITX_SetAVIInfoFrame: VIC=%d, ColorMode=%d, Aspect-Ratio=%s, ITU709=%s, ITC=%s, pixelrep=%u\n",
+        VIC, OutputColorMode, b16x9?"16:9":"4:3", ITU709?"Yes":"No", ITC?"Yes":"No", pixelrep);
 
     AviInfo.pktbyte.AVI_HB[0] = AVI_INFOFRAME_TYPE|0x80 ;
     AviInfo.pktbyte.AVI_HB[1] = AVI_INFOFRAME_VER ;
@@ -238,8 +238,6 @@ bool HDMITX_DevLoopProc()
 
     if( HPDChange )
     {
-
-
         OS_PRINTF("HPDChange\n");
         if( HPD )
         {

@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "system.h"
-#include "altera_avalon_pio_regs.h"
 #include "i2c_opencores.h"
 #include "tvp7002.h"
 
@@ -37,12 +36,12 @@ const ypbpr_to_rgb_csc_t csc_coeffs[] = {
     { "Rec. 709", 0x2000, 0x0000, 0x323E, 0x2000, 0xFA04, 0xF113, 0x2000, 0x3B61, 0x0000 },    // eq. 105
 };
 
-static const alt_u8 Kvco[] = {75, 85, 150, 200};
+static const uint8_t Kvco[] = {75, 85, 150, 200};
 static const char *Kvco_str[] = { "Ultra low", "Low", "Medium", "High" };
 
 static void tvp_set_clamp_type(video_format fmt)
 {
-    alt_u8 status = tvp_readreg(TVP_SOGTHOLD) & 0xF8;
+    uint8_t status = tvp_readreg(TVP_SOGTHOLD) & 0xF8;
 
     switch (fmt) {
     case FORMAT_YPbPr:
@@ -59,10 +58,10 @@ static void tvp_set_clamp_type(video_format fmt)
     tvp_writereg(TVP_SOGTHOLD, status);
 }
 
-static void tvp_set_clamp_alc(video_type type, alt_u8 clamp_ref_offset, alt_8 clamp_user_offset, alt_u8 en_alc)
+static void tvp_set_clamp_alc(video_type type, uint8_t clamp_ref_offset, int8_t clamp_user_offset, uint8_t en_alc)
 {
-    alt_16 clamp_pos = clamp_ref_offset + clamp_user_offset;
-    alt_u8 clamp_width, alc_offset;
+    int16_t clamp_pos = clamp_ref_offset + clamp_user_offset;
+    uint8_t clamp_width, alc_offset;
 
     switch (type) {
     /*case VIDEO_LDTV:
@@ -93,7 +92,7 @@ static void tvp_set_clamp_alc(video_type type, alt_u8 clamp_ref_offset, alt_8 cl
 
     printf("Clamp pos: %u, width: %u (ref_offset: %u, user_offset %d)\n", clamp_pos, clamp_width, clamp_ref_offset, clamp_user_offset);
 
-    tvp_writereg(TVP_CLAMPSTART, (alt_u8)clamp_pos);
+    tvp_writereg(TVP_CLAMPSTART, (uint8_t)clamp_pos);
     tvp_writereg(TVP_CLAMPWIDTH, clamp_width);
 
     if (en_alc) {
@@ -104,9 +103,9 @@ static void tvp_set_clamp_alc(video_type type, alt_u8 clamp_ref_offset, alt_8 cl
     }
 }
 
-static void tvp_sel_clk(tvp_refclk_t refclk, alt_u8 ext_pclk)
+static void tvp_sel_clk(tvp_refclk_t refclk, uint8_t ext_pclk)
 {
-    alt_u8 status = tvp_readreg(TVP_INPMUX2) & 0xF5;
+    uint8_t status = tvp_readreg(TVP_INPMUX2) & 0xF5;
 
     //TODO: set SOG and CLP LPF based on mode
     if (refclk == REFCLK_EXT27) {
@@ -121,7 +120,7 @@ static void tvp_sel_clk(tvp_refclk_t refclk, alt_u8 ext_pclk)
     tvp_writereg(TVP_INPMUX2, status);
 }
 
-inline alt_u32 tvp_readreg(alt_u32 regaddr)
+inline uint32_t tvp_readreg(uint32_t regaddr)
 {
     I2C_start(I2CA_BASE, TVP_BASE, 0);
     I2C_write(I2CA_BASE, regaddr, 1);   //don't use repeated start as it seems unreliable at 400kHz
@@ -129,7 +128,7 @@ inline alt_u32 tvp_readreg(alt_u32 regaddr)
     return I2C_read(I2CA_BASE,1);
 }
 
-inline void tvp_writereg(alt_u32 regaddr, alt_u8 data)
+inline void tvp_writereg(uint32_t regaddr, uint8_t data)
 {
     I2C_start(I2CA_BASE, TVP_BASE, 0);
     I2C_write(I2CA_BASE, regaddr, 0);
@@ -148,7 +147,7 @@ inline void tvp_enable_output()
 
 inline void tvp_powerdown()
 {
-    alt_u8 syncproc_rst = tvp_readreg(TVP_MISCCTRL4) | (1<<7);
+    uint8_t syncproc_rst = tvp_readreg(TVP_MISCCTRL4) | (1<<7);
 
     tvp_writereg(TVP_MISCCTRL4, syncproc_rst);
     usleep(1000);
@@ -164,17 +163,17 @@ inline void tvp_powerup()
     tvp_writereg(TVP_POWERCTRL, 0x00);
 }
 
-inline void tvp_set_hpllcoast(alt_u8 pre, alt_u8 post)
+inline void tvp_set_hpllcoast(uint8_t pre, uint8_t post)
 {
     tvp_writereg(TVP_HPLLPRECOAST, pre);
     tvp_writereg(TVP_HPLLPOSTCOAST, post);
 }
 
-inline void tvp_set_linelen_tol(alt_u8 val) {
+inline void tvp_set_linelen_tol(uint8_t val) {
     tvp_writereg(TVP_LINELENTOL, val);
 }
 
-inline void tvp_set_ssthold(alt_u8 vsdetect_thold)
+inline void tvp_set_ssthold(uint8_t vsdetect_thold)
 {
     tvp_writereg(TVP_SSTHOLD, vsdetect_thold);
 }
@@ -259,13 +258,13 @@ void tvp_set_gain_offset(color_setup_t *col) {
 }
 
 // Configure H-PLL (sampling rate, VCO gain and charge pump current)
-void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2)
+void tvp_setup_hpll(uint16_t h_samplerate, uint16_t pixs_per_line, uint16_t refclks_per_line, uint8_t plldivby2)
 {
-    alt_u32 pclk_est;
-    alt_u8 vco_range;
-    alt_u8 cp_current;
+    uint32_t pclk_est;
+    uint8_t vco_range;
+    uint8_t cp_current;
 
-    alt_u8 status = tvp_readreg(TVP_HPLLPHASE) & 0xF8;
+    uint8_t status = tvp_readreg(TVP_HPLLPHASE) & 0xF8;
 
     // Enable PLL post-div-by-2 with double samplerate
     if (plldivby2 && (h_samplerate < 2048)) {
@@ -280,7 +279,7 @@ void tvp_setup_hpll(alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks
 
     printf("Horizontal samplerate set to %u\n", h_samplerate);
 
-    pclk_est = ((alt_u32)h_samplerate * (TVP_EXTCLK_HZ/(alt_u32)refclks_per_line)) / 1000; //in kHz
+    pclk_est = ((uint32_t)h_samplerate * (TVP_EXTCLK_HZ/(uint32_t)refclks_per_line)) / 1000; //in kHz
 
     printf("Estimated PCLK_HPLL: %lu.%.3lu MHz\n", pclk_est/1000, pclk_est%1000);
 
@@ -328,50 +327,50 @@ void tvp_sel_csc(const ypbpr_to_rgb_csc_t *csc)
     tvp_writereg(TVP_CSC9LO, (csc->B_Pr & 0xff));
 }
 
-void tvp_set_lpf(alt_u8 val)
+void tvp_set_lpf(uint8_t val)
 {
-    alt_u8 status = tvp_readreg(TVP_VIDEOBWLIM) & 0xF0;
+    uint8_t status = tvp_readreg(TVP_VIDEOBWLIM) & 0xF0;
     tvp_writereg(TVP_VIDEOBWLIM, status|val);
     printf("TVP LPF value set to 0x%x\n", val);
 }
 
-void tvp_set_sync_lpf(alt_u8 val)
+void tvp_set_sync_lpf(uint8_t val)
 {
-    alt_u8 status = tvp_readreg(TVP_INPMUX2) & 0x3F;
+    uint8_t status = tvp_readreg(TVP_INPMUX2) & 0x3F;
     tvp_writereg(TVP_INPMUX2, status|(val<<6));
     printf("Sync LPF value set to 0x%x\n", val);
 }
 
-void tvp_set_clp_lpf(alt_u8 val)
+void tvp_set_clp_lpf(uint8_t val)
 {
-    alt_u8 status = tvp_readreg(TVP_INPMUX2) & 0xCF;
+    uint8_t status = tvp_readreg(TVP_INPMUX2) & 0xCF;
     tvp_writereg(TVP_INPMUX2, status|(val<<4));
     printf("CLP LPF value set to 0x%x\n", val);
 }
 
-void tvp_set_hpll_phase(alt_u8 val)
+void tvp_set_hpll_phase(uint8_t val)
 {
-    alt_u8 status = tvp_readreg(TVP_HPLLPHASE) & 0x07;
+    uint8_t status = tvp_readreg(TVP_HPLLPHASE) & 0x07;
 
     tvp_writereg(TVP_HPLLPHASE, (val<<3)|status);
     printf("TVP Phase set to %u/32 (%u deg)\n", val, (val*11250)/1000);
 }
 
-void tvp_set_sog_thold(alt_u8 val)
+void tvp_set_sog_thold(uint8_t val)
 {
-    alt_u8 status = tvp_readreg(TVP_SOGTHOLD) & 0x07;
+    uint8_t status = tvp_readreg(TVP_SOGTHOLD) & 0x07;
     tvp_writereg(TVP_SOGTHOLD, (val<<3)|status);
     printf("SOG thold set to 0x%x\n", val);
 }
 
-void tvp_set_alcfilt(alt_u8 nsv, alt_u8 nsh) {
+void tvp_set_alcfilt(uint8_t nsv, uint8_t nsh) {
     tvp_writereg(TVP_ALCFILT, (nsv<<3)|nsh);
 }
 
-void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 pixs_per_line, alt_u16 refclks_per_line, alt_u8 plldivby2, alt_u8 h_synclen_px, alt_8 clamp_user_offset, alt_u8 vmode_changed)
+void tvp_source_setup(video_type type, uint16_t h_samplerate, uint16_t pixs_per_line, uint16_t refclks_per_line, uint8_t plldivby2, uint8_t h_synclen_px, int8_t clamp_user_offset, uint8_t vmode_changed)
 {
     // Due to short MVS width, clamp reference starts prematurely (at the end of MVS window). Adjust offset so that reference moves back to hsync trailing edge.
-    alt_u8 clamp_ref_offset = h_synclen_px - (((30*h_samplerate)/refclks_per_line)+5)/10;
+    uint8_t clamp_ref_offset = h_synclen_px - (((30*h_samplerate)/refclks_per_line)+5)/10;
 
     // Reset sync processing if mode changed to avoid occasional wobbling issue
     if (vmode_changed)
@@ -401,7 +400,7 @@ void tvp_source_setup(video_type type, alt_u16 h_samplerate, alt_u16 pixs_per_li
 
 void tvp_source_sel(tvp_input_t input, tvp_sync_input_t syncinput, video_format fmt)
 {
-    alt_u8 sync_status;
+    uint8_t sync_status;
 
     // RGB+SOG input select
     tvp_writereg(TVP_INPMUX1, (((syncinput <= TVP_SOG3) ? syncinput : 0)<<6) | (input<<4) | (input<<2) | input);
@@ -450,9 +449,9 @@ void tvp_source_sel(tvp_input_t input, tvp_sync_input_t syncinput, video_format 
     printf("\n");
 }
 
-alt_u8 tvp_check_sync(tvp_sync_input_t syncinput)
+uint8_t tvp_check_sync(tvp_sync_input_t syncinput)
 {
-    alt_u8 sync_status;
+    uint8_t sync_status;
 
     sync_status = tvp_readreg(TVP_SYNCSTAT);
 

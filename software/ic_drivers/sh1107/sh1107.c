@@ -17,26 +17,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include "lcd.h"
 #include "sh1107.h"
-#include "alt_types.h"
-#include "altera_avalon_pio_regs.h"
 #include "i2c_opencores.h"
 #include "font12.h"
 
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
 
-extern alt_u32 sys_ctrl;
+extern uint32_t sys_ctrl;
 
 static void OLED_Write(uint8_t value)
 {
 	SPI_write(I2CA_BASE, &value, 1);
 }
 
-/*static const*/ alt_u8 init[] = {
+static const uint8_t init[] = {
 	0xae,		/*turn off OLED display*/
 	0x00,		/*set lower column address*/
 	0x10,		/*set higher column address*/
@@ -67,14 +66,14 @@ void sh1107_init()
 
     // Clear the screen
     OLED_Write(0xb0);
-    for (alt_u8 i = 0; i < OLED_HEIGHT; i++)
+    for (uint8_t i = 0; i < OLED_HEIGHT; i++)
 	{
 		SC->sys_ctrl.lcd_rs = 0;
         OLED_Write(0x00 + (i & 0x0f));
         OLED_Write(0x10 + (i >> 4));
 
 		SC->sys_ctrl.lcd_rs = 1;
-        for (alt_u8 i = 0; i < OLED_WIDTH / 8; i++)
+        for (uint8_t i = 0; i < OLED_WIDTH / 8; i++)
             OLED_Write(0);
 	}
 
@@ -91,9 +90,9 @@ void sh1107_write(char *row1, char *row2)
 	SC->sys_ctrl.lcd_cs_n = 0;
 	SC->sys_ctrl.lcd_rs = 0;
 
-    alt_u8 row1len = strnlen(row1, LCD_ROW_LEN);
+    uint8_t row1len = strnlen(row1, LCD_ROW_LEN);
 
-    for (alt_u8 i = 0; i < 12; i++)
+    for (uint8_t i = 0; i < 12; i++)
 	{
 		SC->sys_ctrl.lcd_rs = 0;
 		OLED_Write(0xb0);
@@ -101,16 +100,16 @@ void sh1107_write(char *row1, char *row2)
         OLED_Write(0x10 + ((i + 13) >> 4));
 
 		SC->sys_ctrl.lcd_rs = 1;
-        for (alt_u8 j = 0; j < row1len; j++)
+        for (uint8_t j = 0; j < row1len; j++)
             OLED_Write(Font12_Table[(row1[j] - 0x20) * 12 + i]);
 
-        for (alt_u8 j = row1len; j < LCD_ROW_LEN; j++)
+        for (uint8_t j = row1len; j < LCD_ROW_LEN; j++)
             OLED_Write(Font12_Table[i]);
 	}
 
-	alt_u8 row2len = strnlen(row2, LCD_ROW_LEN);
+	uint8_t row2len = strnlen(row2, LCD_ROW_LEN);
 
-    for (alt_u8 i = 0; i < 12; i++)
+    for (uint8_t i = 0; i < 12; i++)
 	{
 		SC->sys_ctrl.lcd_rs = 0;
         OLED_Write(0xb0);
@@ -118,10 +117,10 @@ void sh1107_write(char *row1, char *row2)
         OLED_Write(0x10 + ((i + 39) >> 4));
 
 		SC->sys_ctrl.lcd_rs = 1;
-		for (alt_u8 j = 0; j < row2len; j++)
+		for (uint8_t j = 0; j < row2len; j++)
             OLED_Write(Font12_Table[(row2[j] - 0x20) * 12 + i]);
 
-        for (alt_u8 j = row2len; j < LCD_ROW_LEN; j++)
+        for (uint8_t j = row2len; j < LCD_ROW_LEN; j++)
             OLED_Write(Font12_Table[i]);
 	}
 

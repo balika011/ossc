@@ -33,13 +33,7 @@
 * file be used in conjunction or combination with any other product.          *
 ******************************************************************************/
 
-/******************************************************************************
-*                                                                             *
-* THIS IS A LIBRARY READ-ONLY SOURCE FILE. DO NOT EDIT.                       *
-*                                                                             *
-******************************************************************************/
-
-#include "alt_types.h"
+#include <stdint.h>
 #include "altera_avalon_timer.h"
 
 #ifdef __cplusplus
@@ -51,7 +45,7 @@ extern int alt_timestamp_start (void);
 
 extern alt_timestamp_type alt_timestamp (void);
 
-extern alt_u32 alt_timestamp_freq (void);
+extern uint32_t alt_timestamp_freq (void);
 
 #ifdef __cplusplus
 }

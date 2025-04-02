@@ -34,7 +34,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    printf("size: %u bytes\n", fileinfo.st_size);
+    printf("size: %lu bytes\n", fileinfo.st_size);
 
     if ((fd_o = fopen(argv[3], "w")) == NULL) {
         printf("invalid outfile\n");

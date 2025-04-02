@@ -20,18 +20,18 @@
 #ifndef PLL_RECONFIG_REGS_H_
 #define PLL_RECONFIG_REGS_H_
 
-#include <alt_types.h>
+#include <stdint.h>
 
 typedef union {
     struct {
-        alt_u8 reset:1;
-        alt_u8 update:1;
-        alt_u8 t_config_id:4;
-        alt_u32 pll_reconfig_rsv:21;
-        alt_u8 c_config_id:4;
-        alt_u8 busy:1;
+        uint8_t reset:1;
+        uint8_t update:1;
+        uint8_t t_config_id:4;
+        uint32_t pll_reconfig_rsv:21;
+        uint8_t c_config_id:4;
+        uint8_t busy:1;
     } __attribute__((packed, __may_alias__));
-    alt_u32 data;
+    uint32_t data;
 } pll_config_status_reg;
 
 // char regs

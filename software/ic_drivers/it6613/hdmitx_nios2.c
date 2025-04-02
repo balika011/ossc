@@ -5,7 +5,7 @@
 #include "hdmitx.h"
 #include "it6613.h"
 
-inline alt_u32 read_it2(alt_u32 regaddr)
+inline uint32_t read_it2(uint32_t regaddr)
 {
     I2C_start(I2CA_BASE, IT_BASE, 0);
     I2C_write(I2CA_BASE, regaddr, 0);
@@ -13,7 +13,7 @@ inline alt_u32 read_it2(alt_u32 regaddr)
     return I2C_read(I2CA_BASE,1);
 }
 
-inline void write_it2(alt_u32 regaddr, alt_u8 data)
+inline void write_it2(uint32_t regaddr, uint8_t data)
 {
     I2C_start(I2CA_BASE, IT_BASE, 0);
     I2C_write(I2CA_BASE, regaddr, 0);
