@@ -632,7 +632,7 @@
   <parameter name="alwaysRun" value="true" />
   <parameter name="counterSize" value="32" />
   <parameter name="fixedPeriod" value="true" />
-  <parameter name="period" value="54" />
+  <parameter name="period" value="5400" />
   <parameter name="periodUnits" value="CLOCKS" />
   <parameter name="resetOutput" value="false" />
   <parameter name="snapshot" value="false" />
@@ -953,18 +953,18 @@
  <connection
    kind="clock"
    version="24.1"
-   start="clk_27.clk"
-   end="reset_bridge_0.clk" />
- <connection
-   kind="clock"
-   version="24.1"
-   start="clk_27.clk"
+   start="altpll_0.c1"
    end="osd_generator_0.clock_sink" />
  <connection
    kind="clock"
    version="24.1"
-   start="clk_27.clk"
+   start="altpll_0.c1"
    end="pll_reconfig_0.clock_sink" />
+ <connection
+   kind="clock"
+   version="24.1"
+   start="clk_27.clk"
+   end="reset_bridge_0.clk" />
  <connection
    kind="clock"
    version="24.1"

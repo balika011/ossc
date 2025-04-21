@@ -126,7 +126,6 @@ BUILD_CONFIGS := default
 ELF := fw.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS += crt0_ram.c
 C_SRCS += av_controller.c
 C_SRCS += src/avconfig.c
 C_SRCS += src/controls.c
@@ -159,7 +158,7 @@ C_SRCS += ../ic_drivers/pcm1862/pcm1862.c
 C_SRCS += ../ic_drivers/st7032/st7032.c
 C_SRCS += ../ic_drivers/sh1107/sh1107.c
 CXX_SRCS :=
-ASM_SRCS := crt0.S
+ASM_SRCS := crt0_init.S crt0_ram.S
 
 
 # Path to root of object file tree.
@@ -177,7 +176,7 @@ ifeq ($(HAS_SH1107),y)
 APP_CFLAGS_DEFINED_SYMBOLS += -DHAS_SH1107
 endif
 APP_CFLAGS_UNDEFINED_SYMBOLS :=
-APP_CFLAGS_OPTIMIZATION := -O0
+APP_CFLAGS_OPTIMIZATION := -Os
 APP_CFLAGS_DEBUG_LEVEL :=
 APP_CFLAGS_WARNINGS := -Wall -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function -Wno-packed-bitfield-compat -Wno-switch -Wno-multichar
 APP_CFLAGS_USER_FLAGS := -g -fdata-sections -ffunction-sections -fshort-enums -fgnu89-inline -flto

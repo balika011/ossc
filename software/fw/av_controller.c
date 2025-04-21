@@ -37,7 +37,7 @@
 #include "it6613_sys.h"
 #include "HDMI_TX.h"
 #include "hdmitx.h"
-#include "sys/alt_timestamp.h"
+#include "timer.h"
 
 #define MIN_LINES_PROGRESSIVE   200
 #define MIN_LINES_INTERLACED    400
@@ -297,15 +297,16 @@ status_t get_status(tvp_sync_input_t syncinput)
     uint32_t totlines, clkcnt, pcnt_field;
     uint8_t progressive, sync_active, valid_mode, hsync_width;
     status_t status = NO_CHANGE;
-    alt_timestamp_type start_ts = alt_timestamp();
+	uint64_t start_ts = timer_timestamp();
 
-    // Wait until vsync active (avoid noise coupled to I2C bus on earlier prototypes)
-    while (alt_timestamp() < start_ts + STATUS_TIMEOUT_US*(TIMER_0_FREQ/1000000)) {
+	// Wait until vsync active (avoid noise coupled to I2C bus on earlier prototypes)
+	while (timer_timestamp() < start_ts + STATUS_TIMEOUT_US)
+	{
 		if (SC->controls.vsync_flag)
 			break;
-    }
+	}
 
-    // Read sync information from TVP7002 frontend
+	// Read sync information from TVP7002 frontend
     sync_active = SC->fe_status.sync_active;
     totlines = SC->fe_status.vtotal;
     progressive = !SC->fe_status.interlace_flag;
@@ -709,17 +710,6 @@ int save_profile() {
 // Initialize hardware
 int init_hw()
 {
-	if (!SC->controls.is_1_8)
-	{
-#ifndef HAS_SH1107
-		SC->sys_ctrl.remap_red_r = 1;
-#else
-		SC->sys_ctrl.remap_lcd_bl = 1;
-#endif
-	}
-
-	SC->sys_ctrl.led_g = 1;
-	SC->sys_ctrl.led_r = 0;
 	SC->sys_ctrl.lcd_bl_on = 1;
 	SC->sys_ctrl.lcd_cs_n = 1;
 
@@ -858,43 +848,7 @@ void exit_suspend()
 	init_hw();
 }
 
-#include "altera_avalon_timer.h"
-#include "altera_avalon_timer_regs.h"
-void timer_enable()
-{
-	IOWR_ALTERA_AVALON_TIMER_CONTROL(TIMER_0_BASE,
-									 ALTERA_AVALON_TIMER_CONTROL_ITO_MSK |
-										 ALTERA_AVALON_TIMER_CONTROL_CONT_MSK |
-										 ALTERA_AVALON_TIMER_CONTROL_START_MSK);
-	IOWR_ALTERA_AVALON_TIMER_STATUS(TIMER_0_BASE, 0);
-	IORD_ALTERA_AVALON_TIMER_CONTROL(TIMER_0_BASE);
-	asm volatile("csrs  mie, %0\n" : : "r"(0x80));
-	asm volatile("csrs  mstatus, %0\n" : : "r"(0x8));
-}
-
-void timer_disable(void)
-{
-	asm volatile("csrc  mie, %0\n" : : "r"(0x80));
-}
-
-uint64_t timer_ctr;
-
-// called every us
-void __attribute__((interrupt)) ossc_timer_handler(void)
-{
-	IOWR_ALTERA_AVALON_TIMER_STATUS(TIMER_0_BASE, 0);
-	IORD_ALTERA_AVALON_TIMER_CONTROL(TIMER_0_BASE);
-
-	++timer_ctr;
-
-	if (timer_ctr % 1000 == 0)
-	{
-		SC->sys_ctrl.led_g = !SC->sys_ctrl.led_g;
-		SC->sys_ctrl.led_r = !SC->sys_ctrl.led_r;
-	}
-}
-
-void __attribute__((interrupt)) ossc_exc_handler(void)
+void __attribute__((interrupt, noinline, __section__(".rtext"))) default_exc_handler(void)
 {
 #if 0
 	puts("EXCEPTION!!!\n");
@@ -914,13 +868,19 @@ void __attribute__((interrupt)) ossc_exc_handler(void)
 
 int main()
 {
-	timer_enable();
+	timer_init();
 
-	while (1)
-		asm volatile("wfi");
+	if (!SC->controls.is_1_8)
+	{
+#ifndef HAS_SH1107
+		SC->sys_ctrl.remap_red_r = 1;
+#else
+		SC->sys_ctrl.remap_lcd_bl = 1;
+#endif
+	}
 
-	// Start system timer
-	alt_timestamp_start();
+	SC->sys_ctrl.led_g = 1;
+	SC->sys_ctrl.led_r = 0;
 
 	// Set defaults
 	avconfig_set_default();
@@ -948,8 +908,8 @@ int main()
 	}
 	printf("### DIY VIDEO DIGITIZER / SCANCONVERTER INIT OK ###\n\n");
 
-	alt_timestamp_type start_ts = alt_timestamp();
-	while (alt_timestamp() < start_ts + 500000 * (TIMER_0_FREQ / 1000000))
+	uint64_t start_ts = timer_timestamp();
+	while (timer_timestamp() < start_ts + 500000)
 	{
 		controls_update();
 		enter_controls_setup |= btn2;
@@ -959,21 +919,21 @@ int main()
 		controls_setup();
 
 	// Mainloop
-	alt_timestamp_type auto_input_timestamp = 0;
+	uint64_t auto_input_timestamp = 0;
 	uint8_t auto_input_changed = 0;
 	uint8_t auto_input_ctr = 0;
 	uint8_t auto_input_current_ctr = AUTO_CURRENT_MAX_COUNT;
 	uint8_t auto_input_keep_current = 0;
 	while(1)
 	{
-		alt_timestamp_type start_ts = alt_timestamp();
+		uint64_t start_ts = timer_timestamp();
 
 		controls_update();
 
 		if (!in_suspend)
 		{
 			// Auto input switching
-			if ((auto_input != AUTO_OFF) && (cm.avinput != AV_TESTPAT) && !cm.sync_active && !menu_active && (alt_timestamp() >= auto_input_timestamp + 300 * (alt_timestamp_freq() >> 10)) && (auto_input_ctr < AUTO_MAX_COUNT))
+			if ((auto_input != AUTO_OFF) && (cm.avinput != AV_TESTPAT) && !cm.sync_active && !menu_active && (timer_timestamp() >= auto_input_timestamp + 300) && (auto_input_ctr < AUTO_MAX_COUNT))
 			{
 				// Keep switching on the same physical input when set to Current input or a short time after losing sync.
 				auto_input_keep_current = (auto_input == AUTO_CURRENT_INPUT || auto_input_current_ctr < AUTO_CURRENT_MAX_COUNT);
@@ -1011,7 +971,7 @@ int main()
 				auto_input_changed = 1;
 
 				// set auto_input_timestamp
-				auto_input_timestamp = alt_timestamp();
+				auto_input_timestamp = timer_timestamp();
 			}
 		}
 
@@ -1114,7 +1074,7 @@ int main()
 						userdata_save_initconfig();
 					// Set auto_input_timestamp when input is manually changed
 					auto_input_ctr = 0;
-					auto_input_timestamp = alt_timestamp();
+					auto_input_timestamp = timer_timestamp();
 				}
 				// Avoid detection of initial vsync pulses after auto mode switch
 				if (auto_input_changed)
@@ -1181,7 +1141,7 @@ int main()
 						strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
 						ui_disp_status(1);
 						// Set auto_input_timestamp
-						auto_input_timestamp = alt_timestamp();
+						auto_input_timestamp = timer_timestamp();
 						auto_input_ctr = 0;
 						auto_input_current_ctr = 0;
 					}
@@ -1202,8 +1162,9 @@ int main()
 			}
 		}
 
-        while (alt_timestamp() < start_ts + MAINLOOP_INTERVAL_US*(TIMER_0_FREQ/1000000));
-    }
+		while (timer_timestamp() < start_ts + MAINLOOP_INTERVAL_US)
+			;
+	}
 
     return 0;
 }

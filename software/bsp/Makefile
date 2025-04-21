@@ -124,7 +124,7 @@ RM = rm -f
 #-------------------------------------------------------------------------------
 
 altera_avalon_timer_driver_C_LIB_SRCS := \
-	drivers/src/altera_avalon_timer_ts.c
+	drivers/src/timer.c
 
 altera_nios2_gen2_hal_driver_C_LIB_SRCS := \
 	HAL/src/alt_usleep.c \

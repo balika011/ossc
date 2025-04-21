@@ -18,7 +18,6 @@ SECTIONS
 {
     .vectors :
     {
-        . = ALIGN(4);
         KEEP(*(.vectors))
     } > FLASH
 
@@ -43,11 +42,21 @@ SECTIONS
         _etext = .;
     } > FLASH
 
+    .rvectors :
+    {
+        . = ALIGN(256);
+        _srvectors  =  .;
+        KEEP(*(.rvectors))
+        . = ALIGN(4);
+        _ervectors  =  .;
+    } > IRAM AT> FLASH
+
     .rtext : {
         . = ALIGN(4);
         _srtext  =  .;
         *(.rtext);
         *(.rtext.*)
+        . = ALIGN(4);
         _ertext  =  .;
     } > IRAM AT> FLASH
 
@@ -127,6 +136,7 @@ SECTIONS
         [ .stabstr ]
     }
 
+    _frvectors = LOADADDR(.rvectors);
     _fdata = LOADADDR(.data);
     _frtext = LOADADDR(.rtext);
 }

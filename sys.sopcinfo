@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="sys" kind="sys" version="1.0" fabric="QSYS">
  <!-- Format version 24.1 1077 (Future versions may contain additional information.) -->
- <!-- 2025.04.21.15:10:39 -->
+ <!-- 2025.04.21.16:36:18 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1745241039</value>
+  <value>1745246177</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -2126,6 +2126,18 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>clock_sink</slaveName>
     <name>sc_config_0.clock_sink</name>
    </clockDomainMember>
+   <clockDomainMember>
+    <isBridge>false</isBridge>
+    <moduleName>osd_generator_0</moduleName>
+    <slaveName>clock_sink</slaveName>
+    <name>osd_generator_0.clock_sink</name>
+   </clockDomainMember>
+   <clockDomainMember>
+    <isBridge>false</isBridge>
+    <moduleName>pll_reconfig_0</moduleName>
+    <slaveName>clock_sink</slaveName>
+    <name>pll_reconfig_0.clock_sink</name>
+   </clockDomainMember>
   </interface>
  </module>
  <module name="clk_27" kind="clock_source" version="24.1" path="clk_27">
@@ -2368,18 +2380,6 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>reset_bridge_0</moduleName>
     <slaveName>clk</slaveName>
     <name>reset_bridge_0.clk</name>
-   </clockDomainMember>
-   <clockDomainMember>
-    <isBridge>false</isBridge>
-    <moduleName>osd_generator_0</moduleName>
-    <slaveName>clock_sink</slaveName>
-    <name>osd_generator_0.clock_sink</name>
-   </clockDomainMember>
-   <clockDomainMember>
-    <isBridge>false</isBridge>
-    <moduleName>pll_reconfig_0</moduleName>
-    <slaveName>clock_sink</slaveName>
-    <name>pll_reconfig_0.clock_sink</name>
    </clockDomainMember>
    <clockDomainMember>
     <isBridge>false</isBridge>
@@ -10911,7 +10911,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.LOAD_VALUE</name>
-   <value>53</value>
+   <value>5399</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.MULT</name>
@@ -10919,7 +10919,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.PERIOD</name>
-   <value>54</value>
+   <value>5400</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.PERIOD_UNITS</name>
@@ -10935,7 +10935,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TICKS_PER_SEC</name>
-   <value>1000000</value>
+   <value>10000</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMEOUT_PULSE_OUTPUT</name>
@@ -10975,7 +10975,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="period">
    <type>java.lang.String</type>
-   <value>54</value>
+   <value>5400</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -11057,7 +11057,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="loadValue">
    <type>java.lang.String</type>
-   <value>53</value>
+   <value>5399</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -11073,7 +11073,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="ticksPerSec">
    <type>double</type>
-   <value>1000000.0</value>
+   <value>10000.0</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -14208,6 +14208,60 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>clock_sink</endConnectionPoint>
  </connection>
  <connection
+   name="altpll_0.c1/osd_generator_0.clock_sink"
+   kind="clock"
+   version="24.1"
+   start="altpll_0.c1"
+   end="osd_generator_0.clock_sink">
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>altpll_0</startModule>
+  <startConnectionPoint>c1</startConnectionPoint>
+  <endModule>osd_generator_0</endModule>
+  <endConnectionPoint>clock_sink</endConnectionPoint>
+ </connection>
+ <connection
+   name="altpll_0.c1/pll_reconfig_0.clock_sink"
+   kind="clock"
+   version="24.1"
+   start="altpll_0.c1"
+   end="pll_reconfig_0.clock_sink">
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>altpll_0</startModule>
+  <startConnectionPoint>c1</startConnectionPoint>
+  <endModule>pll_reconfig_0</endModule>
+  <endConnectionPoint>clock_sink</endConnectionPoint>
+ </connection>
+ <connection
    name="clk_27.clk/reset_bridge_0.clk"
    kind="clock"
    version="24.1"
@@ -14233,60 +14287,6 @@ parameters are a RESULT of the module parameters. -->
   <startConnectionPoint>clk</startConnectionPoint>
   <endModule>reset_bridge_0</endModule>
   <endConnectionPoint>clk</endConnectionPoint>
- </connection>
- <connection
-   name="clk_27.clk/osd_generator_0.clock_sink"
-   kind="clock"
-   version="24.1"
-   start="clk_27.clk"
-   end="osd_generator_0.clock_sink">
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>clk_27</startModule>
-  <startConnectionPoint>clk</startConnectionPoint>
-  <endModule>osd_generator_0</endModule>
-  <endConnectionPoint>clock_sink</endConnectionPoint>
- </connection>
- <connection
-   name="clk_27.clk/pll_reconfig_0.clock_sink"
-   kind="clock"
-   version="24.1"
-   start="clk_27.clk"
-   end="pll_reconfig_0.clock_sink">
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>clk_27</startModule>
-  <startConnectionPoint>clk</startConnectionPoint>
-  <endModule>pll_reconfig_0</endModule>
-  <endConnectionPoint>clock_sink</endConnectionPoint>
  </connection>
  <connection
    name="clk_27.clk/altpll_0.inclk_interface"
