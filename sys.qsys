@@ -629,13 +629,13 @@
    version="1.0"
    enabled="1" />
  <module name="timer_0" kind="altera_avalon_timer" version="24.1" enabled="1">
-  <parameter name="alwaysRun" value="false" />
-  <parameter name="counterSize" value="64" />
-  <parameter name="fixedPeriod" value="false" />
-  <parameter name="period" value="0xffffffff" />
+  <parameter name="alwaysRun" value="true" />
+  <parameter name="counterSize" value="32" />
+  <parameter name="fixedPeriod" value="true" />
+  <parameter name="period" value="27" />
   <parameter name="periodUnits" value="CLOCKS" />
   <parameter name="resetOutput" value="false" />
-  <parameter name="snapshot" value="true" />
+  <parameter name="snapshot" value="false" />
   <parameter name="systemFrequency" value="27000000" />
   <parameter name="timeoutPulseOutput" value="false" />
   <parameter name="watchdogPulse" value="2" />

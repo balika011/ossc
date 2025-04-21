@@ -9,7 +9,8 @@ ALT_LIBRARY_DIRS += $(ALT_LIBRARY_ROOT_DIR)
 
 ALT_CPPFLAGS += -pipe
 
-ALT_CFLAGS += -march=rv32emc_zicsr_zifencei -mabi=ilp32e
+# ALT_CFLAGS += -march=rv32emc_zicsr_zifencei -mabi=ilp32e
+ALT_CFLAGS += -march=rv32emc_zicsr_zifencei -mabi=ilp32e -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -ffreestanding
 
 BSP_LIB := libhal_bsp.a
 

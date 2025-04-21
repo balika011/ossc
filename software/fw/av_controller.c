@@ -858,8 +858,67 @@ void exit_suspend()
 	init_hw();
 }
 
+#include "altera_avalon_timer.h"
+#include "altera_avalon_timer_regs.h"
+void timer_enable()
+{
+	IOWR_ALTERA_AVALON_TIMER_CONTROL(TIMER_0_BASE,
+									 ALTERA_AVALON_TIMER_CONTROL_ITO_MSK |
+										 ALTERA_AVALON_TIMER_CONTROL_CONT_MSK |
+										 ALTERA_AVALON_TIMER_CONTROL_START_MSK);
+	IOWR_ALTERA_AVALON_TIMER_STATUS(TIMER_0_BASE, 0);
+	IORD_ALTERA_AVALON_TIMER_CONTROL(TIMER_0_BASE);
+	asm volatile("csrs  mie, %0\n" : : "r"(0x80));
+	asm volatile("csrs  mstatus, %0\n" : : "r"(0x8));
+}
+
+void timer_disable(void)
+{
+	asm volatile("csrc  mie, %0\n" : : "r"(0x80));
+}
+
+uint64_t timer_ctr;
+
+// called every us
+void __attribute__((interrupt)) ossc_timer_handler(void)
+{
+	IOWR_ALTERA_AVALON_TIMER_STATUS(TIMER_0_BASE, 0);
+	IORD_ALTERA_AVALON_TIMER_CONTROL(TIMER_0_BASE);
+
+	++timer_ctr;
+
+	if (timer_ctr % 1000 == 0)
+	{
+		SC->sys_ctrl.led_g = !SC->sys_ctrl.led_g;
+		SC->sys_ctrl.led_r = !SC->sys_ctrl.led_r;
+	}
+}
+
+void __attribute__((interrupt)) ossc_exc_handler(void)
+{
+#if 0
+	puts("EXCEPTION!!!\n");
+	puts("============\n");
+	puts("MEPC:   0x");
+	puthex(get_mepc());
+	puts("\nMCAUSE: 0x");
+	puthex(get_mcause());
+	puts("\nMTVAL:  0x");
+	puthex(get_mtval());
+	putchar('\n');
+#endif
+
+	while (1)
+		;
+}
+
 int main()
 {
+	timer_enable();
+
+	while (1)
+		asm volatile("wfi");
+
 	// Start system timer
 	alt_timestamp_start();
 
@@ -1143,7 +1202,7 @@ int main()
 			}
 		}
 
-        while (alt_timestamp() < start_ts + MAINLOOP_INTERVAL_US*(TIMER_0_FREQ/1000000)) {}
+        while (alt_timestamp() < start_ts + MAINLOOP_INTERVAL_US*(TIMER_0_FREQ/1000000));
     }
 
     return 0;

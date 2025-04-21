@@ -151,7 +151,9 @@ sys sys_inst(
 	.pll_reconfig_0_pll_reconfig_if_scanclkena(pll_scanclkena),
 	.pll_reconfig_0_pll_reconfig_if_configupdate(pll_configupdate),
 	.pll_reconfig_0_pll_reconfig_if_scandata(pll_scandata),
-	.pll_reconfig_0_pll_reconfig_if_scandone(pll_scandone)
+	.pll_reconfig_0_pll_reconfig_if_scandone(pll_scandone),
+	.uart_0_external_connection_rxd(1'b0),
+	.uart_0_external_connection_txd()
 );
 
 

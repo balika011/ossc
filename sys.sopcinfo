@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="sys" kind="sys" version="1.0" fabric="QSYS">
  <!-- Format version 24.1 1077 (Future versions may contain additional information.) -->
- <!-- 2025.04.21.02:59:09 -->
+ <!-- 2025.04.21.14:09:04 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1745197149</value>
+  <value>1745237343</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -4323,7 +4323,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>s1</slaveName>
     <name>timer_0.s1</name>
     <baseAddress>2147483904</baseAddress>
-    <span>64</span>
+    <span>32</span>
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
@@ -5113,7 +5113,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>s1</slaveName>
     <name>timer_0.s1</name>
     <baseAddress>2147483904</baseAddress>
-    <span>64</span>
+    <span>32</span>
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
@@ -10826,15 +10826,15 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <assignment>
    <name>embeddedsw.CMacro.ALWAYS_RUN</name>
-   <value>0</value>
+   <value>1</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.COUNTER_SIZE</name>
-   <value>64</value>
+   <value>32</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.FIXED_PERIOD</name>
-   <value>0</value>
+   <value>1</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.FREQ</name>
@@ -10842,7 +10842,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.LOAD_VALUE</name>
-   <value>4294967294</value>
+   <value>26</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.MULT</name>
@@ -10850,7 +10850,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.PERIOD</name>
-   <value>0xffffffff</value>
+   <value>27</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.PERIOD_UNITS</name>
@@ -10862,11 +10862,11 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.SNAPSHOT</name>
-   <value>1</value>
+   <value>0</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TICKS_PER_SEC</name>
-   <value>0</value>
+   <value>1000000</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMEOUT_PULSE_OUTPUT</name>
@@ -10877,28 +10877,12 @@ the requested settings for a module instance. -->
    <value>1</value>
   </assignment>
   <assignment>
-   <name>embeddedsw.dts.compatible</name>
-   <value>altr,timer-1.0</value>
-  </assignment>
-  <assignment>
-   <name>embeddedsw.dts.group</name>
-   <value>timer</value>
-  </assignment>
-  <assignment>
-   <name>embeddedsw.dts.name</name>
-   <value>timer</value>
-  </assignment>
-  <assignment>
-   <name>embeddedsw.dts.params.clock-frequency</name>
-   <value>27000000</value>
-  </assignment>
-  <assignment>
    <name>embeddedsw.dts.vendor</name>
    <value>altr</value>
   </assignment>
   <parameter name="alwaysRun">
    <type>boolean</type>
-   <value>false</value>
+   <value>true</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -10906,7 +10890,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="counterSize">
    <type>int</type>
-   <value>64</value>
+   <value>32</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -10914,7 +10898,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="fixedPeriod">
    <type>boolean</type>
-   <value>false</value>
+   <value>true</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -10922,7 +10906,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="period">
    <type>java.lang.String</type>
-   <value>0xffffffff</value>
+   <value>27</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -10946,7 +10930,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="snapshot">
    <type>boolean</type>
-   <value>true</value>
+   <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -10980,7 +10964,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timerPreset">
    <type>java.lang.String</type>
-   <value>FULL_FEATURED</value>
+   <value>SIMPLE_PERIODIC_INTERRUPT</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -11004,7 +10988,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="loadValue">
    <type>java.lang.String</type>
-   <value>4294967294</value>
+   <value>26</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -11020,7 +11004,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="ticksPerSec">
    <type>double</type>
-   <value>0.0</value>
+   <value>1000000.0</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -11028,7 +11012,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="slave_address_width">
    <type>int</type>
-   <value>4</value>
+   <value>3</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -11198,7 +11182,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="addressSpan">
     <type>java.math.BigInteger</type>
-    <value>16</value>
+    <value>8</value>
     <derived>true</derived>
     <enabled>true</enabled>
     <visible>false</visible>
@@ -11497,7 +11481,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>address</name>
     <direction>Input</direction>
-    <width>4</width>
+    <width>3</width>
     <role>address</role>
    </port>
    <port>
