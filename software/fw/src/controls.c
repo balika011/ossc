@@ -117,6 +117,11 @@ void controls_setup()
 	ui_disp_status(0);
 }
 
+static void controls_reset_led()
+{
+	SC->sys_ctrl.led_g = 1;
+}
+
 void controls_update()
 {
 	remote_cnt_prev = remote_cnt;
@@ -139,8 +144,14 @@ void controls_update()
 	btn2 = SC->controls.btn2;
 	remote_cnt = SC->controls.ir_cnt;
 
-	if (remote_cnt == 0 || ((remote_cnt > 1) && (remote_cnt < 6)) || remote_cnt == remote_cnt_prev)
+	if ((remote_cnt != 1 && remote_cnt < 6) || remote_cnt == remote_cnt_prev)
 		remote_code = 0;
+
+	if (remote_code)
+	{
+		SC->sys_ctrl.led_g = 0;
+		timer_timeout(150000, controls_reset_led);
+	}
 }
 
 int	controls_parse()

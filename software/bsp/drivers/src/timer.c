@@ -23,7 +23,9 @@
 
 #include "altera_avalon_timer_regs.h"
 
-uint64_t timer_ctr;
+static uint64_t timer_ctr;
+static uint64_t timeout_ctr;
+static void (*timeout_cb)();
 
 // called every 100us
 void __attribute__((interrupt, noinline, __section__(".rtext"))) timer_irq_handler(void)
@@ -32,6 +34,15 @@ void __attribute__((interrupt, noinline, __section__(".rtext"))) timer_irq_handl
 	IORD_ALTERA_AVALON_TIMER_CONTROL(TIMER_0_BASE);
 
 	timer_ctr += 100;
+
+	if (timeout_ctr)
+	{
+		if (timeout_ctr < timer_ctr)
+		{
+			timeout_ctr = 0;
+			timeout_cb();
+		}
+	}
 }
 
 void timer_init()
@@ -52,4 +63,10 @@ void timer_deinit()
 uint64_t __attribute__((noinline, __section__(".rtext"))) timer_timestamp()
 {
 	return timer_ctr;
+}
+
+void timer_timeout(uint64_t usec, void (*cb)())
+{
+	timeout_ctr = timer_ctr + usec;
+	timeout_cb = cb;
 }
