@@ -18,6 +18,6 @@ output_files/*
 incremental_db/*
 .cproject
 .qsys_edit/*
-tools/bin2hex
 tools/create_fw_img
 *.a
+ossc_*.bin

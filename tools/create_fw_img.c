@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2015-2016  Markus Hiienkari <mhiienka@niksula.hut.fi>
+// Copyright (C) 2025  Balázs Triszka <info@balika011.hu>
 //
 // This file is part of Open Source Scan Converter project.
 //
@@ -38,10 +39,8 @@ typedef union {
 		uint8_t version_minor;
 		char version_suffix[FW_SUFFIX_MAX_SIZE];
 		uint32_t hdr_len;
-		uint32_t rbf_len;
-		uint32_t rbf_crc;
-		uint32_t fw_len;
-		uint32_t fw_crc;
+		uint32_t data_len;
+		uint32_t data_crc;
 	} params;
 	struct
 	{
@@ -135,26 +134,44 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	fseek(rbf, 0, SEEK_END);
-	uint32_t rbf_len = ftell(rbf);
-	fseek(rbf, 0, SEEK_SET);
-	uint8_t *rbf_buf = malloc(rbf_len);
-	fread(rbf_buf, 1, rbf_len, rbf);
-	fclose(rbf);
-
 	FILE *fw = fopen(argv[2], "rb");
 	if (!fw)
 	{
 		printf("Failed to open fw\n");
-		free(rbf_buf);
+		return -1;
+	}
+
+	fseek(rbf, 0, SEEK_END);
+	uint32_t rbf_len = ftell(rbf);
+	fseek(rbf, 0, SEEK_SET);
+
+	if (rbf_len > 0x80000)
+	{
+		printf("rbf too big!\n");
+		fclose(rbf);
+		fclose(fw);
 		return -1;
 	}
 
 	fseek(fw, 0, SEEK_END);
 	uint32_t fw_len = ftell(fw);
 	fseek(fw, 0, SEEK_SET);
-	uint8_t *fw_buf = malloc(fw_len);
-	fread(fw_buf, 1, fw_len, fw);
+
+	if (fw_len > 0x80000)
+	{
+		printf("fw too big!\n");
+		fclose(rbf);
+		fclose(fw);
+		return -1;
+	}
+
+	uint8_t *combined_buf = malloc(0x80000 + fw_len);
+	memset(combined_buf, 0xFF, 0x80000 + fw_len);
+
+	fread(combined_buf, 1, rbf_len, rbf);
+	fclose(rbf);
+
+	fread(&combined_buf[0x80000], 1, fw_len, fw);
 	fclose(fw);
 
 	char version_suffix[FW_SUFFIX_MAX_SIZE + 1];
@@ -169,16 +186,13 @@ int main(int argc, char **argv)
 	hdr.params.version_minor = fw_version_minor;
 	memcpy(hdr.params.version_suffix, version_suffix, sizeof(hdr.params.version_suffix));
 	hdr.params.hdr_len = htonl(sizeof(hdr.params));
-	hdr.params.rbf_len = htonl(rbf_len);
-	hdr.params.rbf_crc = htonl(crc32(0, rbf_buf, rbf_len));
-	hdr.params.fw_len = htonl(fw_len);
-	hdr.params.fw_crc = htonl(crc32(0, fw_buf, fw_len));
+	hdr.params.data_len = htonl(0x80000 + fw_len);
+	hdr.params.data_crc = htonl(crc32(0, combined_buf, 0x80000 + fw_len));
 	hdr.raw.hdr_crc = htonl(crc32(0, &hdr, sizeof(hdr.params)));
 
 	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", version_suffix, rbf_len);
 	printf("Header CRC32: %.8x\n", hdr.raw.hdr_crc);
-	printf("RBF CRC32: %.8x\n", hdr.params.rbf_crc);
-	printf("FW CRC32: %.8x\n", hdr.params.fw_crc);
+	printf("DATA CRC32: %.8x\n", hdr.params.data_crc);
 
 	char bin_name[MAX_FILENAME];
 	snprintf(bin_name, sizeof(bin_name), "ossc_%s%s%s.bin", argv[3], (argc == 5) ? "-" : "", (argc == 5) ? argv[4] : "");
@@ -187,19 +201,15 @@ int main(int argc, char **argv)
 	if (!bin)
 	{
 		printf("Failed to open bin\n");
-		free(fw_buf);
-		free(rbf_buf);
+		free(combined_buf);
 		return -1;
 	}
 	fwrite(&hdr, 1, sizeof(hdr), bin);
 	fseek(bin, HDR_SIZE, SEEK_SET);
-	fwrite(rbf_buf, 1, rbf_len, bin);
-	fseek(bin, (HDR_SIZE + rbf_len + 0x1FF) & ~0x1FF, SEEK_SET);
-	fwrite(fw_buf, 1, fw_len, bin);
+	fwrite(combined_buf, 1, rbf_len, bin);
 	fclose(bin);
 
-	free(fw_buf);
-	free(rbf_buf);
+	free(combined_buf);
 
 	printf("Firmware image written to %s\n", bin_name);
 

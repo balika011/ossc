@@ -33,10 +33,6 @@ cd riscv-gnu-toolchain
 ./configure --prefix=/opt/riscv --with-arch=rv32emc --with-abi=ilp32e
 sudo make    # sudo needed if installing under default /opt/riscv location
 ~~~~
-2. Compile custom binary to IHEX converter:
-~~~~
-gcc tools/bin2hex.c -o tools/bin2hex
-~~~~
 
 
 Building RTL (bitstream)
