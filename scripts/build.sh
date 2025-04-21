@@ -16,4 +16,4 @@ cd -
 quartus_cdb ossc -c ossc --update_mif
 quartus_asm --read_settings_files=on --write_settings_files=off ossc -c ossc
 
-tools/create_fw_img output_files/ossc.rbf software/fw/mem_init/flash.bin 1.12
+tools/create_fw_img output_files/ossc.rbf software/fw/fw.bin 1.12

@@ -824,11 +824,11 @@ src/menu_sjis.c: src/menu.c
 src/userdata_sjis.c: src/userdata.c
 	iconv -f UTF-8 -t SHIFT-JIS src/userdata.c > src/userdata_sjis.c
 
-mem_init/flash.bin: fw.elf
-	$(RV_OBJCOPY) --change-addresses -0x10000 -O binary --gap-fill 0 $< mem_init/flash.bin
+fw.bin: fw.elf
+	$(RV_OBJCOPY) --change-addresses -0x10000 -O binary --gap-fill 0 $< fw.bin
 
 .PHONY: mem_init_generate_new
-mem_init_generate_new: mem_init/flash.bin
+mem_init_generate_new: fw.bin
 
 .PHONY: generate_bin
 generate_bin: clean mem_init_generate_new

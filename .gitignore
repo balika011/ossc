@@ -9,9 +9,9 @@ software/*/.force_relink
 software/*/.project
 software/*/.settings/*
 software/*/obj/*
-software/fw/mem_init/*
 software/fw/fw.elf
 software/fw/fw.map
+software/fw/fw.bin
 db/*
 sys/*
 output_files/*
