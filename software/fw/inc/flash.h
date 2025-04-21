@@ -36,6 +36,6 @@ void flash_write_protect(int enable);
 void flash_erase_4k(uint32_t addr);
 void flash_erase_32k(uint32_t addr);
 void flash_erase_64k(uint32_t addr);
-int flash_verify(uint32_t offset, uint32_t length, uint32_t golden_crc, uint8_t swap_bits);
+int flash_verify(uint32_t offset, uint32_t length, uint32_t golden_crc);
 
 #endif /* FLASH_H_ */

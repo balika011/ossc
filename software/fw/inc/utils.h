@@ -24,8 +24,6 @@
 
 #define PRINTF_BUFSIZE 512
 
-void bitswap(void *buf, uint32_t len);
-
 uint32_t bswap32(uint32_t w);
 
 uint32_t crc32(uint32_t crc, const void *buf, uint32_t size);

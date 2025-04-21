@@ -25,19 +25,6 @@
 #include "sysconfig.h"
 #include "altera_avalon_uart_regs.h"
 
-inline uint8_t bitswap8(uint8_t v)
-{
-    return ((v * 0x0802LU & 0x22110LU) |
-            (v * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;
-}
-
-void bitswap(void *buf, uint32_t len)
-{
-	uint8_t *buf8 = buf;
-	for (int i = 0; i < len; i++)
-		buf8[i] = bitswap8(buf8[i]);
-}
-
 uint32_t bswap32(uint32_t w)
 {
     return (((w << 24) & 0xff000000) |

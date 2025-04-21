@@ -318,27 +318,10 @@ void __attribute__((noinline, __section__(".rtext"))) flash_erase_64k(uint32_t a
 	}
 }
 
-int flash_verify(uint32_t offset, uint32_t length, uint32_t golden_crc, uint8_t swap_bits)
+int flash_verify(uint32_t offset, uint32_t length, uint32_t golden_crc)
 {
-	uint32_t crcval = 0;
-	if (!swap_bits)
-	{
-		crcval = crc32(crcval, (uint8_t *)(FLASH_MEM_BASE + offset), length);
-	}
-	else
-	{
-		uint8_t buf[512];
-		for (int i = 0; i < length; i += sizeof(buf))
-		{
-			memcpy(buf, (uint8_t *)(FLASH_MEM_BASE + offset + i), sizeof(buf));
-			bitswap(buf, sizeof(buf));
-
-			crcval = crc32(crcval, buf, (i + sizeof(buf) < length) ? sizeof(buf) : (length - i));
-		}
-	}
-
-	if (crcval != golden_crc)
-        return -FLASH_VERIFY_ERROR;
+	if (crc32(0, (uint8_t *)(FLASH_MEM_BASE + offset), length) != golden_crc)
+		return -FLASH_VERIFY_ERROR;
 
     return 0;
 }

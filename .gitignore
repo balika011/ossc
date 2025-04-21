@@ -11,6 +11,7 @@ software/*/.settings/*
 software/*/obj/*
 software/fw/mem_init/*
 software/fw/fw.elf
+software/fw/fw.map
 db/*
 sys/*
 output_files/*
@@ -18,6 +19,5 @@ incremental_db/*
 .cproject
 .qsys_edit/*
 tools/bin2hex
-tools/bitswap
 tools/create_fw_img
 *.a
