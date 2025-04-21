@@ -75,7 +75,7 @@
          type = "boolean";
       }
    }
-   element intel_generic_serial_flash_interface_top_0
+   element intel_generic_serial_flash_interface_top_swapped_0
    {
       datum _sortIndex
       {
@@ -83,7 +83,7 @@
          type = "int";
       }
    }
-   element intel_generic_serial_flash_interface_top_0.avl_csr
+   element intel_generic_serial_flash_interface_top_swapped_0.avl_csr
    {
       datum _lockedAddress
       {
@@ -96,7 +96,7 @@
          type = "String";
       }
    }
-   element intel_generic_serial_flash_interface_top_0.avl_mem
+   element intel_generic_serial_flash_interface_top_swapped_0.avl_mem
    {
       datum _lockedAddress
       {
@@ -543,8 +543,8 @@
   <parameter name="IBEX_RV32E" value="true" />
  </module>
  <module
-   name="intel_generic_serial_flash_interface_top_0"
-   kind="intel_generic_serial_flash_interface_top"
+   name="intel_generic_serial_flash_interface_top_swapped_0"
+   kind="intel_generic_serial_flash_interface_top_swapped"
    version="24.1"
    enabled="1">
   <parameter name="AUTO_DEVICE" value="EP4CE15E22C8" />
@@ -656,7 +656,7 @@
    kind="avalon"
    version="24.1"
    start="sdc_controller_0.avalon_m"
-   end="intel_generic_serial_flash_interface_top_0.avl_mem">
+   end="intel_generic_serial_flash_interface_top_swapped_0.avl_mem">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x10000000" />
   <parameter name="defaultConnection" value="false" />
@@ -728,7 +728,7 @@
    kind="avalon"
    version="24.1"
    start="ibex_0.avalon_master_bus_data"
-   end="intel_generic_serial_flash_interface_top_0.avl_csr">
+   end="intel_generic_serial_flash_interface_top_swapped_0.avl_csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x80000300" />
   <parameter name="defaultConnection" value="false" />
@@ -737,7 +737,7 @@
    kind="avalon"
    version="24.1"
    start="ibex_0.avalon_master_bus_data"
-   end="intel_generic_serial_flash_interface_top_0.avl_mem">
+   end="intel_generic_serial_flash_interface_top_swapped_0.avl_mem">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x10000000" />
   <parameter name="defaultConnection" value="false" />
@@ -836,7 +836,7 @@
    kind="avalon"
    version="24.1"
    start="ibex_0.avalon_master_bus_debug"
-   end="intel_generic_serial_flash_interface_top_0.avl_csr">
+   end="intel_generic_serial_flash_interface_top_swapped_0.avl_csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x80000300" />
   <parameter name="defaultConnection" value="false" />
@@ -845,7 +845,7 @@
    kind="avalon"
    version="24.1"
    start="ibex_0.avalon_master_bus_debug"
-   end="intel_generic_serial_flash_interface_top_0.avl_mem">
+   end="intel_generic_serial_flash_interface_top_swapped_0.avl_mem">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x10000000" />
   <parameter name="defaultConnection" value="false" />
@@ -899,7 +899,7 @@
    kind="avalon"
    version="24.1"
    start="ibex_0.avalon_master_bus_instr"
-   end="intel_generic_serial_flash_interface_top_0.avl_mem">
+   end="intel_generic_serial_flash_interface_top_swapped_0.avl_mem">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x10000000" />
   <parameter name="defaultConnection" value="false" />
@@ -923,7 +923,7 @@
    kind="clock"
    version="24.1"
    start="clk_27.clk"
-   end="intel_generic_serial_flash_interface_top_0.clk" />
+   end="intel_generic_serial_flash_interface_top_swapped_0.clk" />
  <connection
    kind="clock"
    version="24.1"
@@ -1020,7 +1020,7 @@
    kind="reset"
    version="24.1"
    start="reset_bridge_0.out_reset"
-   end="intel_generic_serial_flash_interface_top_0.reset" />
+   end="intel_generic_serial_flash_interface_top_swapped_0.reset" />
  <connection
    kind="reset"
    version="24.1"
