@@ -21,20 +21,24 @@
 #include "st7032.h"
 #include "sh1107.h"
 
+static int has_sh1107;
+
 void lcd_init()
 {
-#ifndef HAS_SH1107
-	st7032_init();
-#else
-	sh1107_init();
-#endif
+	has_sh1107 = sh1107_init();
+
+	if (!has_sh1107)
+		st7032_init();
 }
 
 void lcd_write(char *row1, char *row2)
 {
-#ifndef HAS_SH1107
-	st7032_write(row1, row2);
-#else
-	sh1107_write(row1, row2);
-#endif
+	if (has_sh1107)
+		sh1107_write(row1, row2);
+	else
+		st7032_write(row1, row2);
+}
+int lcd_has_sh1107()
+{
+	return has_sh1107;
 }

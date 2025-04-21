@@ -4,7 +4,7 @@ set -e
 
 cd software/fw
 make clean
-make HAS_SH1107=y generate_bin
+make generate_bin
 cd -
 
 quartus_cpf --convert --frequency=10MHz --voltage=3.3V --operation=p output_files/ossc.sof output_files/ossc.svf

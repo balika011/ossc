@@ -27,4 +27,6 @@ void lcd_init();
 
 void lcd_write(char *row1, char *row2);
 
+int lcd_has_sh1107();
+
 #endif /* LCD_H_ */

@@ -28,13 +28,6 @@
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
 
-extern uint32_t sys_ctrl;
-
-static void OLED_Write(uint8_t value)
-{
-	SPI_write(I2CA_BASE, &value, 1);
-}
-
 static const uint8_t init[] = {
 	0xae,		/*turn off OLED display*/
 	0x00,		/*set lower column address*/
@@ -58,71 +51,84 @@ static const uint8_t init[] = {
 	0x8a		/*Set DC-DC enable (a=0:disable; a=1:enable) */
 };
 
-void sh1107_init()
+int sh1107_init()
 {
 	SC->sys_ctrl.lcd_cs_n = 0;
 	SC->sys_ctrl.lcd_rs = 0;
-    SPI_write(I2CA_BASE, init, sizeof(init));
 
-    // Clear the screen
-    OLED_Write(0xb0);
-    for (uint8_t i = 0; i < OLED_HEIGHT; i++)
+	if (I2C_start(I2CA_BASE, 0x3c, 1) == I2C_NOACK)
+		return 0;
+
+	if ((I2C_read(I2CA_BASE, 1) & 0x3f) != 7)
+		return 0;
+
+	I2C_start(I2CA_BASE, 0x3c, 0);
+	I2C_write(I2CA_BASE, 0x00, 0);
+	for (int i = 0; i < sizeof(init); i++)
+		I2C_write(I2CA_BASE, init[i], i == sizeof(init) - 1);
+
+	// Clear the screen
+	I2C_start(I2CA_BASE, 0x3c, 0);
+	I2C_write(I2CA_BASE, 0x00, 0);
+	I2C_write(I2CA_BASE, 0xb0, 1);
+	for (uint8_t i = 0; i < OLED_HEIGHT; i++)
 	{
-		SC->sys_ctrl.lcd_rs = 0;
-        OLED_Write(0x00 + (i & 0x0f));
-        OLED_Write(0x10 + (i >> 4));
+		I2C_start(I2CA_BASE, 0x3c, 0);
+		I2C_write(I2CA_BASE, 0x00, 0);
+		I2C_write(I2CA_BASE, 0x00 + (i & 0x0f), 0);
+		I2C_write(I2CA_BASE, 0x10 + (i >> 4), 1);
 
-		SC->sys_ctrl.lcd_rs = 1;
-        for (uint8_t i = 0; i < OLED_WIDTH / 8; i++)
-            OLED_Write(0);
+		I2C_start(I2CA_BASE, 0x3c, 0);
+		I2C_write(I2CA_BASE, 0x40, 0);
+		for (uint8_t i = 0; i < OLED_WIDTH / 8; i++)
+			I2C_write(I2CA_BASE, 0x00, i == OLED_WIDTH / 8 - 1);
 	}
 
-	SC->sys_ctrl.lcd_rs = 0;
-
 	// Turn on
-    OLED_Write(0xaf);
+	I2C_start(I2CA_BASE, 0x3c, 0);
+	I2C_write(I2CA_BASE, 0x00, 0);
+	I2C_write(I2CA_BASE, 0xaf, 1);
 
-	SC->sys_ctrl.lcd_cs_n = 1;
+	return 1;
 }
 
 void sh1107_write(char *row1, char *row2)
 {
-	SC->sys_ctrl.lcd_cs_n = 0;
-	SC->sys_ctrl.lcd_rs = 0;
-
     uint8_t row1len = strnlen(row1, LCD_ROW_LEN);
 
     for (uint8_t i = 0; i < 12; i++)
 	{
-		SC->sys_ctrl.lcd_rs = 0;
-		OLED_Write(0xb0);
-        OLED_Write(0x00 + ((i + 13) & 0x0f));
-        OLED_Write(0x10 + ((i + 13) >> 4));
+		I2C_start(I2CA_BASE, 0x3c, 0);
+		I2C_write(I2CA_BASE, 0x00, 0);
+		I2C_write(I2CA_BASE, 0xb0, 0);
+		I2C_write(I2CA_BASE, 0x00 + ((i + 13) & 0x0f), 0);
+		I2C_write(I2CA_BASE, 0x10 + ((i + 13) >> 4), 1);
 
-		SC->sys_ctrl.lcd_rs = 1;
-        for (uint8_t j = 0; j < row1len; j++)
-            OLED_Write(Font12_Table[(row1[j] - 0x20) * 12 + i]);
+		I2C_start(I2CA_BASE, 0x3c, 0);
+		I2C_write(I2CA_BASE, 0x40, 0);
+		for (uint8_t j = 0; j < row1len; j++)
+			I2C_write(I2CA_BASE, Font12_Table[(row1[j] - 0x20) * 12 + i], j == LCD_ROW_LEN - 1);
 
-        for (uint8_t j = row1len; j < LCD_ROW_LEN; j++)
-            OLED_Write(Font12_Table[i]);
+		for (uint8_t j = row1len; j < LCD_ROW_LEN; j++)
+			I2C_write(I2CA_BASE, Font12_Table[i], j == LCD_ROW_LEN - 1);
 	}
 
 	uint8_t row2len = strnlen(row2, LCD_ROW_LEN);
 
     for (uint8_t i = 0; i < 12; i++)
 	{
-		SC->sys_ctrl.lcd_rs = 0;
-        OLED_Write(0xb0);
-        OLED_Write(0x00 + ((i + 39) & 0x0f));
-        OLED_Write(0x10 + ((i + 39) >> 4));
+		I2C_start(I2CA_BASE, 0x3c, 0);
+		I2C_write(I2CA_BASE, 0x00, 0);
+		I2C_write(I2CA_BASE, 0xb0, 0);
+		I2C_write(I2CA_BASE, 0x00 + ((i + 39) & 0x0f), 0);
+		I2C_write(I2CA_BASE, 0x10 + ((i + 39) >> 4), 1);
 
-		SC->sys_ctrl.lcd_rs = 1;
+		I2C_start(I2CA_BASE, 0x3c, 0);
+		I2C_write(I2CA_BASE, 0x40, 0);
 		for (uint8_t j = 0; j < row2len; j++)
-            OLED_Write(Font12_Table[(row2[j] - 0x20) * 12 + i]);
+			I2C_write(I2CA_BASE, Font12_Table[(row2[j] - 0x20) * 12 + i], j == LCD_ROW_LEN - 1);
 
-        for (uint8_t j = row2len; j < LCD_ROW_LEN; j++)
-            OLED_Write(Font12_Table[i]);
+		for (uint8_t j = row2len; j < LCD_ROW_LEN; j++)
+			I2C_write(I2CA_BASE, Font12_Table[i], j == LCD_ROW_LEN - 1);
 	}
-
-	SC->sys_ctrl.lcd_cs_n = 1;
 }

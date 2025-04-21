@@ -737,6 +737,14 @@ int init_hw()
 	/* Initialize the character display */
 	lcd_init();
 
+	if (!SC->controls.is_1_8)
+	{
+		if (lcd_has_sh1107())
+			SC->sys_ctrl.remap_lcd_bl = 1;
+		else
+			SC->sys_ctrl.remap_red_r = 1;
+	}
+
 	strcpy(row1, "      OSSC");
 	char fwver[LCD_ROW_LEN + 1];
 #if FW_VER_BETA > 0
@@ -869,15 +877,6 @@ void __attribute__((interrupt, noinline, __section__(".rtext"))) default_exc_han
 int main()
 {
 	timer_init();
-
-	if (!SC->controls.is_1_8)
-	{
-#ifndef HAS_SH1107
-		SC->sys_ctrl.remap_red_r = 1;
-#else
-		SC->sys_ctrl.remap_lcd_bl = 1;
-#endif
-	}
 
 	SC->sys_ctrl.led_g = 1;
 	SC->sys_ctrl.led_r = 0;

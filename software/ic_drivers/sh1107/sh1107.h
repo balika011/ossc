@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include "sysconfig.h"
 
-void sh1107_init();
+int sh1107_init();
 
 void sh1107_write(char *row1, char *row2);
 

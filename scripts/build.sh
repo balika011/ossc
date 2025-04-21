@@ -5,7 +5,7 @@ set -e
 gcc tools/create_fw_img.c -o tools/create_fw_img
 
 cd software/fw
-make HAS_SH1107=y generate_bin
+make generate_bin
 cd -
 
 quartus_cdb ossc -c ossc --update_mif
