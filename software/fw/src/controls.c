@@ -28,13 +28,43 @@
 #include "video_modes.h"
 #include "userdata.h"
 #include "lcd.h"
+#include "timer.h"
 
-static const char *rc_keydesc[REMOTE_MAX_KEYS] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-												  "MENU", "OK", "BACK", "UP", "DOWN", "LEFT", "RIGHT", "INFO", "SUSPEND", "SCANLINE MODE",
-												  "SCANLINE TYPE", "SCANLINE INT+", "SCANLINE INT-", "LINEMULT MODE", "PHASE+", "PHASE-", "PROFILE LOAD"};
-const uint16_t rc_keymap_default[REMOTE_MAX_KEYS] = {0x3E29, 0x3EA9, 0x3E69, 0x3EE9, 0x3E19, 0x3E99, 0x3E59, 0x3ED9, 0x3E39, 0x3EC9,
-													 0x3E4D, 0x3E1D, 0x3EED, 0x3E2D, 0x3ECD, 0x3EAD, 0x3E6D, 0x3E65, 0x3E01, 0x1C48,
-													 0x1C18, 0x1C50, 0x1CD0, 0x1CC8, 0x5E58, 0x5ED8, 0x3EB9};
+static const char *rc_keydesc[REMOTE_MAX_KEYS] = {
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+	"MENU", "OK", "BACK", "UP", "DOWN", "LEFT", "RIGHT",
+	"INFO", "SUSPEND",
+	"SCANLINE MODE", "SCANLINE TYPE", "SCANLINE INT+", "SCANLINE INT-",
+	"LINEMULT MODE", "PHASE+", "PHASE-",
+	"PROFILE LOAD"
+};
+
+const uint16_t rc_keymap_old[REMOTE_MAX_KEYS] = {
+	0x3e29, 0x3ea9, 0x3e69, 0x3ee9, 0x3e19, 0x3e99, 0x3e59, 0x3ed9, 0x3e39, 0x3ec9,
+	0x3e4d, 0x3e1d,	0x3eed, 0x3e2d, 0x3ecd, 0x3ead, 0x3e6d,
+	0x3e65, 0x3e01,
+	0x1c48, 0x1c18, 0x1c50, 0x1cd0,
+	0x1cc8, 0x5e58, 0x5ed8,
+	0x3eb9
+};
+
+const uint16_t rc_keymap_L336[REMOTE_MAX_KEYS] = {
+	0xe1, 0x61, 0xa1, 0xd1, 0x51, 0x91, 0xf1, 0x71, 0xb1, 0x49,
+	0xe9, 0x79, 0x25, 0xa9, 0x59, 0xd9, 0x99,
+	0x11, 0x15,
+	0x6b, 0x31, 0x41, 0x19,
+	0xc9, 0xc1, 0x09,
+	0x21
+};
+
+const uint16_t rc_keymap_pro[REMOTE_MAX_KEYS] = {
+	0x0ab0, 0x0a70, 0x0af0, 0x0a38, 0x0ab8, 0x0a78, 0x0af8, 0x0a20, 0x0aa0, 0x0a30,
+	0x0aca, 0x0acc, 0x0a26, 0x0a0e, 0x0a8e, 0x0ace, 0x0a4e,
+	0x0a08, 0x0ae8,
+	0x0a50, 0x0ad0, 0x0a48, 0x0aa8,
+	0x0a7a, 0x0a98, 0x0a18,
+	0x0a88
+};
 
 uint16_t rc_keymap[REMOTE_MAX_KEYS];
 
@@ -46,65 +76,90 @@ uint8_t phase_hotkey_enable;
 
 void controls_set_default()
 {
-	memcpy(rc_keymap, rc_keymap_default, sizeof(rc_keymap));
+	memcpy(rc_keymap, rc_keymap_old, sizeof(rc_keymap));
 }
 
 void controls_setup()
 {
 	OSD->osd_config.menu_active = 1;
 
-	for (int i = 0; i < REMOTE_MAX_KEYS; i++)
+	strncpy(menu_row1, "Sel. Remote", sizeof(menu_row1));
+
+	const char *remote_names[] = { "Old", "L336", "Pro", "Custom" };
+	const uint16_t *remote_maps[] = { rc_keymap_old, rc_keymap_L336, rc_keymap_pro, 0 };
+	int remote_idx = 0;
+
+	while (1)
 	{
-		strncpy(menu_row1, "Press", sizeof(menu_row1));
-		strncpy(menu_row2, rc_keydesc[i], sizeof(menu_row2));
+		strncpy(menu_row2, remote_names[remote_idx], sizeof(menu_row2));
 		ui_disp_menu(1);
-		uint32_t remote_code_prev = 0;
 
-		while (1)
+		controls_update();
+
+		if (!btn1_prev && btn1)
 		{
-			controls_update();
-
-			if (remote_code)
-			{
-				if (!remote_code_prev)
-				{
-					rc_keymap[i] = remote_code;
-					strncpy(menu_row1, "Confirm", sizeof(menu_row1));
-					ui_disp_menu(1);
-				}
-				else if (remote_code != remote_code_prev)
-				{
-					strncpy(menu_row1, "Mismatch, retry", sizeof(menu_row1));
-					ui_disp_menu(1);
-					remote_code_prev = 0;
-					continue;
-				}
-				else
-				{
-					remote_code_prev = 0;
-					break;
-				}
-			}
-
-			if ((!btn1_prev && btn1) || (!btn2_prev && btn2))
-			{
-				// Special case: restore defaults, if we didn't set any keys yet.
-				if (i == 0)
-				{
-					memcpy(rc_keymap, rc_keymap_default, sizeof(rc_keymap));
-					i = REMOTE_MAX_KEYS;
-					break;
-				}
-
-				i -= 2;
-				break;
-			}
-
-			if (remote_code)
-				remote_code_prev = remote_code;
-
-			usleep(WAITLOOP_SLEEP_US);
+			remote_idx = (remote_idx + 1) % (sizeof(remote_names) / sizeof(remote_names[0]));
 		}
+		else if (!btn2_prev && btn2)
+		{
+			if (remote_maps[remote_idx])
+				memcpy(rc_keymap, remote_maps[remote_idx], sizeof(rc_keymap));
+			else
+			{
+				for (int i = 0; i < REMOTE_MAX_KEYS; i++)
+				{
+					strncpy(menu_row1, "Press", sizeof(menu_row1));
+					strncpy(menu_row2, rc_keydesc[i], sizeof(menu_row2));
+					ui_disp_menu(1);
+					uint32_t remote_code_prev = 0;
+
+					while (1)
+					{
+						controls_update();
+
+						if (remote_code)
+						{
+							if (!remote_code_prev)
+							{
+								rc_keymap[i] = remote_code;
+								strncpy(menu_row1, "Confirm", sizeof(menu_row1));
+								ui_disp_menu(1);
+							}
+							else if (remote_code != remote_code_prev)
+							{
+								strncpy(menu_row1, "Mismatch, retry", sizeof(menu_row1));
+								ui_disp_menu(1);
+								remote_code_prev = 0;
+								continue;
+							}
+							else
+							{
+								remote_code_prev = 0;
+								break;
+							}
+						}
+
+						if ((!btn1_prev && btn1) || (!btn2_prev && btn2))
+						{
+							if (i == 0)
+								i = REMOTE_MAX_KEYS;
+							else
+								i -= 2;
+
+							break;
+						}
+
+						if (remote_code)
+							remote_code_prev = remote_code;
+
+						usleep(WAITLOOP_SLEEP_US);
+					}
+				}
+			}
+			break;
+		}
+
+		usleep(WAITLOOP_SLEEP_US);
 	}
 
 	strncpy(menu_row1, "Saving...", sizeof(menu_row1));
@@ -120,7 +175,7 @@ void controls_setup()
 static void controls_reset_led()
 {
 	if (!in_suspend)
-	SC->sys_ctrl.led_g = 1;
+		SC->sys_ctrl.led_g = 1;
 }
 
 void controls_update()
