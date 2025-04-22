@@ -33,11 +33,10 @@
 static const char *rc_keydesc[REMOTE_MAX_KEYS] = {
 	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
 	"MENU", "OK", "BACK", "UP", "DOWN", "LEFT", "RIGHT",
-	"INFO", "SUSPEND",
+	"INFO", "STANDBY",
 	"SCANLINE MODE", "SCANLINE TYPE", "SCANLINE INT+", "SCANLINE INT-",
 	"LINEMULT MODE", "PHASE+", "PHASE-",
-	"PROFILE LOAD"
-};
+	"PROFILE LOAD"};
 
 const uint16_t rc_keymap_old[REMOTE_MAX_KEYS] = {
 	0x3e29, 0x3ea9, 0x3e69, 0x3ee9, 0x3e19, 0x3e99, 0x3e59, 0x3ed9, 0x3e39, 0x3ec9,
@@ -174,7 +173,7 @@ void controls_setup()
 
 static void controls_reset_led()
 {
-	if (!in_suspend)
+	if (!in_standby)
 		SC->sys_ctrl.led_g = 1;
 }
 
@@ -246,14 +245,14 @@ int	controls_parse()
 			code = FP_BTN2;
 	}
 
-	if (in_suspend)
+	if (in_standby)
 	{
 		switch (code)
 		{
-			case RC_SUSPEND:
+			case RC_STANDBY:
 			case FP_BTN1:
 			case FP_BTN2:
-				exit_suspend();
+				exit_standby();
 				break;
 		}
 	}
@@ -286,8 +285,8 @@ int	controls_parse()
 			case RC_INFO:
 				print_vm_stats();
 				break;
-			case RC_SUSPEND:
-				enter_suspend();
+			case RC_STANDBY:
+				enter_standby();
 				break;
 			case RC_SL_MODE:
 				tc.sl_mode = (tc.sl_mode < SL_MODE_MAX) ? (tc.sl_mode + 1) : 0;

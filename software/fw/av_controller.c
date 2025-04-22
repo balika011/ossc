@@ -72,7 +72,7 @@ uint32_t read_it2(uint32_t regaddr);
 mode_data_t vmode_in, vmode_out;
 vm_proc_config_t vm_conf;
 
-uint8_t in_suspend;
+uint8_t in_standby;
 
 // Manually (see cyiv-51005.pdf) or automatically (MIF/HEX from PLL megafunction) generated config may not
 // provide fully correct scan chain data (e.g. mismatches in C3) and lead to incorrect PLL configuration.
@@ -838,18 +838,18 @@ void print_vm_stats() {
     }
 }
 
-void enter_suspend()
+void enter_standby()
 {
-	in_suspend = 1;
+	in_standby = 1;
 	SC->sys_ctrl.lcd_bl_on = 0;
 	SC->sys_ctrl.led_g = 0;
 	SC->sys_ctrl.led_r = 1;
 	SC->sys_ctrl.av_reset_n = 0;
 }
 
-void exit_suspend()
+void exit_standby()
 {
-	in_suspend = 0;
+	in_standby = 0;
 	SC->sys_ctrl.lcd_bl_on = 1;
 	SC->sys_ctrl.led_g = 1;
 	SC->sys_ctrl.led_r = 0;
@@ -929,7 +929,7 @@ int main()
 
 		controls_update();
 
-		if (!in_suspend)
+		if (!in_standby)
 		{
 			// Auto input switching
 			if ((auto_input != AUTO_OFF) && (cm.avinput != AV_TESTPAT) && !cm.sync_active && !menu_active && (timer_timestamp() >= auto_input_timestamp + 300) && (auto_input_ctr < AUTO_MAX_COUNT))
@@ -976,7 +976,7 @@ int main()
 
 		int man_input_change = controls_parse();
 
-		if (!in_suspend)
+		if (!in_standby)
 		{
 			if (menu_active)
 				display_menu(0);

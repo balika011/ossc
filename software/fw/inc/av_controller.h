@@ -78,7 +78,7 @@ extern uint8_t osd_enable, osd_status_timeout, phase_hotkey_enable;
 extern char row1[LCD_ROW_LEN + 1], row2[LCD_ROW_LEN + 1], menu_row1[LCD_ROW_LEN + 1], menu_row2[LCD_ROW_LEN + 1];
 extern uint8_t lt_sel;
 extern uint8_t sl_def_iv_x, sl_def_iv_y;
-extern uint8_t in_suspend;
+extern uint8_t in_standby;
 
 void ui_disp_menu(uint8_t osd_mode);
 void ui_disp_status(uint8_t refresh_osd_timer);
@@ -90,7 +90,7 @@ int save_profile();
 
 void print_vm_stats();
 
-void enter_suspend();
-void exit_suspend();
+void enter_standby();
+void exit_standby();
 
 #endif
