@@ -56,8 +56,7 @@ void st7032_init()
 
 void st7032_write(char *row1, char *row2)
 {
-	uint8_t i, rowlen;
-
+	SC->sys_ctrl.lcd_bl_on = 1;
 	SC->sys_ctrl.lcd_cs_n = 0;
 	SC->sys_ctrl.lcd_rs = 0;
 
@@ -68,14 +67,14 @@ void st7032_write(char *row1, char *row2)
 	SC->sys_ctrl.lcd_rs = 1;
 
 	// ensure no empty row
-	rowlen = strlen(row1);
+	uint8_t rowlen = strlen(row1);
 	if (rowlen == 0)
 	{
 		row1[0] = ' ';
 		rowlen++;
 	}
 
-	for (i = 0; i < rowlen; i++)
+	for (uint8_t i = 0; i < rowlen; i++)
 		lcd_cmd(row1[i], WRDELAY);
 
 	// second row
@@ -92,8 +91,13 @@ void st7032_write(char *row1, char *row2)
 		rowlen++;
 	}
 
-	for (i = 0; i < rowlen; i++)
+	for (uint8_t i = 0; i < rowlen; i++)
 		lcd_cmd(row2[i], WRDELAY);
 
 	SC->sys_ctrl.lcd_cs_n = 1;
+}
+
+void st7032_off()
+{
+	SC->sys_ctrl.lcd_bl_on = 0;
 }

@@ -20,24 +20,57 @@
 #include "lcd.h"
 #include "st7032.h"
 #include "sh1107.h"
+#include "av_controller.h"
+#include "timer.h"
 
 static int has_sh1107;
+static int timer_idx;
 
 void lcd_init()
 {
+	timer_idx = -1;
+
 	has_sh1107 = sh1107_init();
 
 	if (!has_sh1107)
 		st7032_init();
 }
 
+static void lcd_off()
+{
+	if (has_sh1107)
+		sh1107_off();
+	else
+		st7032_off();
+}
+
 void lcd_write(char *row1, char *row2)
 {
+	if (timer_idx >= 0)
+	{
+		timer_cancel(timer_idx);
+		timer_idx = -1;
+	}
+
 	if (has_sh1107)
 		sh1107_write(row1, row2);
 	else
 		st7032_write(row1, row2);
+
+	if (lcd_bl_timeout)
+	{
+		int timeout = 0;
+		switch (lcd_bl_timeout)
+		{
+			case 1: timeout = 3000000; break;
+			case 2: timeout = 10000000; break;
+			case 3: timeout = 30000000; break;	
+		}
+
+		timer_idx = timer_timeout(timeout, lcd_off);
+	}
 }
+
 int lcd_has_sh1107()
 {
 	return has_sh1107;

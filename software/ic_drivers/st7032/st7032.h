@@ -29,4 +29,6 @@ void st7032_init();
 
 void st7032_write(char *row1, char *row2);
 
+void st7032_off();
+
 #endif /* st7032_H_ */

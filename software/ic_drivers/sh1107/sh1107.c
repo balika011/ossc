@@ -84,17 +84,17 @@ int sh1107_init()
 			I2C_write(I2CA_BASE, 0x00, i == OLED_WIDTH / 8 - 1);
 	}
 
-	// Turn on
-	I2C_start(I2CA_BASE, 0x3c, 0);
-	I2C_write(I2CA_BASE, 0x00, 0);
-	I2C_write(I2CA_BASE, 0xaf, 1);
-
 	return 1;
 }
 
 void sh1107_write(char *row1, char *row2)
 {
-    uint8_t row1len = strnlen(row1, LCD_ROW_LEN);
+	// Turn on
+	I2C_start(I2CA_BASE, 0x3c, 0);
+	I2C_write(I2CA_BASE, 0x00, 0);
+	I2C_write(I2CA_BASE, 0xaf, 1);
+
+	uint8_t row1len = strnlen(row1, LCD_ROW_LEN);
 
     for (uint8_t i = 0; i < 12; i++)
 	{
@@ -131,4 +131,12 @@ void sh1107_write(char *row1, char *row2)
 		for (uint8_t j = row2len; j < LCD_ROW_LEN; j++)
 			I2C_write(I2CA_BASE, Font12_Table[i], j == LCD_ROW_LEN - 1);
 	}
+}
+
+int sh1107_off()
+{
+	// Turn off
+	I2C_start(I2CA_BASE, 0x3c, 0);
+	I2C_write(I2CA_BASE, 0x00, 0);
+	I2C_write(I2CA_BASE, 0xae, 1);
 }
