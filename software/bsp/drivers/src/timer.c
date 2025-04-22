@@ -24,8 +24,8 @@
 #include "altera_avalon_timer_regs.h"
 
 static uint64_t timer_ctr;
-static uint64_t timeout_ctr;
-static void (*timeout_cb)();
+static uint64_t timeout_ctr[5];
+static void (*timeout_cb[5])();
 
 // called every 100us
 void __attribute__((interrupt, noinline, __section__(".rtext"))) timer_irq_handler(void)
@@ -35,12 +35,15 @@ void __attribute__((interrupt, noinline, __section__(".rtext"))) timer_irq_handl
 
 	timer_ctr += 100;
 
-	if (timeout_ctr)
+	for (int i = 0; i < 5; i++)
 	{
-		if (timeout_ctr < timer_ctr)
+		if (timeout_ctr[i])
 		{
-			timeout_ctr = 0;
-			timeout_cb();
+			if (timeout_ctr[i] < timer_ctr)
+			{
+				timeout_ctr[i] = 0;
+				timeout_cb[i]();
+			}
 		}
 	}
 }
@@ -65,8 +68,29 @@ uint64_t __attribute__((noinline, __section__(".rtext"))) timer_timestamp()
 	return timer_ctr;
 }
 
-void timer_timeout(uint64_t usec, void (*cb)())
+int timer_timeout(uint64_t usec, void (*cb)())
 {
-	timeout_ctr = timer_ctr + usec;
-	timeout_cb = cb;
+	int idx = -1;
+	for (int i = 0; i < 5; i++)
+	{
+		if (!timeout_ctr[i])
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	if (idx >= 0)
+	{
+		timeout_ctr[idx] = timer_ctr + usec;
+		timeout_cb[idx] = cb;
+	}
+
+	return idx;
+}
+
+void timer_cancel(int idx)
+{
+	if (idx >= 0)
+		timeout_ctr[idx] = 0;
 }
