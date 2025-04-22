@@ -119,6 +119,7 @@ void controls_setup()
 
 static void controls_reset_led()
 {
+	if (!in_suspend)
 	SC->sys_ctrl.led_g = 1;
 }
 
