@@ -47,10 +47,28 @@ int sdcard_check()
 
 int sdcard_read(uint32_t offset, uint8_t *buf, uint32_t len)
 {
-	if (mmc_bread(mmc_dev, offset / SD_BLK_SIZE, (len + SD_BLK_SIZE - 1) / SD_BLK_SIZE, buf) != (len + SD_BLK_SIZE - 1) / SD_BLK_SIZE)
+	uint32_t full_block_len = (len / SD_BLK_SIZE) * SD_BLK_SIZE;
+
+	if (full_block_len)
 	{
-		printf("Failed to read SD card\n");
-		return -1;
+		if (mmc_bread(mmc_dev, offset / SD_BLK_SIZE, full_block_len / SD_BLK_SIZE, buf) != full_block_len / SD_BLK_SIZE)
+		{
+			printf("Failed to read SD card\n");
+			return -1;
+		}
+	}
+
+	if (len != full_block_len)
+	{
+		uint8_t temp[SD_BLK_SIZE];
+
+		if (mmc_bread(mmc_dev, (offset + full_block_len) / SD_BLK_SIZE, 1, temp) != 1)
+		{
+			printf("Failed to read SD card\n");
+			return -2;
+		}
+
+		memcpy(&buf[full_block_len], temp, len - full_block_len);
 	}
 
 	return 0;

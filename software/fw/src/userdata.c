@@ -38,9 +38,23 @@
 
 char target_profile_name[PROFILE_NAME_LEN + 1];
 
+typedef enum
+{
+	UDE_INITCFG = 0,
+	UDE_PROFILE,
+} ude_type;
+
 typedef struct
 {
-	uint32_t magic;
+	char magic[8];
+	uint8_t version_major;
+	uint8_t version_minor;
+	ude_type type;
+} __attribute__((packed)) ude_hdr;
+
+typedef struct
+{
+	ude_hdr hdr;
 	uint16_t data_len;
 	uint8_t last_profile[AV_LAST];
 	uint8_t profile_link;
@@ -59,7 +73,7 @@ typedef struct
 
 typedef struct
 {
-	uint32_t magic;
+	ude_hdr hdr;
 	char name[PROFILE_NAME_LEN + 1];
 	uint16_t avc_data_len;
 	uint16_t vm_data_len;
@@ -70,7 +84,10 @@ typedef struct
 int __attribute__((noinline, __section__(".rtext"))) userdata_save_initconfig()
 {
 	ude_initcfg initcfg;
-	initcfg.magic = 'UC01';
+	strncpy(initcfg.hdr.magic, "USRDATA", 8);
+	initcfg.hdr.type = UDE_INITCFG;
+	initcfg.hdr.version_major = INITCFG_VER_MAJOR;
+	initcfg.hdr.version_minor = INITCFG_VER_MINOR;
 
 	initcfg.data_len = sizeof(ude_initcfg) - offsetof(ude_initcfg, last_profile);
 
@@ -111,7 +128,10 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_save_profile(uint8
 	}
 
 	ude_profile profile;
-	profile.magic = 'UP01';
+	strncpy(profile.hdr.magic, "USRDATA", 8);
+	profile.hdr.type = UDE_PROFILE;
+	profile.hdr.version_major = PROFILE_VER_MAJOR;
+	profile.hdr.version_minor = PROFILE_VER_MINOR;
 
 	profile.avc_data_len = sizeof(avconfig_t);
 	profile.vm_data_len = sizeof(video_modes_plm);
@@ -129,7 +149,7 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_save_profile(uint8
 	for (int i = 0; i < sizeof(profile) / 4; i++)
 		*flash++ = *profile_32++;
 
-	uint8_t *video_modes_plm_8 = (uint8_t *) video_modes_plm;
+	uint8_t *video_modes_plm_8 = (uint8_t *)video_modes_plm;
 
 	uint32_t profile_rem = sizeof(profile) % 4;
 	if (profile_rem != 0)
@@ -154,18 +174,20 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_save_profile(uint8
 
 int userdata_load_initconfig()
 {
-	ude_initcfg *initcfg = (ude_initcfg *)(FLASH_MEM_BASE + USERDATA_OFFSET + MAX_USERDATA_ENTRY * USERDATA_ENTRY_SIZE);
-	if ((initcfg->magic & 0xFFFF0000) != 'UC\0\0')
+	ude_hdr *hdr = (ude_hdr *)(FLASH_MEM_BASE + USERDATA_OFFSET + MAX_USERDATA_ENTRY * USERDATA_ENTRY_SIZE);
+	if (strncmp(hdr->magic, "USRDATA", 8))
 	{
 		printf("No userdata found on entry %u\n", MAX_USERDATA_ENTRY);
 		return 1;
 	}
 
-	if (initcfg->magic != 'UC01')
+	if (hdr->type != UDE_INITCFG || hdr->version_major != INITCFG_VER_MAJOR || hdr->version_minor != INITCFG_VER_MINOR)
 	{
-		printf("Initconfig version does not match current one\n");
+		printf("Initconfig version %u.%.2u does not match current one\n", hdr->version_major, hdr->version_minor);
 		return 2;
 	}
+
+	ude_initcfg *initcfg = (ude_initcfg *)hdr;
 
 	if (initcfg->data_len != sizeof(ude_initcfg) - offsetof(ude_initcfg, last_profile))
 	{
@@ -210,18 +232,20 @@ int userdata_load_profile(uint8_t entry, int dry_run)
 		return -1;
 	}
 
-	ude_profile *profile = (ude_profile *)(FLASH_MEM_BASE + USERDATA_OFFSET + entry * USERDATA_ENTRY_SIZE);
-	if ((profile->magic & 0xFFFF0000) != 'UP\0\0')
+	ude_hdr *hdr = (ude_hdr *)(FLASH_MEM_BASE + USERDATA_OFFSET + entry * USERDATA_ENTRY_SIZE);
+	if (strncmp(hdr->magic, "USRDATA", 8))
 	{
 		printf("No userdata found on entry %u\n", entry);
 		return 1;
 	}
 
-	if (profile->magic != 'UP01')
+	if (hdr->type != UDE_PROFILE || hdr->version_major != PROFILE_VER_MAJOR || hdr->version_minor != PROFILE_VER_MINOR)
 	{
 		printf("Profile version does not match current one\n");
 		return 2;
 	}
+
+	ude_profile *profile = (ude_profile *)hdr;
 
 	if ((profile->avc_data_len != sizeof(avconfig_t)) || (profile->vm_data_len != sizeof(video_modes_plm)))
 	{
@@ -229,7 +253,7 @@ int userdata_load_profile(uint8_t entry, int dry_run)
 		return 3;
 	}
 
-	strncpy(target_profile_name, profile->name, PROFILE_NAME_LEN+1);
+	strncpy(target_profile_name, profile->name, PROFILE_NAME_LEN + 1);
 
 	if (!dry_run)
 	{
@@ -249,7 +273,6 @@ int userdata_load_profile(uint8_t entry, int dry_run)
 
 int __attribute__((noinline, __section__(".rtext"))) userdata_import()
 {
-#if 0
 	int retval = sdcard_check();
 	if (retval != 0)
 		return retval;
@@ -278,8 +301,11 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
 	int entries_imported = 0;
 	for (int n = 0; n <= MAX_USERDATA_ENTRY; ++n)
 	{
+		snprintf(menu_row1, sizeof(menu_row1), "%d", n);
+		ui_disp_menu(1);
+
 		ude_hdr header;
-		if (sdcard_read(512 + n * USERDATA_ENTRY_SIZE, (uint8_t *)&header, sizeof(header)) != sizeof(header))
+		if (sdcard_read(512 + n * USERDATA_ENTRY_SIZE, (uint8_t *)&header, sizeof(header)))
 		{
 			printf("Failed to read SD card\n");
             return -1;
@@ -296,7 +322,7 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
         } else if ((header.type == UDE_INITCFG) && ((header.version_major != INITCFG_VER_MAJOR) || (header.version_minor != INITCFG_VER_MINOR))) {
             printf("Initconfig version %u.%.2u does not match current one\n", header.version_major, header.version_minor);
             continue;
-        } else if (header.type > UDE_PROFILE) {
+        } else {
             printf("Unknown userdata entry type %u\n", header.type);
             continue;
         }
@@ -308,10 +334,10 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
 		uint8_t temp[SD_BLK_SIZE];
 		for (int i = 0; i < entry_len; i += SD_BLK_SIZE)
 		{
-			sdcard_read(512 + n * USERDATA_ENTRY_SIZE, temp, SD_BLK_SIZE);
+			sdcard_read(512 + n * USERDATA_ENTRY_SIZE + i, temp, SD_BLK_SIZE);
 
 			for (int j = 0; j < SD_BLK_SIZE; j += 4)
-				*(uint32_t *)(USERDATA_OFFSET + n * USERDATA_ENTRY_SIZE + j) = *(uint32_t *)&temp[j];
+				*(uint32_t *)(FLASH_MEM_BASE + USERDATA_OFFSET + n * USERDATA_ENTRY_SIZE + i + j) = *(uint32_t *)&temp[j];
 		}
 		flash_write_protect(1);
 
@@ -326,8 +352,8 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
     userdata_load_profile(profile_sel, 0);
 
     sniprintf(menu_row2, LCD_ROW_LEN+1, "%d slots loaded", entries_imported);
-#endif
-    return 1;    
+
+	return 1;
 }
 
 static uint8_t poll_yesno(const useconds_t useconds, uint32_t *const btn_vec_out)
@@ -381,8 +407,6 @@ const char *prompt_msgs = LNG(
 
 int userdata_export()
 {
-#if 0
-	int state = 0;
 	_Static_assert(SD_BLK_SIZE == FAT16_SECTOR_SIZE, "Sector size mismatch");
 
 	int retval = sdcard_check();
@@ -420,7 +444,7 @@ int userdata_export()
 		}
 	}
 
-	usleep(100000U);
+	usleep(1000000);
 	strncpy(menu_row1, "Format?", sizeof(menu_row1));
 	strncpy(menu_row2, "1=FAT16, 2=RAW", sizeof(menu_row2));
 	ui_disp_menu(2);
@@ -439,29 +463,21 @@ int userdata_export()
 	if (btn_vec == rc_keymap[RC_BTN2])
 		goto copy_start;
 
-	state = 1;
-
 	/* Zero out the boot sector, FATs and root directory. */
 	uint8_t databuf[SD_BLK_SIZE];
 	memset(databuf, 0, SD_BLK_SIZE);
-	/*
 	for (uint32_t i = 0; i < FAT16_ROOT_DIR_FIRST_SECTOR + FAT16_ROOT_DIR_SECTORS; i++)
 	{
 		retval = sdcard_write(i * SD_BLK_SIZE, databuf, SD_BLK_SIZE);
 		if (retval)
 			goto out;
 	}
-	*/
-
-	state = 2;
 
 	/* Generate and write the boot sector. */
 	generate_boot_sector_16(databuf);
 	retval = sdcard_write(0, databuf, SD_BLK_SIZE);
 	if (retval)
 		goto out;
-
-	state = 3;
 
 	/* Generate and write the file allocation tables. */
 	for (uint16_t clusters_written = 0, sd_blk_idx = 0;
@@ -480,16 +496,12 @@ int userdata_export()
 		++sd_blk_idx;
 	}
 
-	state = 4;
-
 	/* Write the directory entry of the settings file. */
 	memset(databuf, 0, SD_BLK_SIZE);
 	memcpy(databuf, prof_dirent_16, PROF_DIRENT_16_SIZE);
 	retval = sdcard_write(PROF_DIRENT_16_OFS, databuf, SD_BLK_SIZE);
 	if (retval)
 		goto out;
-
-	state = 5;
 
 copy_start:
 	// Zero out first 512 bytes (1 SD block) of the file
@@ -498,16 +510,23 @@ copy_start:
 	if (retval)
 		goto out;
 
-	state = 6;
-
-	for (int i = 0; i < (MAX_USERDATA_ENTRY + 1) * USERDATA_ENTRY_SIZE; i++)
+	for (int i = 0; i < MAX_USERDATA_ENTRY + 1; i++)
 	{
-		retval = sdcard_write(sd_block_offset++ * SD_BLK_SIZE, (void *)(FLASH_MEM_BASE + USERDATA_OFFSET + i * SD_BLK_SIZE), SD_BLK_SIZE);
-		if (retval)
-			goto out;
-	}
+		ude_hdr *hdr = (ude_hdr *)(FLASH_MEM_BASE + USERDATA_OFFSET + i * USERDATA_ENTRY_SIZE);
+		if (strncmp(hdr->magic, "USRDATA", 8))
+			continue;
 
-	state = 7;
+		uint8_t *data = (uint8_t *) hdr;
+		for (int j = 0; j < USERDATA_ENTRY_SIZE; j += SD_BLK_SIZE)
+		{
+			uint8_t temp[SD_BLK_SIZE];
+			memcpy(temp, &data[j], SD_BLK_SIZE);
+
+			retval = sdcard_write(sd_block_offset * SD_BLK_SIZE + i * USERDATA_ENTRY_SIZE + j, temp, SD_BLK_SIZE);
+			if (retval)
+				goto out;
+		}
+	}
 
 out:
 	const char *msg;
@@ -519,15 +538,13 @@ out:
 		case UDATA_EXPT_CANCELLED: msg = LNG("Cancelled", "ｷｬﾝｾﾙｻﾚﾏｼﾀ"); break; // Alternative: "ｷｬﾝｾﾙｻｾﾃｲﾀﾀﾞｷﾏｽ"
 		default: msg = LNG("SD/Flash error", "SDｶFLASHﾉｴﾗｰ"); break; // ﾌﾗｯｼｭ would be NG.
 	}
-	snprintf(menu_row1, sizeof(menu_row1), "%d %x", state, retval);
 	strncpy(menu_row2, msg, sizeof(menu_row2));
-	ui_disp_menu(/*2*/1);
+	ui_disp_menu(2);
 
 	if (!retval)
 	{
 		return 1;
 	}
-#endif
 
 	/*
 	 * We want the message above to remain on screen, so return a
