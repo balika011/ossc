@@ -26,7 +26,7 @@
 
 struct mmc *ocsdc_mmc_init(int base_addr, int clk_freq, unsigned int host_caps);
 struct mmc *mmc_dev;
-#define SDC_FREQ 108000000U
+#define SDC_FREQ 108000000
 #define SDC_HOST_CAPS (MMC_MODE_HS | MMC_MODE_HS_52MHz | MMC_MODE_4BIT)
 
 void sdcard_init()

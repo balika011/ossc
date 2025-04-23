@@ -805,12 +805,7 @@ static int mmc_read_blocks(struct mmc *mmc, void *dst, size_t start, size_t blkc
 
 int mmc_init(struct mmc *mmc)
 {
-	int err;
-
-	if (mmc->has_init)
-		return 0;
-
-	err = mmc->init(mmc);
+	int err = mmc->init(mmc);
 
 	if (err)
 		return err;

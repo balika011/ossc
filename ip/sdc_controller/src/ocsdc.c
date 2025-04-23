@@ -254,8 +254,8 @@ static int ocsdc_init(struct mmc *mmc)
 	//clear all interrupts
 	ocsdc_write(dev, OCSDC_CMD_INT_STATUS, 0);
 	ocsdc_write(dev, OCSDC_DAT_INT_STATUS, 0);
-	//set clock to divide by 4
-	ocsdc_set_clock(dev, dev->clk_freq/4);
+	//set clock to maximum (devide by 2)
+	ocsdc_set_clock(dev, dev->clk_freq/2);
 
 	return 0;
 }
