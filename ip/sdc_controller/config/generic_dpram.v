@@ -95,9 +95,9 @@
 
 //`include "timescale.v"
 
-//`define VENDOR_FPGA
+`define VENDOR_FPGA
 //`define VENDOR_XILINX
-`define VENDOR_ALTERA
+//`define VENDOR_ALTERA
 
 module generic_dpram(
 	// Generic synchronous dual-port RAM interface
