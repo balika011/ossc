@@ -111,10 +111,6 @@ int fw_update()
 	if (retval != 0)
 		goto failure;
 
-	sniprintf(menu_row1, LCD_ROW_LEN + 1, "%x %x %x %x", databuf[0], databuf[1], databuf[2], databuf[3]);
-	sniprintf(menu_row2, LCD_ROW_LEN + 1, "");
-	ui_disp_menu(1);
-
 	fw_hdr fw_header;
 	retval = check_fw_header(databuf, &fw_header);
 	if (retval != 0)

@@ -26,6 +26,12 @@
 #define FW_VER_MINOR            0
 #define FW_VER_BETA             1 // If it's set to 0, it won't show version as beta
 
+#define PROFILE_VER_MAJOR       1
+#define PROFILE_VER_MINOR       11
+
+#define INITCFG_VER_MAJOR       1
+#define INITCFG_VER_MINOR       0
+
 #ifdef OSDLANG_JP
 #define FW_SUFFIX              "j"
 #else
