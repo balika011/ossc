@@ -23,7 +23,7 @@
 
 #include "altera_avalon_timer_regs.h"
 
-static uint64_t timer_ctr;
+static volatile uint64_t timer_ctr;
 static uint64_t timeout_ctr[5];
 static void (*timeout_cb[5])();
 
@@ -68,7 +68,7 @@ uint64_t __attribute__((noinline, __section__(".rtext"))) timer_timestamp()
 	return timer_ctr;
 }
 
-int timer_timeout(uint64_t usec, void (*cb)())
+int __attribute__((noinline, __section__(".rtext"))) timer_timeout(uint64_t usec, void (*cb)())
 {
 	int idx = -1;
 	for (int i = 0; i < 5; i++)
@@ -89,8 +89,18 @@ int timer_timeout(uint64_t usec, void (*cb)())
 	return idx;
 }
 
-void timer_cancel(int idx)
+void __attribute__((noinline, __section__(".rtext")))  timer_cancel(int idx)
 {
 	if (idx >= 0)
 		timeout_ctr[idx] = 0;
+}
+
+unsigned int __attribute__((noinline, __section__(".rtext"))) usleep(unsigned int us)
+{
+	uint64_t start_ts = timer_ctr;
+
+	while (timer_ctr < start_ts + us)
+		;
+
+	return 0;
 }

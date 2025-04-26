@@ -95,7 +95,8 @@ struct ocsdc priv;
 #define readl(addr) (*(volatile unsigned int *) (addr))
 #define writel(b, addr) ((*(volatile unsigned int *) (addr)) = (b))
 
-void flush_dcache_range(void * start, void * end) {
+void __attribute__((noinline, __section__(".rtext"))) flush_dcache_range(void *start, void *end)
+{
 	/*while (start < end) {
 		or1k_dcache_flush((unsigned long)start);
 		start += 4;
@@ -133,7 +134,8 @@ static void ocsdc_set_clock(struct ocsdc * dev, uint clock)
 	ocsdc_write(dev, OCSDC_SOFTWARE_RESET, 0);
 }
 
-static int ocsdc_finish(struct ocsdc * dev, struct mmc_cmd *cmd) {
+static int __attribute__((noinline, __section__(".rtext"))) ocsdc_finish(struct ocsdc *dev, struct mmc_cmd *cmd)
+{
 
 	int retval = 0;
 	while (1) {
@@ -168,7 +170,8 @@ static int ocsdc_finish(struct ocsdc * dev, struct mmc_cmd *cmd) {
 	return retval;
 }
 
-static int ocsdc_data_finish(struct ocsdc * dev) {
+static int __attribute__((noinline, __section__(".rtext"))) ocsdc_data_finish(struct ocsdc *dev)
+{
 	int status;
 
     while ((status = ocsdc_read(dev, OCSDC_DAT_INT_STATUS)) == 0);
@@ -184,7 +187,8 @@ static int ocsdc_data_finish(struct ocsdc * dev) {
     }
 }
 
-static void ocsdc_setup_data_xfer(struct ocsdc * dev, struct mmc_cmd *cmd, struct mmc_data *data) {
+static void __attribute__((noinline, __section__(".rtext"))) ocsdc_setup_data_xfer(struct ocsdc *dev, struct mmc_cmd *cmd, struct mmc_data *data)
+{
 
 	//invalidate cache
 	if (data->flags & MMC_DATA_READ) {
@@ -199,10 +203,9 @@ static void ocsdc_setup_data_xfer(struct ocsdc * dev, struct mmc_cmd *cmd, struc
 	ocsdc_write(dev, OCSDC_BLOCK_COUNT, data->blocks-1);
 
 	//DBG_PRINTF("ocsdc_setup_read: addr: %x\n", (uint32_t)data->dest);
-
 }
 
-static int ocsdc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
+static int __attribute__((noinline, __section__(".rtext"))) ocsdc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
 {
 	struct ocsdc * dev = mmc->priv;
 

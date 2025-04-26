@@ -2,9 +2,15 @@
 
 create_clock -period 27MHz -name clk27 [get_ports clk27]
 
-set_input_delay -clock clk27 0 [get_ports {sda scl SD_CMD SD_DAT* *ALTERA_DATA0}]
+set_input_delay -clock clk27 0 [get_ports {sda scl *ALTERA_DATA0}]
 
 create_generated_clock -name sd_clock -source sys_inst|altpll_0|sd1|pll7|clk[0] -multiply_by 4 {sys:sys_inst|sdc_controller_top:sdc_controller_0|sdc_controller:sdc0|sd_clock_divider:clock_divider0|SD_CLK_O}
+
+# SD card (IO constraints from Kingston specsheet, slightly reduced t_ODLY)
+set_input_delay -clock sd_clock -min 2.5 [get_ports {SD_CMD SD_DATA[*]}] -add_delay
+set_input_delay -clock sd_clock -max 12 [get_ports {SD_CMD SD_DATA[*]}] -add_delay
+set_output_delay -clock sd_clock -min -2 [get_ports {SD_CMD SD_DATA[*]}] -add_delay
+set_output_delay -clock sd_clock -max 6 [get_ports {SD_CMD SD_DATA[*]}] -add_delay
 
 set_false_path -from [get_ports {btn* cfg* ir_rx HDMI_TX_INT_N LED_R}]
 set_false_path -to {sys:sys_inst|sys_pio_1:pio_1|readdata*}

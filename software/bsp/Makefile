@@ -126,22 +126,6 @@ RM = rm -f
 altera_avalon_timer_driver_C_LIB_SRCS := \
 	drivers/src/timer.c
 
-altera_nios2_gen2_hal_driver_C_LIB_SRCS := \
-	HAL/src/alt_usleep.c \
-	HAL/src/alt_busy_sleep.c
-
-#	HAL/src/alt_printf.c \
-	HAL/src/alt_putchar.c \
-	HAL/src/alt_putstr.c \
-	HAL/src/alt_ecc_fatal_exception.c \
-	HAL/src/alt_instruction_exception_entry.c \
-	HAL/src/alt_remap_cached.c \
-	HAL/src/alt_remap_uncached.c \
-	HAL/src/alt_uncached_free.c \
-	HAL/src/alt_uncached_malloc.c \
-	HAL/src/alt_do_ctors.c \
-	HAL/src/alt_do_dtors.c
-
 hal_C_LIB_SRCS := \
 	HAL/src/alt_dev_llist_insert.c \
 	HAL/src/alt_errno.c \
@@ -158,18 +142,8 @@ sdc_controller_SRCS := \
 # Assemble all component C source files 
 COMPONENT_C_LIB_SRCS += \
 	$(altera_avalon_timer_driver_C_LIB_SRCS) \
-	$(altera_nios2_gen2_hal_driver_C_LIB_SRCS) \
 	$(i2c_opencores_driver_C_LIB_SRCS) \
 	$(sdc_controller_SRCS)
-
-
-#	$(altera_avalon_jtag_uart_driver_C_LIB_SRCS) \
-#	$(altera_avalon_timer_driver_C_LIB_SRCS) \
-#	$(altera_nios2_gen2_hal_driver_C_LIB_SRCS) \
-#	$(hal_C_LIB_SRCS) \
-#	$(i2c_opencores_driver_C_LIB_SRCS) \
-#	$(nios2_hw_crc32_driver_C_LIB_SRCS) \
-#	$(sdc_controller_SRCS)
 
 # Assemble all component assembly source files 
 COMPONENT_ASM_LIB_SRCS += \

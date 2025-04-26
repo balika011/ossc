@@ -1,7 +1,7 @@
 #ifndef _FONT12_H
 #define _FONT12_H
 
-static const uint8_t Font12_Table[] = 
+uint8_t __attribute__((__section__(".data"))) Font12_Table[] = 
 {
 	// @0 ' ' (7 pixels wide)
 	0x00, //        
