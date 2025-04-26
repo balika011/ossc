@@ -33,67 +33,46 @@
 
 #define FW_UPDATE_RETRIES 3
 
-typedef struct
+#define HDR_SIZE 512
+#define FW_SUFFIX_MAX_SIZE 8
+
+#pragma pack(push, 1)
+
+typedef union
 {
-	char fw_key[4];
-	uint8_t version_major;
-	uint8_t version_minor;
-	char version_suffix[8];
-	uint32_t hdr_len;
-	uint32_t data_len;
-	uint32_t data_crc;
-	uint32_t hdr_crc;
+	struct
+	{
+		uint32_t magic;
+		uint8_t version_major;
+		uint8_t version_minor;
+		char version_suffix[FW_SUFFIX_MAX_SIZE];
+		uint32_t hdr_len;
+		uint32_t data_len;
+		uint32_t data_crc;
+	} params;
+	struct
+	{
+		uint8_t buf[HDR_SIZE - 4];
+		uint32_t hdr_crc;
+	} raw;
+	/* data */
 } fw_hdr;
 
-static int check_fw_header(uint8_t *databuf, fw_hdr *hdr)
-{
-	uint32_t tmp;
+#pragma pack(pop)
 
-	strncpy(hdr->fw_key, (char*)databuf, 4);
-	if (strncmp(hdr->fw_key, "OSSC", 4))
+static int check_fw_header(fw_hdr *hdr)
+{
+	if (hdr->params.magic != __builtin_bswap32('OSSC'))
 		return FW_IMAGE_ERROR;
 
-	hdr->version_major = databuf[4];
-	hdr->version_minor = databuf[5];
-	strncpy(hdr->version_suffix, (char*)(databuf+6), 8);
-	hdr->version_suffix[7] = 0;
-
-	memcpy(&tmp, databuf+14, 4);
-	hdr->hdr_len = __builtin_bswap32(tmp);
-	memcpy(&tmp, databuf+18, 4);
-	hdr->data_len = __builtin_bswap32(tmp);
-	memcpy(&tmp, databuf+22, 4);
-	hdr->data_crc = __builtin_bswap32(tmp);
-	// Always at bytes [508-511]
-	memcpy(&tmp, databuf+508, 4);
-	hdr->hdr_crc = __builtin_bswap32(tmp);
-
-	if (hdr->hdr_len < 26 || hdr->hdr_len > 508)
+	if (__builtin_bswap32(hdr->params.hdr_len) < 26 || __builtin_bswap32(hdr->params.hdr_len) > 508)
 		return FW_HDR_ERROR;
 
-	if (crc32(0, databuf, hdr->hdr_len) != hdr->hdr_crc)
+	if (crc32(0, (uint8_t *)hdr, __builtin_bswap32(hdr->params.hdr_len)) != __builtin_bswap32(hdr->raw.hdr_crc))
 		return FW_HDR_CRC_ERROR;
 
-	return 0;
-}
-
-static int check_fw_image(uint32_t offset, uint32_t size, uint32_t golden_crc, uint8_t *tmpbuf)
-{
-	uint32_t crcval = 0, i, bytes_to_read;
-
-	for (uint32_t i = 0; i < size; i = i + SD_BLK_SIZE)
-	{
-		uint32_t bytes_to_read = ((size - i < SD_BLK_SIZE) ? (size - i) : SD_BLK_SIZE);
-
-		int res = sdcard_read(offset + i, tmpbuf, bytes_to_read);
-		if (res != 0)
-			return -res;
-
-		crcval = crc32(crcval, tmpbuf, bytes_to_read);
-	}
-
-	if (crcval != golden_crc)
-		return FW_DATA_CRC_ERROR;
+	hdr->params.data_len = __builtin_bswap32(hdr->params.data_len);
+	hdr->params.data_crc = __builtin_bswap32(hdr->params.data_crc);
 
 	return 0;
 }
@@ -118,24 +97,27 @@ int __attribute__((noinline, __section__(".rtext"))) fw_update()
 		goto failure;
 	}
 
-	uint8_t databuf[SD_BLK_SIZE];
-	retval = sdcard_read(0, databuf, SD_BLK_SIZE);
-	if (retval != 0)
-		goto failure;
-
 	fw_hdr fw_header;
-	retval = check_fw_header(databuf, &fw_header);
+	retval = sdcard_read(0, (uint8_t *)&fw_header, sizeof(fw_header));
+	if (retval != 0)
+	{
+		retval = -retval;
+		goto failure;
+	}
+
+	retval = check_fw_header(&fw_header);
 	if (retval != 0)
 		goto failure;
 
 	sniprintf(menu_row1, LCD_ROW_LEN+1, "Validating data");
-	sniprintf(menu_row2, LCD_ROW_LEN+1, "%u bytes", (unsigned)fw_header.data_len);
+	sniprintf(menu_row2, LCD_ROW_LEN + 1, "%u bytes", (unsigned)fw_header.params.data_len);
 	ui_disp_menu(1);
-	retval = check_fw_image(512, fw_header.data_len, fw_header.data_crc, databuf);
+
+	retval = sdcard_check_crc(sizeof(fw_hdr), fw_header.params.data_len, fw_header.params.data_crc);
 	if (retval != 0)
 		goto failure;
 
-	sniprintf(menu_row1, LCD_ROW_LEN+1, "%u.%.2u%s%s", fw_header.version_major, fw_header.version_minor, (fw_header.version_suffix[0] == 0) ? "" : "-", fw_header.version_suffix);
+	sniprintf(menu_row1, LCD_ROW_LEN + 1, "%u.%.2u%s%s", fw_header.params.version_major, fw_header.params.version_minor, (fw_header.params.version_suffix[0] == 0) ? "" : "-", fw_header.params.version_suffix);
 	strncpy(menu_row2, "Update? 1=Y, 2=N", LCD_ROW_LEN+1);
 	ui_disp_menu(1);
 
@@ -172,9 +154,10 @@ update_init:
 
 	lcd_write(Updating_FW, please_wait);
 
-	for (int i = 0; i < fw_header.data_len; i += SD_BLK_SIZE)
+	for (int i = 0; i < fw_header.params.data_len; i += SD_BLK_SIZE)
 	{
-		retval = sdcard_read(512 + i, databuf, SD_BLK_SIZE);
+		uint8_t databuf[SD_BLK_SIZE];
+		retval = sdcard_read(sizeof(fw_hdr) + i, databuf, SD_BLK_SIZE);
 		if (retval != 0)
 			goto failure;
 
@@ -186,7 +169,7 @@ update_init:
 
 	lcd_write(Verifying_flash, please_wait);
 
-	if (crc32(0, (void *) FLASH_MEM_BASE, fw_header.data_len) != fw_header.data_crc)
+	if (crc32(0, (void *)FLASH_MEM_BASE, fw_header.params.data_len) != fw_header.params.data_crc)
 	{
 		retval = FLASH_VERIFY_ERROR;
 		goto failure;
