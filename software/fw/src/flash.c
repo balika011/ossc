@@ -317,11 +317,3 @@ void __attribute__((noinline, __section__(".rtext"))) flash_erase_64k(uint32_t a
 			break;
 	}
 }
-
-int flash_verify(uint32_t offset, uint32_t length, uint32_t golden_crc)
-{
-	if (crc32(0, (uint8_t *)(FLASH_MEM_BASE + offset), length) != golden_crc)
-		return -FLASH_VERIFY_ERROR;
-
-    return 0;
-}

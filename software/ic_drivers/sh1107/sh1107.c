@@ -145,7 +145,7 @@ void __attribute__((noinline, __section__(".rtext"))) sh1107_write(char *row1, c
 	}
 }
 
-int sh1107_off()
+void sh1107_off()
 {
 	// Turn off
 	I2C_start(I2CA_BASE, 0x3c, 0);
