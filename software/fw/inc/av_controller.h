@@ -72,7 +72,6 @@ extern uint8_t update_cur_vm;
 extern uint8_t input_profiles[AV_LAST];
 extern uint8_t profile_sel, profile_sel_menu;
 extern uint8_t def_input, profile_link;
-extern uint8_t lcd_bl_timeout;
 extern uint8_t auto_input, auto_av1_ypbpr, auto_av2_ypbpr, auto_av3_ypbpr;
 extern uint8_t osd_enable, osd_status_timeout, phase_hotkey_enable;
 extern char row1[LCD_ROW_LEN + 1], row2[LCD_ROW_LEN + 1], menu_row1[LCD_ROW_LEN + 1], menu_row2[LCD_ROW_LEN + 1];

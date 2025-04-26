@@ -24,12 +24,11 @@
 #include "timer.h"
 
 static int has_sh1107;
-static int timer_idx;
+static int timer_idx = -1;
+uint8_t lcd_bl_timeout;
 
 void lcd_init()
 {
-	timer_idx = -1;
-
 	has_sh1107 = sh1107_init();
 
 	if (!has_sh1107)

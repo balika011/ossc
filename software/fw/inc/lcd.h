@@ -21,7 +21,11 @@
 #ifndef LCD_H_
 #define LCD_H_
 
+#include <stdint.h>
+
 #define LCD_ROW_LEN 16
+
+extern uint8_t lcd_bl_timeout;
 
 void lcd_init();
 
