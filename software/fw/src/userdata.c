@@ -301,9 +301,6 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
 	int entries_imported = 0;
 	for (int n = 0; n <= MAX_USERDATA_ENTRY; ++n)
 	{
-		snprintf(menu_row1, sizeof(menu_row1), "%d", n);
-		ui_disp_menu(1);
-
 		ude_hdr header;
 		if (sdcard_read(512 + n * USERDATA_ENTRY_SIZE, (uint8_t *)&header, sizeof(header)))
 		{
@@ -316,16 +313,27 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
             continue;
         }
 
-        if ((header.type == UDE_PROFILE) && ((header.version_major != PROFILE_VER_MAJOR) || (header.version_minor != PROFILE_VER_MINOR))) {
-            printf("Profile version %u.%.2u does not match current one\n", header.version_major, header.version_minor);
-            continue;
-        } else if ((header.type == UDE_INITCFG) && ((header.version_major != INITCFG_VER_MAJOR) || (header.version_minor != INITCFG_VER_MINOR))) {
-            printf("Initconfig version %u.%.2u does not match current one\n", header.version_major, header.version_minor);
-            continue;
-        } else {
-            printf("Unknown userdata entry type %u\n", header.type);
-            continue;
+        if (header.type == UDE_PROFILE)
+		{
+			if (header.version_major != PROFILE_VER_MAJOR || header.version_minor != PROFILE_VER_MINOR)
+			{
+				printf("Profile version %u.%.2u does not match current one\n", header.version_major, header.version_minor);
+				continue;
+			}
         }
+		else if (header.type == UDE_INITCFG)
+		{
+			if (header.version_major != INITCFG_VER_MAJOR || header.version_minor != INITCFG_VER_MINOR)
+			{
+				printf("Initconfig version %u.%.2u does not match current one\n", header.version_major, header.version_minor);
+	            continue;
+			}
+        }
+		else
+		{
+			printf("Unknown userdata entry type %u\n", header.type);
+            continue;
+		}
 
 		int entry_len = header.type == UDE_PROFILE ? (sizeof(ude_profile) + sizeof(video_modes_plm)) : sizeof(ude_initcfg);
 
@@ -512,11 +520,7 @@ copy_start:
 
 	for (int i = 0; i < MAX_USERDATA_ENTRY + 1; i++)
 	{
-		ude_hdr *hdr = (ude_hdr *)(FLASH_MEM_BASE + USERDATA_OFFSET + i * USERDATA_ENTRY_SIZE);
-		if (strncmp(hdr->magic, "USRDATA", 8))
-			continue;
-
-		uint8_t *data = (uint8_t *) hdr;
+		uint8_t *data = (uint8_t *)(FLASH_MEM_BASE + USERDATA_OFFSET + i * USERDATA_ENTRY_SIZE);
 		for (int j = 0; j < USERDATA_ENTRY_SIZE; j += SD_BLK_SIZE)
 		{
 			uint8_t temp[SD_BLK_SIZE];
