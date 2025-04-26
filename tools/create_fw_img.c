@@ -190,7 +190,7 @@ int main(int argc, char **argv)
 	hdr.params.data_crc = htonl(crc32(0, combined_buf, 0x80000 + fw_len));
 	hdr.raw.hdr_crc = htonl(crc32(0, &hdr, sizeof(hdr.params)));
 
-	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", version_suffix, rbf_len);
+	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", version_suffix, 0x80000 + fw_len);
 	printf("Header CRC32: %.8x\n", hdr.raw.hdr_crc);
 	printf("DATA CRC32: %.8x\n", hdr.params.data_crc);
 
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 	}
 	fwrite(&hdr, 1, sizeof(hdr), bin);
 	fseek(bin, HDR_SIZE, SEEK_SET);
-	fwrite(combined_buf, 1, rbf_len, bin);
+	fwrite(combined_buf, 1, 0x80000 + fw_len, bin);
 	fclose(bin);
 
 	free(combined_buf);
