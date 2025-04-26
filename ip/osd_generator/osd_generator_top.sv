@@ -60,18 +60,14 @@ reg [10:0] xpos_osd_area_scaled, xpos_text_scaled;
 reg [10:0] ypos_osd_area_scaled, ypos_text_scaled;
 reg [7:0] x_ptr[2:5], y_ptr[2:5] /* synthesis ramstyle = "logic" */;
 reg osd_text_act_pp[2:6], osd_act_pp[3:6];
-reg [14:0] to_ctr, to_ctr_ms;
 reg char_px;
 
 wire render_enable = osd_config[0];
-wire status_refresh = osd_config[1];
-wire menu_active = osd_config[2];
-wire [1:0] status_timeout = osd_config[4:3];
-wire [2:0] x_offset = osd_config[7:5];
-wire [2:0] y_offset = osd_config[10:8];
-wire [1:0] x_size = osd_config[12:11];
-wire [1:0] y_size = osd_config[14:13];
-wire [1:0] border_color = osd_config[16:15];
+wire [2:0] x_offset = osd_config[3:1];
+wire [2:0] y_offset = osd_config[6:4];
+wire [1:0] x_size = osd_config[8:7];
+wire [1:0] y_size = osd_config[10:9];
+wire [1:0] border_color = osd_config[12:11];
 
 wire [10:0] xpos_scaled_w = (xpos >> x_size)-({3'h0, x_offset} << 3);
 wire [10:0] ypos_scaled_w = (ypos >> y_size)-({3'h0, y_offset} << 3);
@@ -124,7 +120,6 @@ always @(posedge vclk) begin
     end
 
     osd_text_act_pp[2] <= render_enable &
-                          (menu_active || (to_ctr_ms > 0)) &
                           (((xpos_text_scaled < 8*CHAR_COLS) & config_reg[OSD_ROW_LSEC_ENABLE_REGNUM][ypos_text_scaled/8]) |
                            ((xpos_text_scaled >= 8*(CHAR_COLS+CHAR_SEC_SEPARATOR)) & (xpos_text_scaled < 8*(2*CHAR_COLS+CHAR_SEC_SEPARATOR)) & config_reg[OSD_ROW_RSEC_ENABLE_REGNUM][ypos_text_scaled/8])) &
                           (ypos_text_scaled < 8*CHAR_ROWS);
@@ -133,7 +128,6 @@ always @(posedge vclk) begin
     end
 
     osd_act_pp[3] <= render_enable &
-                     (menu_active || (to_ctr_ms > 0)) &
                      (((xpos_osd_area_scaled/8 < (CHAR_COLS+1)) & config_reg[OSD_ROW_LSEC_ENABLE_REGNUM][(ypos_osd_area_scaled/8) ? ((ypos_osd_area_scaled/8)-1) : 0]) |
                       ((xpos_osd_area_scaled/8 >= (CHAR_COLS+1)) & (xpos_osd_area_scaled/8 < (2*CHAR_COLS+CHAR_SEC_SEPARATOR+1)) & (config_reg[OSD_ROW_RSEC_ENABLE_REGNUM][(ypos_osd_area_scaled/8)-1] | config_reg[OSD_ROW_RSEC_ENABLE_REGNUM][ypos_osd_area_scaled/8]))) &
                      (ypos_osd_area_scaled < 8*(CHAR_ROWS+1));
@@ -153,28 +147,6 @@ always @(posedge vclk) begin
         end
     end else begin // border
         osd_color <= border_color;
-    end
-end
-
-// OSD status timeout counters
-always @(posedge clk_i)
-begin
-    if (status_refresh) begin
-        to_ctr <= 15'd0;
-        case (status_timeout)
-            default: to_ctr_ms <= 2000; // 2s
-            2'b01:   to_ctr_ms <= 5000; // 5s
-            2'b10:   to_ctr_ms <= 10000; // 10s
-            2'b11:   to_ctr_ms <= 0;    // off
-        endcase
-    end else begin
-        if (to_ctr == 27000-1) begin
-            to_ctr <= 0;
-            if (to_ctr_ms != 15'h0)
-                to_ctr_ms <= to_ctr_ms - 1'b1;
-        end else begin
-            to_ctr <= to_ctr + 1'b1;
-        end
     end
 end
 

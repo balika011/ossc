@@ -146,6 +146,7 @@ C_SRCS += src/userdata.c
 endif
 C_SRCS += src/utils.c
 C_SRCS += src/video_modes.c
+C_SRCS += src/osd.c
 C_SRCS += ../ic_drivers/it6613/EDID.c
 C_SRCS += ../ic_drivers/it6613/HDMI_TX.c
 C_SRCS += ../ic_drivers/it6613/hdmitx_nios2.c

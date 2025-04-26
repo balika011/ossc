@@ -30,6 +30,7 @@
 #include "lcd.h"
 #include "utils.h"
 #include "menu.h"
+#include "osd.h"
 
 #define FW_UPDATE_RETRIES 3
 

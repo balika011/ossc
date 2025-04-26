@@ -29,6 +29,7 @@
 #include "userdata.h"
 #include "lcd.h"
 #include "timer.h"
+#include "osd.h"
 
 static const char *rc_keydesc[REMOTE_MAX_KEYS] = {
 	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
@@ -80,7 +81,7 @@ void controls_set_default()
 
 void controls_setup()
 {
-	OSD->osd_config.menu_active = 1;
+	osd_set_menu_active(0);
 
 	strncpy(menu_row1, "Sel. Remote", sizeof(menu_row1));
 
@@ -167,7 +168,7 @@ void controls_setup()
 
 	userdata_save_initconfig();
 
-	OSD->osd_config.menu_active = 0;
+	osd_set_menu_active(0);
 	ui_disp_status(0);
 }
 
@@ -271,7 +272,7 @@ int	controls_parse()
 			case RC_BTN0: man_target_input = AV3_YPBPR; break;
 			case RC_MENU:
 				menu_active = !menu_active;
-				OSD->osd_config.menu_active = menu_active;
+				osd_set_menu_active(menu_active);
 				profile_sel_menu = profile_sel;
 
 				if (menu_active) {
@@ -293,7 +294,7 @@ int	controls_parse()
 				if (!menu_active) {
 					strncpy((char*)OSD->osd_array.data[0][0], menu_scanlines.items[0].name, OSD_CHAR_COLS);
 					strncpy((char*)OSD->osd_array.data[1][0], menu_scanlines.items[0].sel.setting_str[tc.sl_mode], OSD_CHAR_COLS);
-					OSD->osd_config.status_refresh = 1;
+					osd_status_refresh();
 					OSD->osd_row_color.mask = 0;
 					OSD->osd_sec_enable[0].mask = 3;
 					OSD->osd_sec_enable[1].mask = 0;
@@ -306,7 +307,7 @@ int	controls_parse()
 				if (!menu_active) {
 					strncpy((char*)OSD->osd_array.data[0][0], menu_scanlines.items[6].name, OSD_CHAR_COLS);
 					strncpy((char*)OSD->osd_array.data[1][0], menu_scanlines.items[6].sel.setting_str[tc.sl_type], OSD_CHAR_COLS);
-					OSD->osd_config.status_refresh = 1;
+					osd_status_refresh();
 					OSD->osd_row_color.mask = 0;
 					OSD->osd_sec_enable[0].mask = 3;
 					OSD->osd_sec_enable[1].mask = 0;
@@ -325,7 +326,7 @@ int	controls_parse()
 					strncpy((char*)OSD->osd_array.data[0][0], menu_scanlines.items[1].name, OSD_CHAR_COLS);
 					menu_scanlines.items[1].num.df(tc.sl_str);
 					strncpy((char*)OSD->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
-					OSD->osd_config.status_refresh = 1;
+					osd_status_refresh();
 					OSD->osd_row_color.mask = 0;
 					OSD->osd_sec_enable[0].mask = 3;
 					OSD->osd_sec_enable[1].mask = 0;
@@ -336,7 +337,7 @@ int	controls_parse()
 			case RC_LM_MODE:
 				strncpy(menu_row1, "Linemult mode:", LCD_ROW_LEN+1);
 				strncpy(menu_row2, "press 1-6", LCD_ROW_LEN+1);
-				OSD->osd_config.menu_active = 1;
+				osd_set_menu_active(1);
 				ui_disp_menu(1);
 
 				while (1)
@@ -370,7 +371,7 @@ int	controls_parse()
 					usleep(WAITLOOP_SLEEP_US);
 				}
 				menu_active = 0;
-				OSD->osd_config.menu_active = 0;
+				osd_set_menu_active(0);
 				ui_disp_status(0);
 				break;
 			case RC_PHASE_MINUS:
@@ -390,7 +391,7 @@ int	controls_parse()
 						strncpy((char*)OSD->osd_array.data[0][0], menu_advtiming.items[10].name, OSD_CHAR_COLS);
 						sampler_phase_disp(video_modes_plm[cm.id].sampler_phase);
 						strncpy((char*)OSD->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
-						OSD->osd_config.status_refresh = 1;
+						osd_status_refresh();
 						OSD->osd_row_color.mask = 0;
 						OSD->osd_sec_enable[0].mask = 3;
 						OSD->osd_sec_enable[1].mask = 0;
@@ -404,7 +405,7 @@ Prof_Hotkey_Prompt:
 			{
 				strncpy(menu_row1, "Profile load:", LCD_ROW_LEN+1);
 				sniprintf(menu_row2, LCD_ROW_LEN+1, "press %u-%u", prof_x10*10, ((prof_x10*10+9) > MAX_PROFILE) ? MAX_PROFILE : (prof_x10*10+9));
-				OSD->osd_config.menu_active = 1;
+				osd_set_menu_active(1);
 				ui_disp_menu(1);
 
 				uint32_t btn_vec_prev = 1;
@@ -440,7 +441,7 @@ Prof_Hotkey_Prompt:
 				}
 
 				menu_active = 0;
-				OSD->osd_config.menu_active = 0;
+				osd_set_menu_active(0);
 				ui_disp_status(0);
 				break;
 			}

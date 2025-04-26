@@ -30,6 +30,7 @@
 #include "av_controller.h"
 #include "menu.h"
 #include "utils.h"
+#include "osd.h"
 
 #define USERDATA_ENTRY_SIZE 0x10000
 

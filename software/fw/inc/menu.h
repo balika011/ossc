@@ -133,7 +133,6 @@ void init_menu();
 void render_osd_page();
 void display_menu(uint8_t forcedisp);
 void sampler_phase_disp(uint8_t v);
-void update_osd_size(mode_data_t *vm_out);
 static void vm_select();
 static void vm_tweak(uint16_t *v);
 

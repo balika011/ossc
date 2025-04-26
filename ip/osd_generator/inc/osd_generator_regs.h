@@ -29,15 +29,11 @@
 typedef union {
     struct {
         uint8_t enable:1;
-        uint8_t status_refresh:1;
-        uint8_t menu_active:1;
-        uint8_t status_timeout:2;
         uint8_t x_offset:3;
         uint8_t y_offset:3;
         uint8_t x_size:2;
         uint8_t y_size:2;
         uint8_t border_color:2;
-        uint32_t osd_rsv:15;
     } __attribute__((packed));
     uint32_t data;
 } osd_config_reg;

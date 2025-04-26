@@ -27,6 +27,7 @@
 #include "lcd.h"
 #include "tvp7002.h"
 #include "firmware.h"
+#include "osd.h"
 
 #define OPT_NOWRAP  0
 #define OPT_WRAP    1
@@ -269,14 +270,7 @@ void init_menu() {
 	vm_arg_info.max = VIDEO_MODE_COUNT - 1;
 
 	// Setup OSD
-    OSD->osd_config.x_size = 0;
-    OSD->osd_config.y_size = 0;
-    OSD->osd_config.x_offset = 3;
-    OSD->osd_config.y_offset = 3;
-    OSD->osd_config.enable = 1;
-    OSD->osd_config.status_timeout = 1;
-    OSD->osd_config.border_color = 1;
-
+	osd_init();
 }
 
 void write_option_value(menuitem_t *item, int func_called, int retval)
@@ -314,7 +308,8 @@ void write_option_value(menuitem_t *item, int func_called, int retval)
     }
 }
 
-void render_osd_page() {
+void render_osd_page()
+{
     int i;
     menuitem_t *item;
     uint32_t row_mask[2] = {0, 0};
@@ -376,8 +371,8 @@ void display_menu(uint8_t forcedisp)
             render_osd_page();
         } else {
             menu_active = 0;
-            OSD->osd_config.menu_active = 0;
-            ui_disp_status(0);
+			osd_set_menu_active(0);
+			ui_disp_status(0);
             return;
         }
         break;
@@ -467,20 +462,6 @@ void display_menu(uint8_t forcedisp)
         OSD->osd_sec_enable[1].mask |= (1<<navi[navlvl].mp);
 
     ui_disp_menu(0);
-}
-
-void update_osd_size(mode_data_t *vm_out) {
-    uint8_t osd_size = vm_out->timings.v_active / 700;
-    uint8_t par_x4 = (((400*vm_out->timings.h_active*vm_out->ar.v)/((vm_out->timings.v_active<<vm_out->timings.interlaced)*vm_out->ar.h))+50)/100;
-    int8_t xadj_log2 = -2;
-
-    while (par_x4 > 1) {
-        par_x4 >>= 1;
-        xadj_log2++;
-    }
-
-    OSD->osd_config.x_size = ((osd_size + vm_out->timings.interlaced + xadj_log2) >= 0) ? (osd_size + vm_out->timings.interlaced + xadj_log2) : 0;
-    OSD->osd_config.y_size = osd_size;
 }
 
 static void vm_select() {

@@ -38,6 +38,7 @@
 #include "HDMI_TX.h"
 #include "hdmitx.h"
 #include "timer.h"
+#include "osd.h"
 
 #define MIN_LINES_PROGRESSIVE   200
 #define MIN_LINES_INTERLACED    400
@@ -55,11 +56,8 @@ tvp_sync_input_t target_tvp_sync;
 uint8_t target_type;
 uint8_t update_cur_vm;
 
-uint8_t profile_sel, profile_sel_menu, input_profiles[AV_LAST], lt_sel, def_input, profile_link, lcd_bl_timeout;
-uint8_t osd_enable=1, osd_status_timeout=1;
+uint8_t profile_sel, profile_sel_menu, input_profiles[AV_LAST], lt_sel, def_input, profile_link;
 uint8_t auto_input, auto_av1_ypbpr, auto_av2_ypbpr = 1, auto_av3_ypbpr;
-
-char row1[LCD_ROW_LEN+1], row2[LCD_ROW_LEN+1], menu_row1[LCD_ROW_LEN+1], menu_row2[LCD_ROW_LEN+1];
 
 avinput_t target_input;
 
@@ -101,44 +99,6 @@ const pll_config_t pll_configs[] = { {{0x0d806000, 0x00402010, 0x08800020, 0x000
                                      {{0x04004070, 0x2190C804, 0x02800020, 0x00080002, 0x00000000}},    // 5x lo-bw (~20-40MHz)
                                      {{0x04004070, 0x21E0F004, 0x02800020, 0x00080002, 0x00000000}},    // 6x lo-bw (~20-40MHz)
                                      {{0x040040F0, 0x61A0D004, 0x02800020, 0x00080002, 0x00000000}} };  // 2x lo-bw (~75MHz)
-
-void ui_disp_menu(uint8_t osd_mode)
-{
-	uint8_t menu_page;
-
-	if ((osd_mode == 1) || (osd_enable == 2))
-	{
-		strncpy((char *)OSD->osd_array.data[0][0], menu_row1, OSD_CHAR_COLS);
-		strncpy((char *)OSD->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
-		OSD->osd_row_color.mask = 0;
-		OSD->osd_sec_enable[0].mask = menu_row2[0] ? 3 : 1;
-		OSD->osd_sec_enable[1].mask = 0;
-	}
-	else if (osd_mode == 2)
-	{
-		menu_page = get_current_menunavi()->mp;
-		strncpy((char *)OSD->osd_array.data[menu_page][1], menu_row2, OSD_CHAR_COLS);
-		OSD->osd_sec_enable[1].mask |= (1 << menu_page);
-	}
-
-	lcd_write(menu_row1, menu_row2);
-}
-
-void ui_disp_status(uint8_t refresh_osd_timer)
-{
-	if (!menu_active) {
-        if (refresh_osd_timer)
-            OSD->osd_config.status_refresh = 1;
-
-        strncpy((char*)OSD->osd_array.data[0][0], row1, OSD_CHAR_COLS);
-        strncpy((char*)OSD->osd_array.data[1][0], row2, OSD_CHAR_COLS);
-        OSD->osd_row_color.mask = 0;
-        OSD->osd_sec_enable[0].mask = 3;
-        OSD->osd_sec_enable[1].mask = 0;
-
-		lcd_write(row1, row2);
-	}
-}
 
 inline void SetupAudio(tx_mode_t mode)
 {
@@ -623,9 +583,9 @@ void program_mode()
 
     fpga_pll_config_changed = pll_reconfigure(vm_conf.si_pclk_mult, pclk_i_hz, cm.cc.fpga_pll_bw);
 
-    update_osd_size(&vmode_out);
+	osd_update_size(&vmode_out);
 
-    update_sc_config(&vmode_in, &vmode_out, &vm_conf, &cm.cc);
+	update_sc_config(&vmode_in, &vmode_out, &vm_conf, &cm.cc);
 
     TX_SetPixelRepetition(vm_conf.tx_pixelrep, ((cm.cc.tx_mode!=TX_DVI) && (vm_conf.tx_pixelrep == vm_conf.hdmitx_pixr_ifr)) ? 1 : 0);
 
@@ -831,7 +791,7 @@ void print_vm_stats() {
 		sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%u.%.2u" FW_SUFFIX " @ " __DATE__, FW_VER_MAJOR, FW_VER_MINOR);
 #endif
 
-        OSD->osd_config.status_refresh = 1;
+        osd_status_refresh();
         OSD->osd_row_color.mask = 0;
         OSD->osd_sec_enable[0].mask = (1<<(row+1))-1;
         OSD->osd_sec_enable[1].mask = (1<<(row+1))-1;
@@ -1109,15 +1069,8 @@ int main()
 				printf("Changing AV3 RGB source\n");
 				cm.cc.av3_alt_rgb = tc.av3_alt_rgb;
 			}
-			if ((!!osd_enable != OSD->osd_config.enable) || (osd_status_timeout != OSD->osd_config.status_timeout)) {
-				OSD->osd_config.enable = !!osd_enable;
-				OSD->osd_config.status_timeout = osd_status_timeout;
-				if (menu_active) {
-					remote_code = 0;
-					render_osd_page();
-					display_menu(1);
-				}
-			}
+
+			osd_update();
 
 			if (cm.avinput != AV_TESTPAT)
 			{
