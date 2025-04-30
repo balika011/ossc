@@ -4,7 +4,7 @@ __DYNAMIC  =  0;
 MEMORY
 {
     FLASH : ORIGIN = 0x10080000, LENGTH = 0x80000
-    IRAM  : ORIGIN = 0x10200000, LENGTH = 0x8000
+    IRAM  : ORIGIN = 0x10200000, LENGTH = 0x4000
 }
 
 /* Stack information variables */
