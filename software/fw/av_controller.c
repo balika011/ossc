@@ -363,7 +363,7 @@ status_t get_status(tvp_sync_input_t syncinput)
 
 void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t *vm_conf, avconfig_t *avconfig)
 {
-    int i;
+	osd_update_size(&vmode_out);
 
     hv_config_reg hv_in_config = {.data=0x00000000};
     hv_config2_reg hv_in_config2 = {.data=0x00000000};
@@ -417,12 +417,14 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
     misc_config.reverse_lpf = avconfig->reverse_lpf;
     misc_config.shmask_mode = avconfig->shmask_mode;
     misc_config.lumacode_mode = avconfig->lumacode_mode;
-    /*misc_config.lm_deint_mode = 0;
+    /*
+	misc_config.lm_deint_mode = 0;
     misc_config.nir_even_offset = 0;
     misc_config.ypbpr_cs = (avconfig->ypbpr_cs == 0) ? ((vm_in->type & VIDEO_HDTV) ? 1 : 0) : avconfig->ypbpr_cs-1;
     misc_config.vip_enable = 0;
     misc_config.bfi_enable = 0;
-    misc_config.bfi_str = 0;*/
+    misc_config.bfi_str = 0;
+	*/
 
     // set default/custom scanline interval
     sl_def_iv_y = (vm_conf->y_rpt > 0) ? vm_conf->y_rpt : 1;
@@ -431,7 +433,8 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
     sl_config3.sl_iv_y = ((avconfig->sl_type == 3) && (avconfig->sl_cust_iv_y)) ? avconfig->sl_cust_iv_y : sl_def_iv_y;
 
     // construct custom/default scanline overlay
-    for (i=0; i<6; i++) {
+	for (int i = 0; i < 6; i++)
+	{
         if (avconfig->sl_type == 3) {
             sl_config.sl_l_str_arr |= ((avconfig->sl_cust_l_str[i]-1)&0xf)<<(4*i);
             sl_config.sl_l_overlay |= (avconfig->sl_cust_l_str[i]!=0)<<i;
@@ -445,7 +448,9 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
             }
         }
     }
-    for (i = 0; i < 10; i++) {
+
+	for (int i = 0; i < 10; i++)
+	{
         if (avconfig->sl_type == 3) {
             if (i < 8)
                 sl_config2.sl_c_str_arr_l |= ((avconfig->sl_cust_c_str[i]-1)&0xf)<<(4*i);
@@ -462,6 +467,7 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
                 sl_config3.sl_c_overlay = (1<<((sl_config3.sl_iv_x+1)/2))-1;
         }
     }
+
     sl_config.sl_method = avconfig->sl_method;
     sl_config.sl_altern = avconfig->sl_altern;
     sl_config3.sl_hybr_str = avconfig->sl_hybr_str;
@@ -515,7 +521,7 @@ void program_mode()
 
     sniprintf(row1, LCD_ROW_LEN+1, "%s %u-%c", avinput_str[cm.avinput], (unsigned)cm.totlines, cm.progressive ? 'p' : 'i');
     sniprintf(row2, LCD_ROW_LEN+1, "%u.%.2ukHz %u.%.2uHz", (unsigned)(h_hz/1000), (unsigned)((h_hz%1000)/10), (unsigned)(vmode_in.timings.v_hz_x100/100), (unsigned)(vmode_in.timings.v_hz_x100%100));
-    ui_disp_status(1);
+    osd_status(1);
 
     retval = get_pure_lm_mode(&cm.cc, &vmode_in, &vmode_out, &vm_conf);
 
@@ -582,8 +588,6 @@ void program_mode()
     set_sampler_phase(video_modes_plm[cm.id].sampler_phase, 0);
 
     fpga_pll_config_changed = pll_reconfigure(vm_conf.si_pclk_mult, pclk_i_hz, cm.cc.fpga_pll_bw);
-
-	osd_update_size(&vmode_out);
 
 	update_sc_config(&vmode_in, &vmode_out, &vm_conf, &cm.cc);
 
@@ -717,7 +721,7 @@ int init_hw()
 	for (int i = 0; i < (LCD_ROW_LEN - strlen(fwver)) / 2; i++)
 		*prow2++ = ' ';
 	strcpy(prow2, fwver);
-	ui_disp_status(1);
+	osd_status(1);
 
 	if (!ths_init())
 	{
@@ -862,7 +866,7 @@ int main()
 	{
 		sniprintf(row1, sizeof(row1), "Init error  %d", init_stat);
 		strncpy(row2, "", sizeof(row2));
-		ui_disp_status(1);
+		osd_status(1);
 		while (1);
 	}
 	printf("### DIY VIDEO DIGITIZER / SCANCONVERTER INIT OK ###\n\n");
@@ -1026,7 +1030,7 @@ int main()
 				SC->sys_ctrl.vsync_type = target_format == FORMAT_RGBHV;
 				strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
 				strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
-				ui_disp_status(1);
+				osd_status(1);
 				if (man_input_change) {
 					// record last input if it was selected manually
 					if (def_input == AV_LAST)
@@ -1091,7 +1095,7 @@ int main()
 						//ths_source_sel(THS_STANDBY, 0);
 						strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
 						strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
-						ui_disp_status(1);
+						osd_status(1);
 						// Set auto_input_timestamp
 						auto_input_timestamp = timer_timestamp();
 						auto_input_ctr = 0;

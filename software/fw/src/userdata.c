@@ -279,7 +279,7 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
 		return retval;
 
 	strncpy(menu_row2, "Import? 1=Y, 2=N", LCD_ROW_LEN+1);
-    ui_disp_menu(2);
+    osd_notification(2);
 
     while (1) {
 		uint32_t btn_vec = SC->controls.ir_code;
@@ -296,7 +296,7 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
     }
 
     strncpy(menu_row2, "Loading...", LCD_ROW_LEN+1);
-    ui_disp_menu(2);
+    osd_notification(2);
 
 	// Import the userdata
 	int entries_imported = 0;
@@ -436,7 +436,7 @@ int userdata_export()
 		prompt_state = prompt_transitions[prompt_state];
 
 		strncpy(menu_row2, msg, sizeof(menu_row2));
-		ui_disp_menu(2);
+		osd_notification(2);
 		if (poll_yesno(prompt_delay, &btn_vec))
 		{
 			if (btn_vec == rc_keymap[RC_BTN1])
@@ -456,7 +456,7 @@ int userdata_export()
 	usleep(1000000);
 	strncpy(menu_row1, "Format?", sizeof(menu_row1));
 	strncpy(menu_row2, "1=FAT16, 2=RAW", sizeof(menu_row2));
-	ui_disp_menu(2);
+	osd_notification(2);
 	if ((!poll_yesno(5000000U, &btn_vec)) || ((btn_vec != rc_keymap[RC_BTN1]) && (btn_vec != rc_keymap[RC_BTN2])))
 	{
 		retval = UDATA_EXPT_CANCELLED;
@@ -466,7 +466,7 @@ int userdata_export()
 
 	strncpy(menu_row1, "Export sett.", sizeof(menu_row1));
 	strncpy(menu_row2, LNG("Exporting...", "ｵﾏﾁｸﾀﾞｻｲ"), sizeof(menu_row2));
-	ui_disp_menu(2);
+	osd_notification(2);
 
 	// RAW copy
 	if (btn_vec == rc_keymap[RC_BTN2])
@@ -544,7 +544,7 @@ out:
 		default: msg = LNG("SD/Flash error", "SDｶFLASHﾉｴﾗｰ"); break; // ﾌﾗｯｼｭ would be NG.
 	}
 	strncpy(menu_row2, msg, sizeof(menu_row2));
-	ui_disp_menu(2);
+	osd_notification(2);
 
 	if (!retval)
 	{

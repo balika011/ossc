@@ -29,8 +29,23 @@
 #include "firmware.h"
 #include "osd.h"
 
-#define OPT_NOWRAP  0
-#define OPT_WRAP    1
+#define SETTING_ITEM(x) 0, sizeof(x)/sizeof(char*)-1, x
+#define MENU(X, Y) menuitem_t X##_items[] = Y; static const menu_t X = { sizeof(X##_items)/sizeof(menuitem_t), X##_items };
+#define P99_PROTECT(...) __VA_ARGS__
+
+typedef enum
+{
+    NO_ACTION    = 0,
+    OPT_SELECT   = RC_OK,
+    PREV_MENU    = RC_BACK,
+    PREV_PAGE    = RC_UP,
+    NEXT_PAGE    = RC_DOWN,
+    VAL_MINUS    = RC_LEFT,
+    VAL_PLUS     = RC_RIGHT,
+} menucode_id; // order must be consequential with rc_code_t
+
+#define OPT_NOWRAP	0
+#define OPT_WRAP	1
 
 uint16_t tc_h_samplerate, tc_h_samplerate_adj, tc_h_synclen, tc_h_bporch, tc_h_active, tc_v_synclen, tc_v_bporch, tc_v_active, tc_sampler_phase, tc_h_mask, tc_v_mask;
 uint8_t menu_active;
@@ -98,7 +113,7 @@ static arg_info_t vm_arg_info = {&vm_sel, 0, vm_display_name};
 static const arg_info_t profile_arg_info = {&profile_sel_menu, MAX_PROFILE, profile_disp};
 static const arg_info_t lt_arg_info = {&lt_sel, (sizeof(lt_desc)/sizeof(char*))-1, lt_disp};
 
-MENU_DYN(menu_advtiming, P99_PROTECT({ \
+MENU(menu_advtiming, P99_PROTECT({ \
     { LNG("H. samplerate","H. ｻﾝﾌﾟﾙﾚｰﾄ"),        OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_h_samplerate, H_TOTAL_MIN,   H_TOTAL_MAX, vm_tweak } } },
     { "H. s.rate frac",                           OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_h_samplerate_adj, 0,  H_TOTAL_ADJ_MAX, vm_tweak } } },
     { LNG("H. synclen","H. ﾄﾞｳｷﾅｶﾞｻ"),       OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_h_synclen,    H_SYNCLEN_MIN, H_SYNCLEN_MAX, vm_tweak } } },
@@ -151,7 +166,7 @@ MENU(menu_sampling, P99_PROTECT({ \
     { LNG("480p in sampler","ｻﾝﾌﾟﾗｰﾃﾞ480p"),     OPT_AVCONFIG_SELECTION, { .sel = { &tc.s480p_mode,    OPT_WRAP, SETTING_ITEM(s480p_mode_desc) } } },
     { LNG("400p in sampler","ｻﾝﾌﾟﾗｰﾃﾞ400p"),     OPT_AVCONFIG_SELECTION, { .sel = { &tc.s400p_mode,    OPT_WRAP, SETTING_ITEM(s400p_mode_desc) } } },
     { LNG("Allow upsample2x","ｱｯﾌﾟｻﾝﾌﾟﾙ2xｷｮﾖｳ"), OPT_AVCONFIG_SELECTION, { .sel = { &tc.upsample2x,   OPT_WRAP, SETTING_ITEM(off_on_desc) } } },
-    { LNG("<Adv. timing   >","<ｶｸｼｭﾀｲﾐﾝｸﾞ>"),    OPT_SUBMENU,            { .sub = { &menu_advtiming, &vm_arg_info, vm_select } } },
+	{ LNG("Adv. timing    >","ｶｸｼｭﾀｲﾐﾝｸﾞ >"),	OPT_SUBMENU,			{ .sub = { &menu_advtiming, &vm_arg_info, vm_select } } },
 }))
 
 MENU(menu_sync, P99_PROTECT({ \
@@ -186,7 +201,7 @@ MENU(menu_output, P99_PROTECT({ \
     { "HDMI VRR flag",                         OPT_AVCONFIG_SELECTION, { .sel = { &tc.hdmi_vrr,        OPT_WRAP, SETTING_ITEM(off_on_desc) } } },
 }))
 
-MENU_DYN(menu_scanlines, P99_PROTECT({ \
+MENU(menu_scanlines, P99_PROTECT({ \
     { LNG("Scanlines","ｽｷｬﾝﾗｲﾝ"),                  OPT_AVCONFIG_SELECTION, { .sel = { &tc.sl_mode,     OPT_WRAP,   SETTING_ITEM(sl_mode_desc) } } },
     { LNG("Sl. strength","ｽｷｬﾝﾗｲﾝﾂﾖｻ"),            OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.sl_str,      OPT_NOWRAP, 0, SCANLINESTR_MAX, sl_str_disp } } },
     { "Sl. hybrid str.",                          OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.sl_hybr_str, OPT_NOWRAP, 0, SL_HYBRIDSTR_MAX, sl_hybr_str_disp } } },
@@ -219,7 +234,6 @@ MENU(menu_audio, P99_PROTECT({ \
     { "Mono mode",                              OPT_AVCONFIG_SELECTION,  { .sel = { &tc.audio_mono,      OPT_WRAP, SETTING_ITEM(off_on_desc) } } },
     { "Pre-ADC gain",                           OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.audio_gain,     OPT_NOWRAP, 0, AUDIO_GAIN_MAX, aud_db_disp } } },
 }))
-#define AUDIO_MENU { LNG("Audio options  >","ｵｰﾃﾞｨｵｵﾌﾟｼｮﾝ     >"),                  OPT_SUBMENU,            { .sub = { &menu_audio, NULL, NULL } } },
 
 MENU(menu_settings, P99_PROTECT({ \
     { LNG("Link prof->input","Link prof->input"), OPT_AVCONFIG_NUMVALUE,  { .num = { &tc.link_av,  OPT_WRAP, AV1_RGBs, AV_LAST, link_av_desc } } },
@@ -233,9 +247,9 @@ MENU(menu_settings, P99_PROTECT({ \
     { "OSD",                                    OPT_AVCONFIG_SELECTION, { .sel = { &osd_enable,   OPT_WRAP,   SETTING_ITEM(osd_enable_desc) } } },
     { "OSD status disp.",                       OPT_AVCONFIG_SELECTION, { .sel = { &osd_status_timeout,   OPT_WRAP,   SETTING_ITEM(osd_status_desc) } } },
     { "Phase hotkey",                           OPT_AVCONFIG_SELECTION, { .sel = { &phase_hotkey_enable,  OPT_WRAP, SETTING_ITEM(off_on_desc) } } },
-    { LNG("<Load profile >","<ﾌﾟﾛﾌｧｲﾙﾛｰﾄﾞ    >"),   OPT_FUNC_CALL,         { .fun = { load_profile, &profile_arg_info } } },
-    { LNG("<Save profile >","<ﾌﾟﾛﾌｧｲﾙｾｰﾌﾞ    >"),  OPT_FUNC_CALL,          { .fun = { save_profile, &profile_arg_info } } },
-    { LNG("<Reset settings>","<ｾｯﾃｲｦｼｮｷｶ    >"),  OPT_FUNC_CALL,          { .fun = { avconfig_set_default, NULL } } },
+	{ LNG("<Load profile  >","<ﾌﾟﾛﾌｧｲﾙﾛｰﾄﾞ   >"),   OPT_FUNC_CALL,         { .fun = { load_profile, &profile_arg_info } } },
+	{ LNG("<Save profile  >","<ﾌﾟﾛﾌｧｲﾙｾｰﾌﾞ   >"),  OPT_FUNC_CALL,          { .fun = { save_profile, &profile_arg_info } } },
+	{ LNG("<Reset settings>","<ｾｯﾃｲｦｼｮｷｶ     >"),  OPT_FUNC_CALL,          { .fun = { avconfig_set_default, NULL } } },
 #ifndef DEBUG
     { LNG("<Import sett.  >","<ｾｯﾃｲﾖﾐｺﾐ      >"), OPT_FUNC_CALL,        { .fun = { userdata_import, NULL } } },
     { LNG("<Export sett.  >","<ｾｯﾃｲｶｷｺﾐ      >"), OPT_FUNC_CALL,        { .fun = { userdata_export, NULL } } },
@@ -252,7 +266,7 @@ MENU(menu_main, P99_PROTECT({ \
     { LNG("Scanline opt.  >","ｽｷｬﾝﾗｲﾝｵﾌﾟｼｮﾝ >"),  OPT_SUBMENU,            { .sub = { &menu_scanlines, NULL, NULL } } },
     { LNG("Post-proc.     >","ｱﾄｼｮﾘ         >"),  OPT_SUBMENU,            { .sub = { &menu_postproc, NULL, NULL } } },
     { LNG("Compatibility  >","ｺﾞｶﾝｾｲ        >"),  OPT_SUBMENU,            { .sub = { &menu_compatibility, NULL, NULL } } },
-    AUDIO_MENU
+	{ LNG("Audio options  >","ｵｰﾃﾞｨｵｵﾌﾟｼｮﾝ     >"),                  OPT_SUBMENU,            { .sub = { &menu_audio, NULL, NULL } } },
     { LNG("Settings opt   >","ｾｯﾃｲｶﾝﾘ       >"),  OPT_SUBMENU,            { .sub = { &menu_settings, NULL, NULL } } },
 }))
 
@@ -260,17 +274,18 @@ MENU(menu_main, P99_PROTECT({ \
 menunavi navi[] = {{&menu_main, 0}, {NULL, 0}, {NULL, 0}};
 uint8_t navlvl = 0;
 
-
-menunavi* get_current_menunavi() {
-    return &navi[navlvl];
-}
-
-void init_menu() {
+void init_menu()
+{
     // Set max ids for adv timing
 	vm_arg_info.max = VIDEO_MODE_COUNT - 1;
 
 	// Setup OSD
 	osd_init();
+}
+
+menunavi* get_current_menunavi()
+{
+	return &navi[navlvl];
 }
 
 void write_option_value(menuitem_t *item, int func_called, int retval)
@@ -308,7 +323,7 @@ void write_option_value(menuitem_t *item, int func_called, int retval)
     }
 }
 
-void render_osd_page()
+void menu_render_page()
 {
     int i;
     menuitem_t *item;
@@ -361,18 +376,18 @@ void display_menu(uint8_t forcedisp)
             OSD->osd_sec_enable[1].mask &= ~(1<<navi[navlvl].mp);
 
         if (code == PREV_PAGE)
-            navi[navlvl].mp = (navi[navlvl].mp == 0) ? navi[navlvl].m->num_items-1 : (navi[navlvl].mp-1);
+            navi[navlvl].mp = (navi[navlvl].mp == 0) ? navi[navlvl].m->num_items - 1 : (navi[navlvl].mp - 1);
         else
-            navi[navlvl].mp = (navi[navlvl].mp+1) % navi[navlvl].m->num_items;
+            navi[navlvl].mp = (navi[navlvl].mp + 1) % navi[navlvl].m->num_items;
         break;
     case PREV_MENU:
         if (navlvl > 0) {
             navlvl--;
-            render_osd_page();
+			menu_render_page();
         } else {
             menu_active = 0;
 			osd_set_menu_active(0);
-			ui_disp_status(0);
+			osd_status(0);
             return;
         }
         break;
@@ -386,7 +401,7 @@ void display_menu(uint8_t forcedisp)
                     navi[navlvl+1].mp = 0;
                 navi[navlvl+1].m = item->sub.menu;
                 navlvl++;
-                render_osd_page();
+				menu_render_page();
 
                 break;
             case OPT_FUNC_CALL:
@@ -456,12 +471,10 @@ void display_menu(uint8_t forcedisp)
     item = &navi[navlvl].m->items[navi[navlvl].mp];
     strncpy(menu_row1, item->name, LCD_ROW_LEN+1);
     write_option_value(item, func_called, retval);
-    strncpy((char*)OSD->osd_array.data[navi[navlvl].mp][1], menu_row2, OSD_CHAR_COLS);
-    OSD->osd_row_color.mask = (1<<navi[navlvl].mp);
-    if (func_called || ((item->type == OPT_FUNC_CALL) && item->fun.arg_info != NULL) || ((item->type == OPT_SUBMENU) && item->sub.arg_info != NULL))
-        OSD->osd_sec_enable[1].mask |= (1<<navi[navlvl].mp);
+	if (menu_row2[0])
+		osd_draw_text(navi[navlvl].mp, 1, 1, 3, menu_row2);
 
-    ui_disp_menu(0);
+	lcd_write(menu_row1, menu_row2);
 }
 
 static void vm_select() {
@@ -515,4 +528,64 @@ static void vm_tweak(uint16_t *v) {
         sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%.2u", video_modes_plm[vm_edit].timings.h_total, video_modes_plm[vm_edit].timings.h_total_adj*5);
     else
         sniprintf(menu_row2, LCD_ROW_LEN+1, "%u", *v);
+}
+
+void menu_sampler_phase(uint8_t v)
+{
+	if (!menu_active)
+	{
+		strncpy(menu_row1, LNG("Sampling phase", "ｻﾝﾌﾟﾘﾝｸﾞﾌｪｰｽﾞ"), OSD_CHAR_COLS);
+		sampler_phase_disp(v);
+		osd_notification(1);
+		osd_status_refresh();
+	}
+	else if (get_current_menunavi()->m == &menu_advtiming)
+	{
+		menu_render_page();
+	}
+}
+
+void menu_scanlines_mode()
+{
+	if (!menu_active)
+	{
+		strncpy(menu_row1, LNG("Scanlines", "ｽｷｬﾝﾗｲﾝ"), OSD_CHAR_COLS);
+		strncpy(menu_row2, sl_mode_desc[tc.sl_mode], OSD_CHAR_COLS);
+		osd_notification(1);
+		osd_status_refresh();
+	}
+	else if (get_current_menunavi()->m == &menu_scanlines)
+	{
+		menu_render_page();
+	}
+}
+
+void menu_scanlines_type()
+{
+	if (!menu_active)
+	{
+		strncpy(menu_row1, LNG("Sl. type", "ｽｷｬﾝﾗｲﾝﾙｲ"), OSD_CHAR_COLS);
+		strncpy(menu_row2, sl_type_desc[tc.sl_type], OSD_CHAR_COLS);
+		osd_notification(1);
+		osd_status_refresh();
+	}
+	else if (get_current_menunavi()->m == &menu_scanlines)
+	{
+		menu_render_page();
+	}
+}
+
+void menu_scanlines_strength()
+{
+	if (!menu_active)
+	{
+		strncpy(menu_row1, LNG("Sl. strength", "ｽｷｬﾝﾗｲﾝﾂﾖｻ"), OSD_CHAR_COLS);
+		sl_str_disp(tc.sl_str);
+		osd_notification(1);
+		osd_status_refresh();
+	}
+	else if (get_current_menunavi()->m == &menu_scanlines)
+	{
+		menu_render_page();
+	}
 }

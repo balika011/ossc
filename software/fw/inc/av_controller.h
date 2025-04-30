@@ -78,9 +78,6 @@ extern uint8_t lt_sel;
 extern uint8_t sl_def_iv_x, sl_def_iv_y;
 extern uint8_t in_standby;
 
-void ui_disp_menu(uint8_t osd_mode);
-void ui_disp_status(uint8_t refresh_osd_timer);
-
 void set_sampler_phase(uint8_t sampler_phase, uint8_t update_sc);
 
 int load_profile();

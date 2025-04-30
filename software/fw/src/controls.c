@@ -92,7 +92,7 @@ void controls_setup()
 	while (1)
 	{
 		strncpy(menu_row2, remote_names[remote_idx], sizeof(menu_row2));
-		ui_disp_menu(1);
+		osd_notification(1);
 
 		controls_update();
 
@@ -110,7 +110,7 @@ void controls_setup()
 				{
 					strncpy(menu_row1, "Press", sizeof(menu_row1));
 					strncpy(menu_row2, rc_keydesc[i], sizeof(menu_row2));
-					ui_disp_menu(1);
+					osd_notification(1);
 					uint32_t remote_code_prev = 0;
 
 					while (1)
@@ -123,12 +123,12 @@ void controls_setup()
 							{
 								rc_keymap[i] = remote_code;
 								strncpy(menu_row1, "Confirm", sizeof(menu_row1));
-								ui_disp_menu(1);
+								osd_notification(1);
 							}
 							else if (remote_code != remote_code_prev)
 							{
 								strncpy(menu_row1, "Mismatch, retry", sizeof(menu_row1));
-								ui_disp_menu(1);
+								osd_notification(1);
 								remote_code_prev = 0;
 								continue;
 							}
@@ -164,12 +164,12 @@ void controls_setup()
 
 	strncpy(menu_row1, "Saving...", sizeof(menu_row1));
 	menu_row2[0] = 0;
-	ui_disp_menu(1);
+	osd_notification(1);
 
 	userdata_save_initconfig();
 
 	osd_set_menu_active(0);
-	ui_disp_status(0);
+	osd_status(0);
 }
 
 static void controls_reset_led()
@@ -276,10 +276,10 @@ int	controls_parse()
 				profile_sel_menu = profile_sel;
 
 				if (menu_active) {
-					render_osd_page();
+					menu_render_page();
 					display_menu(1);
 				} else {
-					ui_disp_status(0);
+					osd_status(0);
 				}
 
 				break;
@@ -291,29 +291,11 @@ int	controls_parse()
 				break;
 			case RC_SL_MODE:
 				tc.sl_mode = (tc.sl_mode < SL_MODE_MAX) ? (tc.sl_mode + 1) : 0;
-				if (!menu_active) {
-					strncpy((char*)OSD->osd_array.data[0][0], menu_scanlines.items[0].name, OSD_CHAR_COLS);
-					strncpy((char*)OSD->osd_array.data[1][0], menu_scanlines.items[0].sel.setting_str[tc.sl_mode], OSD_CHAR_COLS);
-					osd_status_refresh();
-					OSD->osd_row_color.mask = 0;
-					OSD->osd_sec_enable[0].mask = 3;
-					OSD->osd_sec_enable[1].mask = 0;
-				} else if (get_current_menunavi()->m == &menu_scanlines) {
-					render_osd_page();
-				}
+				menu_scanlines_mode();
 				break;
 			case RC_SL_TYPE:
 				tc.sl_type = (tc.sl_type < SL_TYPE_MAX) ? (tc.sl_type + 1) : 0;
-				if (!menu_active) {
-					strncpy((char*)OSD->osd_array.data[0][0], menu_scanlines.items[6].name, OSD_CHAR_COLS);
-					strncpy((char*)OSD->osd_array.data[1][0], menu_scanlines.items[6].sel.setting_str[tc.sl_type], OSD_CHAR_COLS);
-					osd_status_refresh();
-					OSD->osd_row_color.mask = 0;
-					OSD->osd_sec_enable[0].mask = 3;
-					OSD->osd_sec_enable[1].mask = 0;
-				} else if (get_current_menunavi()->m == &menu_scanlines) {
-					render_osd_page();
-				}
+				menu_scanlines_type();
 				break;
 			case RC_SL_MINUS:
 			case RC_SL_PLUS:
@@ -322,23 +304,13 @@ int	controls_parse()
 				else
 					tc.sl_str = (tc.sl_str < SCANLINESTR_MAX) ? (tc.sl_str + 1) : SCANLINESTR_MAX;
 
-				if (!menu_active) {
-					strncpy((char*)OSD->osd_array.data[0][0], menu_scanlines.items[1].name, OSD_CHAR_COLS);
-					menu_scanlines.items[1].num.df(tc.sl_str);
-					strncpy((char*)OSD->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
-					osd_status_refresh();
-					OSD->osd_row_color.mask = 0;
-					OSD->osd_sec_enable[0].mask = 3;
-					OSD->osd_sec_enable[1].mask = 0;
-				} else if (get_current_menunavi()->m == &menu_scanlines) {
-					render_osd_page();
-				}
+				menu_scanlines_strength();
 				break;
 			case RC_LM_MODE:
 				strncpy(menu_row1, "Linemult mode:", LCD_ROW_LEN+1);
 				strncpy(menu_row2, "press 1-6", LCD_ROW_LEN+1);
 				osd_set_menu_active(1);
-				ui_disp_menu(1);
+				osd_notification(1);
 
 				while (1)
 				{
@@ -360,7 +332,7 @@ int	controls_parse()
 							*pmcfg_ptr[video_modes_plm[cm.id].group] = i;
 						} else {
 							sniprintf(menu_row2, LCD_ROW_LEN+1, "%ux unsupported", i+1);
-							ui_disp_menu(1);
+							osd_notification(1);
 							usleep(500000);
 						}
 						break;
@@ -372,7 +344,7 @@ int	controls_parse()
 				}
 				menu_active = 0;
 				osd_set_menu_active(0);
-				ui_disp_status(0);
+				osd_status(0);
 				break;
 			case RC_PHASE_MINUS:
 			case RC_PHASE_PLUS:
@@ -387,17 +359,7 @@ int	controls_parse()
 
 					set_sampler_phase(video_modes_plm[cm.id].sampler_phase, 1);
 
-					if (!menu_active) {
-						strncpy((char*)OSD->osd_array.data[0][0], menu_advtiming.items[10].name, OSD_CHAR_COLS);
-						sampler_phase_disp(video_modes_plm[cm.id].sampler_phase);
-						strncpy((char*)OSD->osd_array.data[1][0], menu_row2, OSD_CHAR_COLS);
-						osd_status_refresh();
-						OSD->osd_row_color.mask = 0;
-						OSD->osd_sec_enable[0].mask = 3;
-						OSD->osd_sec_enable[1].mask = 0;
-					} else if (get_current_menunavi()->m == &menu_advtiming) {
-						render_osd_page();
-					}
+					menu_sampler_phase(video_modes_plm[cm.id].sampler_phase);
 				}
 				break;
 			case RC_PROF_HOTKEY:
@@ -406,7 +368,7 @@ Prof_Hotkey_Prompt:
 				strncpy(menu_row1, "Profile load:", LCD_ROW_LEN+1);
 				sniprintf(menu_row2, LCD_ROW_LEN+1, "press %u-%u", prof_x10*10, ((prof_x10*10+9) > MAX_PROFILE) ? MAX_PROFILE : (prof_x10*10+9));
 				osd_set_menu_active(1);
-				ui_disp_menu(1);
+				osd_notification(1);
 
 				uint32_t btn_vec_prev = 1;
 				while (1)
@@ -424,7 +386,7 @@ Prof_Hotkey_Prompt:
 							profile_sel_menu = prof_x10*10 + ((i+1)%10);
 							int retval = load_profile();
 							sniprintf(menu_row2, LCD_ROW_LEN+1, "%s", (retval==0) ? "Done" : "Failed");
-							ui_disp_menu(1);
+							osd_notification(1);
 							usleep(500000);
 							break;
 						} else if (i == RC_PROF_HOTKEY) {
@@ -442,7 +404,7 @@ Prof_Hotkey_Prompt:
 
 				menu_active = 0;
 				osd_set_menu_active(0);
-				ui_disp_status(0);
+				osd_status(0);
 				break;
 			}
 			case RC_RIGHT:

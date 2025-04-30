@@ -25,7 +25,7 @@ void osd_init()
 	OSD->osd_config.border_color = 1;
 }
 
-void ui_disp_menu(uint8_t osd_mode)
+void osd_notification(uint8_t osd_mode)
 {
 	uint8_t menu_page;
 
@@ -47,7 +47,7 @@ void ui_disp_menu(uint8_t osd_mode)
 	lcd_write(menu_row1, menu_row2);
 }
 
-void ui_disp_status(uint8_t refresh_osd_timer)
+void osd_status(uint8_t refresh_osd_timer)
 {
 	if (!menu_active)
 	{

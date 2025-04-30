@@ -112,7 +112,7 @@ int fw_update()
 
 	sniprintf(menu_row1, LCD_ROW_LEN+1, "Validating data");
 	sniprintf(menu_row2, LCD_ROW_LEN + 1, "%u bytes", (unsigned)fw_header.params.data_len);
-	ui_disp_menu(1);
+	osd_notification(1);
 
 	retval = sdcard_check_crc(sizeof(fw_hdr), fw_header.params.data_len, fw_header.params.data_crc);
 	if (retval != 0)
@@ -120,7 +120,7 @@ int fw_update()
 
 	sniprintf(menu_row1, LCD_ROW_LEN + 1, "%u.%.2u%s%s", fw_header.params.version_major, fw_header.params.version_minor, (fw_header.params.version_suffix[0] == 0) ? "" : "-", fw_header.params.version_suffix);
 	strncpy(menu_row2, "Update? 1=Y, 2=N", LCD_ROW_LEN+1);
-	ui_disp_menu(1);
+	osd_notification(1);
 
 	while (1) {
 		uint32_t btn_vec = SC->controls.ir_code;
@@ -202,7 +202,7 @@ failure:
 	else
 	{
 		strncpy(menu_row2, errmsg, LCD_ROW_LEN + 1);
-		ui_disp_menu(1);
+		osd_notification(1);
 	}
 
 	usleep(1000000);
@@ -219,6 +219,6 @@ failure:
 		while(1);
 	}
 
-	render_osd_page();
+	menu_render_page();
 	return -1;
 }
