@@ -20,15 +20,6 @@ set_module_property REPORT_TO_TALKBACK false
 set_module_property ALLOW_GREYBOX_GENERATION false
 set_module_property REPORT_HIERARCHY false
 
-#
-# parameters
-#
-#add_parameter USE_MEMORY_BLOCKS INTEGER 1
-#set_parameter_property USE_MEMORY_BLOCKS DISPLAY_NAME "Use memory blocks for character array"
-#set_parameter_property USE_MEMORY_BLOCKS DISPLAY_HINT boolean
-#set_parameter_property USE_MEMORY_BLOCKS UNITS None
-#set_parameter_property USE_MEMORY_BLOCKS HDL_PARAMETER true
-
 # 
 # file sets
 # 
@@ -123,37 +114,86 @@ set_interface_assignment avalon_s embeddedsw.configuration.isNonVolatileStorage 
 set_interface_assignment avalon_s embeddedsw.configuration.isPrintableDevice 0
 
 
+#
+# connection point osd_clk
+#
+add_interface osd_clk clock end
+set_interface_property osd_clk ENABLED true
+set_interface_property osd_clk EXPORT_OF ""
+set_interface_property osd_clk PORT_NAME_MAP ""
+set_interface_property osd_clk CMSIS_SVD_VARIABLES ""
+set_interface_property osd_clk SVD_ADDRESS_GROUP ""
+
+add_interface_port osd_clk vclk clk Input 1
+
+
+#
+# connection point avalon_m
+#
+add_interface avalon_m avalon start
+set_interface_property avalon_m addressUnits SYMBOLS
+set_interface_property avalon_m associatedClock osd_clk
+set_interface_property avalon_m associatedReset reset_sink
+set_interface_property avalon_m bitsPerSymbol 8
+set_interface_property avalon_m burstOnBurstBoundariesOnly false
+set_interface_property avalon_m burstcountUnits WORDS
+set_interface_property avalon_m doStreamReads false
+set_interface_property avalon_m doStreamWrites false
+set_interface_property avalon_m holdTime 0
+set_interface_property avalon_m linewrapBursts false
+set_interface_property avalon_m maximumPendingReadTransactions 0
+set_interface_property avalon_m maximumPendingWriteTransactions 0
+set_interface_property avalon_m readLatency 0
+set_interface_property avalon_m readWaitTime 1
+set_interface_property avalon_m setupTime 0
+set_interface_property avalon_m timingUnits Cycles
+set_interface_property avalon_m writeWaitTime 0
+set_interface_property avalon_m ENABLED true
+set_interface_property avalon_m EXPORT_OF ""
+set_interface_property avalon_m PORT_NAME_MAP ""
+set_interface_property avalon_m CMSIS_SVD_VARIABLES ""
+set_interface_property avalon_m SVD_ADDRESS_GROUP ""
+add_interface_port avalon_m avalon_m_address address Output 32
+add_interface_port avalon_m avalon_m_readdata readdata Input 32
+add_interface_port avalon_m avalon_m_read read Output 1
+add_interface_port avalon_m avalon_m_readdatavalid readdatavalid Input 1
+add_interface_port avalon_m avalon_m_waitrequest waitrequest Input 1
+add_interface_port avalon_m avalon_m_write write Output 1
+add_interface_port avalon_m avalon_m_byteenable byteenable Output 4
+add_interface_port avalon_m avalon_m_writedata writedata Output 32
+add_interface_port avalon_m avalon_m_response response Input 2
+add_interface_port avalon_m avalon_m_writeresponsevalid writeresponsevalid Input 1
+
+
 # 
-# connection point bus
+# connection point osd_in
 # 
-#add_sv_interface bus osd_if
+add_interface osd_in conduit end
+set_interface_property osd_in associatedClock ""
+set_interface_property osd_in associatedReset ""
+set_interface_property osd_in ENABLED true
+set_interface_property osd_in EXPORT_OF ""
+set_interface_property osd_in PORT_NAME_MAP ""
+set_interface_property osd_in CMSIS_SVD_VARIABLES ""
+set_interface_property osd_in SVD_ADDRESS_GROUP ""
 
-# Setting the parameter property to add SV interface parameters
-#set_parameter_property my_interface_parameter SV_INTERFACE_PARAMETER bus
-
-# Setting the port properties to add them to SV interface port set_port_property clk SV_INTERFACE_PORT bus #set_port_property p1 SV_INTERFACE_PORT bus
-#set_port_property p2 SV_INTERFACE_PORT bus
-#set_port_property p1 SV_INTERFACE_SIGNAL bus
-#set_port_property p2 SV_INTERFACE_SIGNAL bus
-
-#Adding the SV Interface File
-#add_fileset_file osd_if.sv SYSTEM_VERILOG PATH osd_if.sv SYSTEMVERILOG_INTERFACE
+add_interface_port osd_in x x Input 12
+add_interface_port osd_in y y Input 11
 
 
 # 
-# connection point osd_if
+# connection point osd_out
 # 
-add_interface osd_if conduit end
-set_interface_property osd_if associatedClock ""
-set_interface_property osd_if associatedReset ""
-set_interface_property osd_if ENABLED true
-set_interface_property osd_if EXPORT_OF ""
-set_interface_property osd_if PORT_NAME_MAP ""
-set_interface_property osd_if CMSIS_SVD_VARIABLES ""
-set_interface_property osd_if SVD_ADDRESS_GROUP ""
+add_interface osd_out conduit end
+set_interface_property osd_out associatedClock ""
+set_interface_property osd_out associatedReset ""
+set_interface_property osd_out ENABLED true
+set_interface_property osd_out EXPORT_OF ""
+set_interface_property osd_out PORT_NAME_MAP ""
+set_interface_property osd_out CMSIS_SVD_VARIABLES ""
+set_interface_property osd_out SVD_ADDRESS_GROUP ""
 
-add_interface_port osd_if vclk vclk Input 1
-add_interface_port osd_if xpos xpos Input 11
-add_interface_port osd_if ypos ypos Input 11
-add_interface_port osd_if osd_enable osd_enable Output 1
-add_interface_port osd_if osd_color osd_color Output 2
+add_interface_port osd_out osd_alpha alpha Output 8
+add_interface_port osd_out osd_red red Output 8
+add_interface_port osd_out osd_green green Output 8
+add_interface_port osd_out osd_blue blue Output 8

@@ -278,11 +278,15 @@
 #define I2CA_BASE I2C_OPENCORES_0_BASE
 #define SDC_CONTROLLER_BASE SDC_CONTROLLER_QSYS_0_BASE
 #define SCANCOVERTER_CONFIG_BASE SC_CONFIG_0_BASE
-#define OSD_GENERATOR_BASE OSD_GENERATOR_0_BASE
 #define PLL_RECONFIG_BASE PLL_RECONFIG_0_BASE
+#define OSD_GENERATOR_BASE OSD_GENERATOR_0_BASE
+#define OSD_FB_BASE 0xa0000000
 
 #define SC							((volatile sc_regs *) SCANCOVERTER_CONFIG_BASE)
 #define OSD							((volatile osd_regs *) OSD_GENERATOR_BASE)
 #define PLL_RECONFIG				((volatile pll_reconfig_regs *) PLL_RECONFIG_BASE)
+#define OSDFB8						((uint8_t *) OSD_FB_BASE)
+#define OSDFB16						((uint16_t *) OSD_FB_BASE)
+#define OSDFB32						((uint32_t *) OSD_FB_BASE)
 
 #endif /* __SYSTEM_H_ */

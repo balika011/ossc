@@ -76,7 +76,7 @@ uint8_t phase_hotkey_enable;
 
 void controls_set_default()
 {
-	memcpy(rc_keymap, rc_keymap_old, sizeof(rc_keymap));
+	memcpy(rc_keymap, rc_keymap_L336, sizeof(rc_keymap));
 }
 
 void controls_setup()

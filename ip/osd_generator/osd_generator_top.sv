@@ -18,193 +18,230 @@
 //
 
 module osd_generator_top (
-    // common
-    input clk_i,
-    input rst_i,
-    // avalon slave
-    input [31:0] avalon_s_writedata,
-    output [31:0] avalon_s_readdata,
-    input [7:0] avalon_s_address,
-    input [3:0] avalon_s_byteenable,
-    input avalon_s_write,
-    input avalon_s_read,
-    input avalon_s_chipselect,
-    output avalon_s_waitrequest_n,
-    // OSD interface
-    input vclk,
-    input [10:0] xpos,
-    input [10:0] ypos,
-    output reg osd_enable,
-    output reg [1:0] osd_color
+	// common
+	input clk_i,
+	input rst_i,
+
+	// avalon slave
+	input [31:0] avalon_s_writedata,
+	output [31:0] avalon_s_readdata,
+	input [7:0] avalon_s_address,
+	input [3:0] avalon_s_byteenable,
+	input avalon_s_write,
+	input avalon_s_read,
+	input avalon_s_chipselect,
+	output avalon_s_waitrequest_n,
+
+	// video clock
+	input vclk,
+
+	// avalon master
+	output logic [31:0] avalon_m_address,
+	input logic [31:0] avalon_m_readdata,
+	output logic avalon_m_read,
+	input logic avalon_m_readdatavalid,
+	input logic avalon_m_waitrequest,
+	output logic avalon_m_write,
+	output logic [3:0] avalon_m_byteenable,
+	output logic [8:0] avalon_m_writedata,
+	input logic [1:0] avalon_m_response,
+	input logic avalon_m_writeresponsevalid,
+
+	input [11:0] x,
+	input [10:0] y,
+
+	output [7:0] osd_alpha,
+	output [7:0] osd_red,
+	output [7:0] osd_green,
+	output [7:0] osd_blue
 );
 
-localparam CHAR_ROWS = 30;
-localparam CHAR_COLS = 16;
-localparam CHAR_SECTIONS = 2;
-localparam CHAR_SEC_SEPARATOR = 2;
-
-localparam BG_BLACK =   2'h0;
-localparam BG_BLUE =    2'h1;
-localparam BG_YELLOW =  2'h2;
-localparam BG_WHITE =   2'h3;
-
-localparam OSD_CONFIG_REGNUM =          8'hf0;
-localparam OSD_ROW_LSEC_ENABLE_REGNUM = 8'hf1;
-localparam OSD_ROW_RSEC_ENABLE_REGNUM = 8'hf2;
-localparam OSD_ROW_COLOR_REGNUM =       8'hf3;
+localparam OSD_CONFIG_REGNUM =	8'h0;
+localparam OSD_POS_REGNUM =		8'h1;
+localparam OSD_SIZE_REGNUM =	8'h2;
+localparam OSD_COLORS0_REGNUM =	8'h3;
+localparam OSD_COLORS1_REGNUM =	8'h4;
+localparam OSD_COLORS2_REGNUM =	8'h5;
+localparam OSD_COLORS3_REGNUM =	8'h6;
 
 reg [31:0] osd_config;
-reg [31:0] config_reg[OSD_ROW_LSEC_ENABLE_REGNUM:OSD_ROW_COLOR_REGNUM] /* synthesis ramstyle = "logic" */;
-
-reg [10:0] xpos_osd_area_scaled, xpos_text_scaled;
-reg [10:0] ypos_osd_area_scaled, ypos_text_scaled;
-reg [7:0] x_ptr[2:5], y_ptr[2:5] /* synthesis ramstyle = "logic" */;
-reg osd_text_act_pp[2:6], osd_act_pp[3:6];
-reg char_px;
+reg [11:0] osd_xpos;
+reg [10:0] osd_ypos;
+reg [11:0] osd_xsize;
+reg [10:0] osd_ysize;
+reg [31:0] osd_colors[3:0];
 
 wire render_enable = osd_config[0];
-wire [2:0] x_offset = osd_config[3:1];
-wire [2:0] y_offset = osd_config[6:4];
-wire [1:0] x_size = osd_config[8:7];
-wire [1:0] y_size = osd_config[10:9];
-wire [1:0] border_color = osd_config[12:11];
 
-wire [10:0] xpos_scaled_w = (xpos >> x_size)-({3'h0, x_offset} << 3);
-wire [10:0] ypos_scaled_w = (ypos >> y_size)-({3'h0, y_offset} << 3);
-wire [7:0] rom_rdaddr;
-wire [0:7] char_data[7:0];
-wire [4:0] char_row = (ypos_text_scaled >> 3);
-wire [5:0] char_col = (xpos_text_scaled >> 3) - (((xpos_text_scaled >> 3) >= CHAR_COLS) ? CHAR_SEC_SEPARATOR : 0);
-wire [9:0] char_idx = 32*char_row + char_col;
+wire [20:0] pixel_idx = (y - osd_ypos) * osd_xsize + (x - osd_xpos);
 
-assign avalon_s_waitrequest_n = 1'b1;
+reg [31:0] fb_address;
+reg fb_read;
+reg [31:0] fb_data_temp;
+reg [31:0] fb_data;
+wire [1:0] fb_pixel[15:0];
+assign fb_pixel[0] = fb_data[1:0];
+assign fb_pixel[1] = fb_data[3:2];
+assign fb_pixel[2] = fb_data[5:4];
+assign fb_pixel[3] = fb_data[7:6];
+assign fb_pixel[4] = fb_data[9:8];
+assign fb_pixel[5] = fb_data[11:10];
+assign fb_pixel[6] = fb_data[13:12];
+assign fb_pixel[7] = fb_data[15:14];
+assign fb_pixel[8] = fb_data[17:16];
+assign fb_pixel[9] = fb_data[19:18];
+assign fb_pixel[10] = fb_data[21:20];
+assign fb_pixel[11] = fb_data[23:22];
+assign fb_pixel[12] = fb_data[25:24];
+assign fb_pixel[13] = fb_data[27:26];
+assign fb_pixel[14] = fb_data[29:28];
+assign fb_pixel[15] = fb_data[31:30];
 
-char_array char_array_inst (
-    .byteena_a(avalon_s_byteenable),
-    .data(avalon_s_writedata),
-    .rdaddress(char_idx),
-    .rdclock(vclk),
-    .wraddress(avalon_s_address),
-    .wrclock(clk_i),
-    .wren(avalon_s_chipselect && avalon_s_write && (avalon_s_address < CHAR_ROWS*CHAR_COLS*CHAR_SECTIONS)),
-    .q(rom_rdaddr)
-);
+assign avalon_m_address = fb_address;
+assign avalon_m_read = fb_read;
+assign avalon_m_write = 1'b0;
+assign avalon_m_byteenable = 4'b1111;
+assign avalon_m_writedata = 32'b0;
 
-char_rom char_rom_inst (
-    .clock(vclk),
-    .address(rom_rdaddr),
-    .q({char_data[7],char_data[6],char_data[5],char_data[4],char_data[3],char_data[2],char_data[1],char_data[0]})
-);
+reg offscreen_read;
 
-// Pipeline structure
-// |    0     |    1     |    2    |    3    |    4    |    5    |   6    |
-// |----------|----------|---------|---------|---------|---------|--------|
-// > POS_TEXT | POS_AREA |         |         |         |         |        |
-// >          |   PTR    |   PTR   |   PTR   |   PTR   |         |        |
-// >          |  ENABLE  | ENABLE  | ENABLE  | ENABLE  | ENABLE  | ENABLE |
-// >          |  INDEX   |  INDEX  |         |         |         |        |
-// >          |          |         | CHARROM | CHARROM | CHAR_PX | COLOR  |
-integer idx, pp_idx;
-always @(posedge vclk) begin
-    xpos_text_scaled <= xpos_scaled_w;
-    ypos_text_scaled <= ypos_scaled_w;
+always @(negedge vclk or posedge rst_i) begin
+	if (rst_i) begin
+		fb_read <= 0;
+		offscreen_read <= 0;
+	end else begin
+		if (render_enable & x >= osd_xpos & x < (osd_xpos + osd_xsize) & y >= osd_ypos & y < (osd_ypos + osd_ysize)) begin
+			offscreen_read <= 0;
 
-    xpos_osd_area_scaled <= xpos_text_scaled + 3'h4;
-    ypos_osd_area_scaled <= ypos_text_scaled + 3'h4;
+			// Prepare for the next 16 pixels
+			if (pixel_idx[3:0] == 0) begin
+				fb_address <= { (pixel_idx[20:4] + 1), 2'd0 };
+				fb_read <= 1;
+			end else if (avalon_m_readdatavalid) begin
+				if (pixel_idx[3:0] == 15)
+					fb_data <= avalon_m_readdata;
+				else
+					fb_data_temp <= avalon_m_readdata;
+				fb_read <= 0;
+			end else if (pixel_idx[3:0] == 15) begin
+				fb_data <= fb_data_temp;
+			end
 
-    x_ptr[2] <= xpos_text_scaled[7:0];
-    y_ptr[2] <= ypos_text_scaled[7:0];
-    for(pp_idx = 3; pp_idx <= 5; pp_idx = pp_idx+1) begin
-        x_ptr[pp_idx] <= x_ptr[pp_idx-1];
-        y_ptr[pp_idx] <= y_ptr[pp_idx-1];
-    end
+			{ osd_alpha, osd_red, osd_green, osd_blue } <= osd_colors[fb_pixel[pixel_idx]];
+		end else begin
+			{ osd_alpha, osd_red, osd_green, osd_blue } <= 32'h00000000;
 
-    osd_text_act_pp[2] <= render_enable &
-                          (((xpos_text_scaled < 8*CHAR_COLS) & config_reg[OSD_ROW_LSEC_ENABLE_REGNUM][ypos_text_scaled/8]) |
-                           ((xpos_text_scaled >= 8*(CHAR_COLS+CHAR_SEC_SEPARATOR)) & (xpos_text_scaled < 8*(2*CHAR_COLS+CHAR_SEC_SEPARATOR)) & config_reg[OSD_ROW_RSEC_ENABLE_REGNUM][ypos_text_scaled/8])) &
-                          (ypos_text_scaled < 8*CHAR_ROWS);
-    for(pp_idx = 3; pp_idx <= 6; pp_idx = pp_idx+1) begin
-        osd_text_act_pp[pp_idx] <= osd_text_act_pp[pp_idx-1];
-    end
-
-    osd_act_pp[3] <= render_enable &
-                     (((xpos_osd_area_scaled/8 < (CHAR_COLS+1)) & config_reg[OSD_ROW_LSEC_ENABLE_REGNUM][(ypos_osd_area_scaled/8) ? ((ypos_osd_area_scaled/8)-1) : 0]) |
-                      ((xpos_osd_area_scaled/8 >= (CHAR_COLS+1)) & (xpos_osd_area_scaled/8 < (2*CHAR_COLS+CHAR_SEC_SEPARATOR+1)) & (config_reg[OSD_ROW_RSEC_ENABLE_REGNUM][(ypos_osd_area_scaled/8)-1] | config_reg[OSD_ROW_RSEC_ENABLE_REGNUM][ypos_osd_area_scaled/8]))) &
-                     (ypos_osd_area_scaled < 8*(CHAR_ROWS+1));
-    for(pp_idx = 4; pp_idx <= 6; pp_idx = pp_idx+1) begin
-        osd_act_pp[pp_idx] <= osd_act_pp[pp_idx-1];
-    end
-
-    char_px <= char_data[y_ptr[5]][x_ptr[5]];
-
-    osd_enable <= osd_act_pp[6];
-
-    if (osd_text_act_pp[6]) begin
-        if (char_px) begin
-            osd_color <= config_reg[OSD_ROW_COLOR_REGNUM][char_row] ? BG_YELLOW : BG_WHITE;
-        end else begin
-            osd_color <= BG_BLUE;
-        end
-    end else begin // border
-        osd_color <= border_color;
-    end
+			if (y < osd_ypos | y > (osd_ypos + osd_ysize)) begin
+				if (offscreen_read == 0) begin
+					offscreen_read <= 1;
+					fb_address <= 0;
+					fb_read <= 1;
+				end else if (avalon_m_readdatavalid) begin
+					fb_data <= avalon_m_readdata;
+					fb_read <= 0;
+				end
+			end
+		end
+	end
 end
 
 // Avalon register interface
+
+assign avalon_s_waitrequest_n = 1'b1;
+
 always @(posedge clk_i or posedge rst_i) begin
-    if (rst_i) begin
-        osd_config <= 32'h0;
-    end else begin
-        if (avalon_s_chipselect && avalon_s_write && (avalon_s_address==OSD_CONFIG_REGNUM)) begin
-            if (avalon_s_byteenable[3])
-                osd_config[31:24] <= avalon_s_writedata[31:24];
-            if (avalon_s_byteenable[2])
-                osd_config[23:16] <= avalon_s_writedata[23:16];
-            if (avalon_s_byteenable[1])
-                osd_config[15:8] <= avalon_s_writedata[15:8];
-            if (avalon_s_byteenable[0])
-                osd_config[7:0] <= avalon_s_writedata[7:0];
-        end else begin
-            osd_config[1] <= 1'b0; // reset timer refresh bit
-        end
-    end
+	if (rst_i) begin
+		osd_config <= 32'h0;
+	end else begin
+		if (avalon_s_chipselect && avalon_s_write) begin
+			if (avalon_s_address == OSD_CONFIG_REGNUM) begin
+				if (avalon_s_byteenable[3])
+					osd_config[31:24] <= avalon_s_writedata[31:24];
+				if (avalon_s_byteenable[2])
+					osd_config[23:16] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					osd_config[15:8] <= avalon_s_writedata[15:8];
+				if (avalon_s_byteenable[0])
+					osd_config[7:0] <= avalon_s_writedata[7:0];
+			end else if (avalon_s_address == OSD_POS_REGNUM) begin
+				if (avalon_s_byteenable[3])
+					osd_xpos[11:8] <= avalon_s_writedata[27:24];
+				if (avalon_s_byteenable[2])
+					osd_xpos[7:0] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					osd_ypos[10:8] <= avalon_s_writedata[10:8];
+				if (avalon_s_byteenable[0])
+					osd_ypos[7:0] <= avalon_s_writedata[7:0];
+			end else if (avalon_s_address == OSD_SIZE_REGNUM) begin
+				if (avalon_s_byteenable[3])
+					osd_xsize[11:8] <= avalon_s_writedata[27:24];
+				if (avalon_s_byteenable[2])
+					osd_xsize[7:0] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					osd_ysize[10:8] <= avalon_s_writedata[10:8];
+				if (avalon_s_byteenable[0])
+					osd_ysize[7:0] <= avalon_s_writedata[7:0];
+			end else if (avalon_s_address == OSD_COLORS0_REGNUM) begin
+				if (avalon_s_byteenable[3])
+					osd_colors[0][31:24] <= avalon_s_writedata[31:24];
+				if (avalon_s_byteenable[2])
+					osd_colors[0][23:16] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					osd_colors[0][15:8] <= avalon_s_writedata[15:8];
+				if (avalon_s_byteenable[0])
+					osd_colors[0][7:0] <= avalon_s_writedata[7:0];
+			end else if (avalon_s_address == OSD_COLORS1_REGNUM) begin
+				if (avalon_s_byteenable[3])
+					osd_colors[1][31:24] <= avalon_s_writedata[31:24];
+				if (avalon_s_byteenable[2])
+					osd_colors[1][23:16] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					osd_colors[1][15:8] <= avalon_s_writedata[15:8];
+				if (avalon_s_byteenable[0])
+					osd_colors[1][7:0] <= avalon_s_writedata[7:0];
+			end else if (avalon_s_address == OSD_COLORS2_REGNUM) begin
+				if (avalon_s_byteenable[3])
+					osd_colors[2][31:24] <= avalon_s_writedata[31:24];
+				if (avalon_s_byteenable[2])
+					osd_colors[2][23:16] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					osd_colors[2][15:8] <= avalon_s_writedata[15:8];
+				if (avalon_s_byteenable[0])
+					osd_colors[2][7:0] <= avalon_s_writedata[7:0];
+			end else if (avalon_s_address == OSD_COLORS3_REGNUM) begin
+				if (avalon_s_byteenable[3])
+					osd_colors[3][31:24] <= avalon_s_writedata[31:24];
+				if (avalon_s_byteenable[2])
+					osd_colors[3][23:16] <= avalon_s_writedata[23:16];
+				if (avalon_s_byteenable[1])
+					osd_colors[3][15:8] <= avalon_s_writedata[15:8];
+				if (avalon_s_byteenable[0])
+					osd_colors[3][7:0] <= avalon_s_writedata[7:0];
+			end
+		end
+	end
 end
 
-genvar i;
-generate
-    for (i=OSD_ROW_LSEC_ENABLE_REGNUM; i <= OSD_ROW_COLOR_REGNUM; i++) begin : gen_reg
-        always @(posedge clk_i or posedge rst_i) begin
-            if (rst_i) begin
-                config_reg[i] <= 0;
-            end else begin
-                if (avalon_s_chipselect && avalon_s_write && (avalon_s_address==i)) begin
-                    if (avalon_s_byteenable[3])
-                        config_reg[i][31:24] <= avalon_s_writedata[31:24];
-                    if (avalon_s_byteenable[2])
-                        config_reg[i][23:16] <= avalon_s_writedata[23:16];
-                    if (avalon_s_byteenable[1])
-                        config_reg[i][15:8] <= avalon_s_writedata[15:8];
-                    if (avalon_s_byteenable[0])
-                        config_reg[i][7:0] <= avalon_s_writedata[7:0];
-                end
-            end
-        end
-    end
-endgenerate
-
-
 always @(*) begin
-    if (avalon_s_chipselect && avalon_s_read) begin
-        case (avalon_s_address)
-            OSD_CONFIG_REGNUM:              avalon_s_readdata = osd_config;
-            OSD_ROW_LSEC_ENABLE_REGNUM:     avalon_s_readdata = config_reg[OSD_ROW_LSEC_ENABLE_REGNUM];
-            OSD_ROW_RSEC_ENABLE_REGNUM:     avalon_s_readdata = config_reg[OSD_ROW_RSEC_ENABLE_REGNUM];
-            OSD_ROW_COLOR_REGNUM:           avalon_s_readdata = config_reg[OSD_ROW_COLOR_REGNUM];
-            default:                        avalon_s_readdata = 32'h00000000;
-        endcase
-    end else begin
-        avalon_s_readdata = 32'h00000000;
-    end
+	if (avalon_s_chipselect && avalon_s_read) begin
+		if (avalon_s_address == OSD_CONFIG_REGNUM) begin
+			avalon_s_readdata = osd_config;
+		end else if (avalon_s_address == OSD_POS_REGNUM) begin
+			avalon_s_readdata = { 4'd0, osd_xpos, 5'd0, osd_ypos };
+		end else if (avalon_s_address == OSD_SIZE_REGNUM) begin
+			avalon_s_readdata = { 4'd0, osd_xsize, 5'd0, osd_ysize };
+		end else if (avalon_s_address == OSD_COLORS0_REGNUM) begin
+			avalon_s_readdata = osd_colors[0];
+		end else if (avalon_s_address == OSD_COLORS1_REGNUM) begin
+			avalon_s_readdata = osd_colors[1];
+		end else if (avalon_s_address == OSD_COLORS2_REGNUM) begin
+			avalon_s_readdata = osd_colors[2];
+		end else if (avalon_s_address == OSD_COLORS3_REGNUM) begin
+			avalon_s_readdata = osd_colors[3];
+		end
+	end else begin
+		avalon_s_readdata = 32'h00000000;
+	end
 end
 
 endmodule

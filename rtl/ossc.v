@@ -65,7 +65,7 @@ module ossc (
 	output altera_reserved_tdo
 );
 
-assign HDMI_TX_PCLK = PCLK_sc;
+assign HDMI_TX_PCLK = sc_pclk;
 
 
 wire LED_R_TVP_SOG_REMAPPED;
@@ -98,10 +98,9 @@ assign av_reset_n = sys_ctrl[1];
 wire hw_reset = sys_ctrl[0];
 
 wire resync_indicator = (warn_pll_lock_lost != 0) | (resync_led_ctr != 0);
-wire [31:0] controls = { 1'b0, resync_indicator, N_VSYNC_sc_LL, pll_activeclock, cfg_L, ~btn_LL, ir_code_cnt, ir_code };
+wire [31:0] controls = { 1'b0, resync_indicator, N_sc_vsync_LL, pll_activeclock, cfg_L, ~btn_LL, ir_code_cnt, ir_code };
 
-wire osd_enable;
-wire [1:0] osd_color;
+wire [7:0] osd_alpha, osd_red, osd_green, osd_blue;
 
 sys sys_inst(
 	.reset_reset_n(1'b1),
@@ -117,13 +116,13 @@ sys sys_inst(
 	.i2c_opencores_0_export_scl_pad_io(scl),
 	.i2c_opencores_0_export_sda_pad_io(sda),
 	.i2c_opencores_0_export_spi_miso_pad_i(1'b0),
-	.sdc_controller_0_sd_clk_o_clk(SD_CLK),
-	.sdc_controller_0_sd_sd_cmd_dat_i(SD_CMD),
-	.sdc_controller_0_sd_sd_cmd_out_o(sd_cmd_out_o),
-	.sdc_controller_0_sd_sd_cmd_oe_o(sd_cmd_oe_o),
-	.sdc_controller_0_sd_sd_dat_dat_i(SD_DAT),
-	.sdc_controller_0_sd_sd_dat_out_o(sd_dat_out_o),
-	.sdc_controller_0_sd_sd_dat_oe_o(sd_dat_oe_o),
+	// .sdc_controller_0_sd_clk_o_clk(SD_CLK),
+	// .sdc_controller_0_sd_sd_cmd_dat_i(SD_CMD),
+	// .sdc_controller_0_sd_sd_cmd_out_o(sd_cmd_out_o),
+	// .sdc_controller_0_sd_sd_cmd_oe_o(sd_cmd_oe_o),
+	// .sdc_controller_0_sd_sd_dat_dat_i(SD_DAT),
+	// .sdc_controller_0_sd_sd_dat_out_o(sd_dat_out_o),
+	// .sdc_controller_0_sd_sd_dat_oe_o(sd_dat_oe_o),
 	.sc_config_0_sc_in_fe_status_i({ 19'h0, TVP_sync_active, TVP_fe_interlace, TVP_fe_vtotal }),
 	.sc_config_0_sc_in_fe_status2_i({ 4'h0, TVP_hsync_width, TVP_fe_pcnt_field }),
 	.sc_config_0_sc_in_lt_status_i(32'h00000000),
@@ -141,11 +140,13 @@ sys sys_inst(
 	.sc_config_0_sc_out_sl_config2_o(sl_config2),
 	.sc_config_0_sc_out_sl_config3_o(sl_config3),
 	.sc_config_0_sc_out_sys_ctrl_o(sys_ctrl),
-	.osd_generator_0_osd_if_vclk(PCLK_sc),
-	.osd_generator_0_osd_if_xpos(xpos_sc),
-	.osd_generator_0_osd_if_ypos(ypos_sc),
-	.osd_generator_0_osd_if_osd_enable(osd_enable),
-	.osd_generator_0_osd_if_osd_color(osd_color),
+	.clock_bridge_0_in_clk_clk(sc_pclk),
+	.osd_generator_0_osd_in_x(sc_xpos),
+	.osd_generator_0_osd_in_y(sc_ypos),
+	.osd_generator_0_osd_out_alpha(osd_alpha),
+	.osd_generator_0_osd_out_red(osd_red),
+	.osd_generator_0_osd_out_green(osd_green),
+	.osd_generator_0_osd_out_blue(osd_blue),
 	.pll_reconfig_0_pll_reconfig_if_areset(pll_areset),
 	.pll_reconfig_0_pll_reconfig_if_scanclk(pll_scanclk),
 	.pll_reconfig_0_pll_reconfig_if_scanclkena(pll_scanclkena),
@@ -189,7 +190,7 @@ cycloneive_rublock rublock_inst(
 
 
 
-wire pll_clkout, pll_clkswitch, pll_locked;
+wire pll_clkout, pll_clkswitch, pll_locked, pll_areset, pll_scanclk, pll_scanclkena, pll_configupdate, pll_scandata, pll_scandone, pll_activeclock;
 
 pll_2x pll_pclk (
 	.areset(pll_areset),
@@ -266,12 +267,11 @@ tvp7002_frontend u_tvp_frontend (
 
 
 
-wire [7:0] R_sc, G_sc, B_sc;
-wire HSYNC_sc, VSYNC_sc, DE_sc;
-wire pll_areset, pll_scanclk, pll_scanclkena, pll_configupdate, pll_scandata, pll_scandone, pll_activeclock;
-wire PCLK_sc;
-wire [10:0] xpos_sc;
-wire [10:0] ypos_sc;
+wire sc_pclk;
+wire [11:0] sc_xpos;
+wire [10:0] sc_ypos;
+wire [7:0] sc_red, sc_green, sc_blue;
+wire sc_hsync, sc_vsync, sc_de;
 wire resync_strobe;
 
 scanconverter #(
@@ -310,15 +310,15 @@ scanconverter #(
 	.ext_R_i(8'h00),
 	.ext_G_i(8'h00),
 	.ext_B_i(8'h00),
-	.PCLK_o(PCLK_sc),
-	.R_o(R_sc),
-	.G_o(G_sc),
-	.B_o(B_sc),
-	.HSYNC_o(HSYNC_sc),
-	.VSYNC_o(VSYNC_sc),
-	.DE_o(DE_sc),
-	.xpos_o(xpos_sc),
-	.ypos_o(ypos_sc),
+	.PCLK_o(sc_pclk),
+	.R_o(sc_red),
+	.G_o(sc_green),
+	.B_o(sc_blue),
+	.HSYNC_o(sc_hsync),
+	.VSYNC_o(sc_vsync),
+	.DE_o(sc_de),
+	.xpos_o(sc_xpos),
+	.ypos_o(sc_ypos),
 	.resync_strobe(resync_strobe),
 	.emif_br_clk(1'b0),
 	.emif_br_reset(1'b0),
@@ -396,11 +396,11 @@ end
 
 
 
-reg N_VSYNC_sc_L, N_VSYNC_sc_LL;
+reg N_sc_vsync_L, N_sc_vsync_LL;
 
 // Sync vsync flag to CPU clock
 always @(posedge clk27) begin
-	{N_VSYNC_sc_L, N_VSYNC_sc_LL} <= {~VSYNC_sc, N_VSYNC_sc_L};
+	{N_sc_vsync_L, N_sc_vsync_LL} <= {~sc_vsync, N_sc_vsync_L};
 end
 
 
@@ -433,28 +433,36 @@ always @(posedge clk27) begin
 	TVP_VS_CLK27_LL <= TVP_VS_CLK27_L;
 end
 
+wire [15:0] osd_alpha_red, osd_alpha_green, osd_alpha_blue;
+assign osd_alpha_red = osd_red * osd_alpha;
+assign osd_alpha_green = osd_green * osd_alpha;
+assign osd_alpha_blue = osd_blue * osd_alpha;
 
-
+wire [7:0] sc_alpha = 256 - osd_alpha;
+wire [15:0] sc_alpha_red, sc_alpha_green, sc_alpha_blue;
+assign sc_alpha_red = sc_red * sc_alpha;
+assign sc_alpha_green = sc_green * sc_alpha;
+assign sc_alpha_blue = sc_blue * sc_alpha;
 
 // Output registers
-always @(posedge PCLK_sc) begin
-	if (osd_enable) begin
-		if (osd_color == 2'h0) begin
-			{HDMI_TX_RD, HDMI_TX_GD, HDMI_TX_BD} <= 24'h000000;
-		end else if (osd_color == 2'h1) begin
-			{HDMI_TX_RD, HDMI_TX_GD, HDMI_TX_BD} <= 24'h0000ff;
-		end else if (osd_color == 2'h2) begin
-			{HDMI_TX_RD, HDMI_TX_GD, HDMI_TX_BD} <= 24'hffff00;
-		end else begin
-			{HDMI_TX_RD, HDMI_TX_GD, HDMI_TX_BD} <= 24'hffffff;
-		end
+always @(posedge sc_pclk) begin
+	if (osd_alpha == 0) begin
+		HDMI_TX_RD <= sc_red;
+		HDMI_TX_GD <= sc_green;
+		HDMI_TX_BD <= sc_blue;
+	end else if (osd_alpha == 255) begin
+		HDMI_TX_RD <= osd_red;
+		HDMI_TX_GD <= osd_green;
+		HDMI_TX_BD <= osd_blue;
 	end else begin
-		{HDMI_TX_RD, HDMI_TX_GD, HDMI_TX_BD} <= {R_sc, G_sc, B_sc};
+		HDMI_TX_RD <= osd_alpha_red[15:8] + sc_alpha_red[15:8];
+		HDMI_TX_GD <= osd_alpha_green[15:8] + sc_alpha_green[15:8];
+		HDMI_TX_BD <= osd_alpha_blue[15:8] + sc_alpha_blue[15:8];
 	end
 
-	HDMI_TX_HS <= HSYNC_sc;
-	HDMI_TX_VS <= VSYNC_sc;
-	HDMI_TX_DE <= DE_sc;
+	HDMI_TX_HS <= sc_hsync;
+	HDMI_TX_VS <= sc_vsync;
+	HDMI_TX_DE <= sc_de;
 end
 
 

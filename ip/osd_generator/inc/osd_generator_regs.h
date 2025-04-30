@@ -26,32 +26,14 @@
 
 #include <stdint.h>
 
-typedef union {
-    struct {
-        uint8_t enable:1;
-        uint8_t x_offset:3;
-        uint8_t y_offset:3;
-        uint8_t x_size:2;
-        uint8_t y_size:2;
-        uint8_t border_color:2;
-    } __attribute__((packed));
-    uint32_t data;
-} osd_config_reg;
-
-// char regs
-typedef struct {
-    char data[OSD_CHAR_ROWS][OSD_CHAR_SECTIONS][OSD_CHAR_COLS];
-} osd_char_array;
-
-typedef struct {
-    uint32_t mask;
-} osd_enable_color_reg;
-
-typedef struct {
-    osd_char_array osd_array;
-    osd_config_reg osd_config;
-    osd_enable_color_reg osd_sec_enable[OSD_CHAR_SECTIONS];
-    osd_enable_color_reg osd_row_color;
+typedef struct
+{
+	volatile uint32_t enable;
+	volatile uint16_t xpos;
+	volatile uint16_t ypos;
+	volatile uint16_t xsize;
+	volatile uint16_t ysize;
+	volatile uint32_t colors[4];
 } __attribute__((packed)) osd_regs;
 
 #endif //OSD_GENERATOR_REGS_H_

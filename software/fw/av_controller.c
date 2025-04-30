@@ -435,7 +435,7 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
     // construct custom/default scanline overlay
 	for (int i = 0; i < 6; i++)
 	{
-        if (avconfig->sl_type == 3) {
+		if (avconfig->sl_type == 3) {
             sl_config.sl_l_str_arr |= ((avconfig->sl_cust_l_str[i]-1)&0xf)<<(4*i);
             sl_config.sl_l_overlay |= (avconfig->sl_cust_l_str[i]!=0)<<i;
         } else {
@@ -447,11 +447,11 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
                     sl_config.sl_l_overlay <<= (sl_config3.sl_iv_y+2)/2;
             }
         }
-    }
+	}
 
 	for (int i = 0; i < 10; i++)
 	{
-        if (avconfig->sl_type == 3) {
+		if (avconfig->sl_type == 3) {
             if (i < 8)
                 sl_config2.sl_c_str_arr_l |= ((avconfig->sl_cust_c_str[i]-1)&0xf)<<(4*i);
             else
@@ -466,9 +466,9 @@ void update_sc_config(mode_data_t *vm_in, mode_data_t *vm_out, vm_proc_config_t 
             if ((i==9) && ((avconfig->sl_type == 1) || (avconfig->sl_type == 2)))
                 sl_config3.sl_c_overlay = (1<<((sl_config3.sl_iv_x+1)/2))-1;
         }
-    }
+	}
 
-    sl_config.sl_method = avconfig->sl_method;
+	sl_config.sl_method = avconfig->sl_method;
     sl_config.sl_altern = avconfig->sl_altern;
     sl_config3.sl_hybr_str = avconfig->sl_hybr_str;
 
@@ -765,41 +765,60 @@ int init_hw()
 	return 0;
 }
 
-void print_vm_stats() {
-    int row = 0;
+static void print_vm_stats_hide()
+{
+	osd_set_menu_active(0);
+}
 
-    if (!menu_active) {
-        memset((void*)OSD->osd_array.data, 0, sizeof(osd_char_array));
+void print_vm_stats()
+{
+    if (!menu_active)
+	{
+		char buf[OSD_CHAR_COLS];
+		osd_clear();
+
+		osd_set_menu_active(1);
+
 		userdata_load_profile(profile_sel, 1);
 
-		sniprintf((char*)OSD->osd_array.data[row][0], OSD_CHAR_COLS, "Mode preset:");
-        sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%s", vmode_out.name);
-        sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "Refresh rate:");
-        sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%u.%.2uHz", vmode_out.timings.v_hz_x100/100, vmode_out.timings.v_hz_x100%100);
-        sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "H/V synclen:");
-        sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%-5u %-5u", vmode_out.timings.h_synclen, vmode_out.timings.v_synclen);
-        sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "H/V backporch:");
-        sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%-5u %-5u", vmode_out.timings.h_backporch, vmode_out.timings.v_backporch);
-        sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "H/V active:");
-        sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%-5u %-5u", vmode_out.timings.h_active, vmode_out.timings.v_active);
-        sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "H/V total:");
-        sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%-5u %-5u", vmode_out.timings.h_total, vmode_out.timings.v_total);
-        row++;
+		osd_draw_text(0, 0, 1, 2, "Mode preset:");
+		sniprintf(buf, sizeof(buf), "%s", vmode_out.name);
+		osd_draw_text(0, 1, 1, 2, buf);
 
-        sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "Profile:");
-        sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%u: %s", profile_sel, (target_profile_name[0] == 0) ? "<empty>" : target_profile_name);
-        sniprintf((char*)OSD->osd_array.data[++row][0], OSD_CHAR_COLS, "FW:");
+		osd_draw_text(1, 0, 1, 2, "Refresh rate:");
+		sniprintf(buf, sizeof(buf), "%u.%.2uHz", vmode_out.timings.v_hz_x100 / 100, vmode_out.timings.v_hz_x100 % 100);
+		osd_draw_text(1, 1, 1, 2, buf);
+
+		osd_draw_text(2, 0, 1, 2, "H/V synclen:");
+		sniprintf(buf, sizeof(buf), "%-5u %-5u", vmode_out.timings.h_synclen, vmode_out.timings.v_synclen);
+		osd_draw_text(2, 1, 1, 2, buf);
+
+		osd_draw_text(3, 0, 1, 2, "H/V backporch:");
+		sniprintf(buf, sizeof(buf), "%-5u %-5u", vmode_out.timings.h_backporch, vmode_out.timings.v_backporch);
+		osd_draw_text(3, 1, 1, 2, buf);
+
+		osd_draw_text(4, 0, 1, 2, "H/V active:");
+		sniprintf(buf, sizeof(buf), "%-5u %-5u", vmode_out.timings.h_active, vmode_out.timings.v_active);
+		osd_draw_text(4, 1, 1, 2, buf);
+
+		osd_draw_text(5, 0, 1, 2, "H/V total:");
+		sniprintf(buf, sizeof(buf), "%-5u %-5u", vmode_out.timings.h_total, vmode_out.timings.v_total);
+		osd_draw_text(5, 1, 1, 2, buf);
+
+		osd_draw_text(7, 0, 1, 2, "Profile:");
+		sniprintf(buf, sizeof(buf), "%u: %s", profile_sel, (target_profile_name[0] == 0) ? "<empty>" : target_profile_name);
+		osd_draw_text(7, 1, 1, 2, buf);
+
+		osd_draw_text(8, 0, 1, 2, "FW:");
 #if FW_VER_BETA > 0
-		sniprintf((char *)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%u.%.2u beta %u" FW_SUFFIX " @ " __DATE__, FW_VER_MAJOR, FW_VER_MINOR, FW_VER_BETA);
+		sniprintf(buf, sizeof(buf), "%u.%.2u beta %u" FW_SUFFIX " @ " __DATE__, FW_VER_MAJOR, FW_VER_MINOR, FW_VER_BETA);
 #else
-		sniprintf((char*)OSD->osd_array.data[row][1], OSD_CHAR_COLS, "%u.%.2u" FW_SUFFIX " @ " __DATE__, FW_VER_MAJOR, FW_VER_MINOR);
+		sniprintf(buf, sizeof(buf), "%u.%.2u" FW_SUFFIX " @ " __DATE__, FW_VER_MAJOR, FW_VER_MINOR);
 #endif
+		osd_draw_text(8, 1, 1, 2, buf);
 
-        osd_status_refresh();
-        OSD->osd_row_color.mask = 0;
-        OSD->osd_sec_enable[0].mask = (1<<(row+1))-1;
-        OSD->osd_sec_enable[1].mask = (1<<(row+1))-1;
-    }
+		timer_timeout(10000000, print_vm_stats_hide);
+	}
 }
 
 void enter_standby()
