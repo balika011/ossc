@@ -95,7 +95,7 @@ struct ocsdc priv;
 #define readl(addr) (*(volatile unsigned int *) (addr))
 #define writel(b, addr) ((*(volatile unsigned int *) (addr)) = (b))
 
-void __attribute__((noinline, __section__(".rtext"))) flush_dcache_range(void *start, void *end)
+void flush_dcache_range(void *start, void *end)
 {
 	/*while (start < end) {
 		or1k_dcache_flush((unsigned long)start);
@@ -134,7 +134,7 @@ static void ocsdc_set_clock(struct ocsdc * dev, uint clock)
 	ocsdc_write(dev, OCSDC_SOFTWARE_RESET, 0);
 }
 
-static int __attribute__((noinline, __section__(".rtext"))) ocsdc_finish(struct ocsdc *dev, struct mmc_cmd *cmd)
+static int ocsdc_finish(struct ocsdc *dev, struct mmc_cmd *cmd)
 {
 
 	int retval = 0;
@@ -170,7 +170,7 @@ static int __attribute__((noinline, __section__(".rtext"))) ocsdc_finish(struct 
 	return retval;
 }
 
-static int __attribute__((noinline, __section__(".rtext"))) ocsdc_data_finish(struct ocsdc *dev)
+static int ocsdc_data_finish(struct ocsdc *dev)
 {
 	int status;
 
@@ -187,7 +187,7 @@ static int __attribute__((noinline, __section__(".rtext"))) ocsdc_data_finish(st
     }
 }
 
-static void __attribute__((noinline, __section__(".rtext"))) ocsdc_setup_data_xfer(struct ocsdc *dev, struct mmc_cmd *cmd, struct mmc_data *data)
+static void ocsdc_setup_data_xfer(struct ocsdc *dev, struct mmc_cmd *cmd, struct mmc_data *data)
 {
 
 	//invalidate cache
@@ -205,7 +205,7 @@ static void __attribute__((noinline, __section__(".rtext"))) ocsdc_setup_data_xf
 	//DBG_PRINTF("ocsdc_setup_read: addr: %x\n", (uint32_t)data->dest);
 }
 
-static int __attribute__((noinline, __section__(".rtext"))) ocsdc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
+static int ocsdc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
 {
 	struct ocsdc * dev = mmc->priv;
 

@@ -68,7 +68,7 @@ uint64_t __attribute__((noinline, __section__(".rtext"))) timer_timestamp()
 	return timer_ctr;
 }
 
-int __attribute__((noinline, __section__(".rtext"))) timer_timeout(uint64_t usec, void (*cb)())
+int timer_timeout(uint64_t usec, void (*cb)())
 {
 	int idx = -1;
 	for (int i = 0; i < 5; i++)
@@ -89,7 +89,7 @@ int __attribute__((noinline, __section__(".rtext"))) timer_timeout(uint64_t usec
 	return idx;
 }
 
-void __attribute__((noinline, __section__(".rtext")))  timer_cancel(int idx)
+void  timer_cancel(int idx)
 {
 	if (idx >= 0)
 		timeout_ctr[idx] = 0;

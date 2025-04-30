@@ -90,7 +90,7 @@ static void mmc_set_clock(struct mmc *mmc, uint clock)
 	mmc_set_ios(mmc);
 }
 
-static int __attribute__((noinline, __section__(".rtext"))) mmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
+static int mmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
 {
 	int ret;
 
@@ -754,7 +754,7 @@ static int mmc_startup(struct mmc *mmc)
 	return 0;
 }
 
-static int __attribute__((noinline, __section__(".rtext"))) mmc_set_blocklen(struct mmc *mmc, int len)
+static int mmc_set_blocklen(struct mmc *mmc, int len)
 {
 	struct mmc_cmd cmd;
 
@@ -765,7 +765,7 @@ static int __attribute__((noinline, __section__(".rtext"))) mmc_set_blocklen(str
 	return mmc_send_cmd(mmc, &cmd, NULL);
 }
 
-static int __attribute__((noinline, __section__(".rtext"))) mmc_read_blocks(struct mmc *mmc, void *dst, size_t start, size_t blkcnt)
+static int mmc_read_blocks(struct mmc *mmc, void *dst, size_t start, size_t blkcnt)
 {
 	struct mmc_cmd cmd;
 	struct mmc_data data;
@@ -846,7 +846,7 @@ int mmc_init(struct mmc *mmc)
 	return err;
 }
 
-size_t __attribute__((noinline, __section__(".rtext"))) mmc_bread(struct mmc *mmc, size_t start, size_t blkcnt, void *dst)
+size_t mmc_bread(struct mmc *mmc, size_t start, size_t blkcnt, void *dst)
 {
 	size_t cur, blocks_todo = blkcnt;
 

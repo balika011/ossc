@@ -28,7 +28,7 @@
 #define WRDELAY 20
 #define CLEARDELAY 800
 
-static void __attribute__((noinline, __section__(".rtext"))) lcd_cmd(uint8_t cmd, uint16_t postdelay)
+static void lcd_cmd(uint8_t cmd, uint16_t postdelay)
 {
 	SPI_write(I2CA_BASE, &cmd, 1);
 	usleep(postdelay);
@@ -54,7 +54,7 @@ void st7032_init()
 	SC->sys_ctrl.lcd_cs_n = 1;
 }
 
-void __attribute__((noinline, __section__(".rtext"))) st7032_write(char *row1, char *row2)
+void st7032_write(char *row1, char *row2)
 {
 	SC->sys_ctrl.lcd_bl_on = 1;
 	SC->sys_ctrl.lcd_cs_n = 0;

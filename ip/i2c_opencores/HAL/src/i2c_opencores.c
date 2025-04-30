@@ -55,7 +55,7 @@ return value
        1 if address was not acknowledged
 15-OCT-07 initial release
 *****************************************************************/
-int __attribute__((noinline, __section__(".rtext"))) I2C_start(uint32_t base, uint32_t add, uint32_t read)
+int I2C_start(uint32_t base, uint32_t add, uint32_t read)
 {
 #ifdef  I2C_DEBUG
         printf(" Start  I2C at 0x%x, \n\twith address 0x%x \n\tand read 0x%x \n\tand prescale 0x%x\n",base,add,read);
@@ -101,7 +101,7 @@ return value
        byte read back.
 15-OCT-07 initial release
 *****************************************************************/
-uint32_t __attribute__((noinline, __section__(".rtext"))) I2C_read(uint32_t base, uint32_t last)
+uint32_t I2C_read(uint32_t base, uint32_t last)
 {
 #ifdef  I2C_DEBUG
         printf(" Read I2C at 0x%x, \n\twith last0x%x\n",base,last);
@@ -141,7 +141,7 @@ return value
        1 if address was not acknowledged
 15-OCT-07 initial release
 *****************************************************************/
-uint32_t __attribute__((noinline, __section__(".rtext"))) I2C_write(uint32_t base, uint8_t data, uint32_t last)
+uint32_t I2C_write(uint32_t base, uint8_t data, uint32_t last)
 {
   #ifdef  I2C_DEBUG
         printf(" Read I2C at 0x%x, \n\twith data 0x%x,\n\twith last0x%x\n",base,data,last);
@@ -181,7 +181,7 @@ uint32_t __attribute__((noinline, __section__(".rtext"))) I2C_write(uint32_t bas
 
 }
 
-void __attribute__((noinline, __section__(".rtext"))) SPI_read(uint32_t base, uint8_t *rdata, int len)
+void SPI_read(uint32_t base, uint8_t *rdata, int len)
 {
     int i;
 
@@ -196,7 +196,7 @@ void __attribute__((noinline, __section__(".rtext"))) SPI_read(uint32_t base, ui
     }
 }
 
-void __attribute__((noinline, __section__(".rtext"))) SPI_write(uint32_t base, const uint8_t *wdata, int len)
+void SPI_write(uint32_t base, const uint8_t *wdata, int len)
 {
     int i;
 

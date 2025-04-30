@@ -43,7 +43,7 @@ static void lcd_off()
 		st7032_off();
 }
 
-void __attribute__((noinline, __section__(".rtext")))  lcd_write(char *row1, char *row2)
+void lcd_write(char *row1, char *row2)
 {
 	if (timer_idx >= 0)
 	{

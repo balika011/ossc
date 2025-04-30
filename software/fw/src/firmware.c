@@ -88,7 +88,7 @@ char __attribute__((__section__(".data"))) SD_Flash_error[] = "SD/Flash error";
 char __attribute__((__section__(".data"))) Flash_verif_fail[] = "Flash verif fail";
 char __attribute__((__section__(".data"))) Restart_in_3_sec[] = "Restart in 3 sec";
 
-int __attribute__((noinline, __section__(".rtext"))) fw_update()
+int fw_update()
 {
 	int screwed = 0;
 

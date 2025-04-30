@@ -45,7 +45,7 @@ int sdcard_check()
 	return 0;
 }
 
-int __attribute__((noinline, __section__(".rtext"))) sdcard_read(uint32_t offset, uint8_t *buf, uint32_t len)
+int sdcard_read(uint32_t offset, uint8_t *buf, uint32_t len)
 {
 	uint32_t full_block_len = len & ~0x1FF;
 
