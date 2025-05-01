@@ -55,12 +55,7 @@ HDCP_ResumeAuthentication()
 #define ROMOFF_OUTPUT_AUDIO_MODE 8
 #define ROMOFF_AUDIO_CH_SWAP 9
 
-
-
 #define TIMER_LOOP_LEN 10
-#define MS(x) (((x)+(TIMER_LOOP_LEN-1))/TIMER_LOOP_LEN) ; // for timer loop
-
-
+#define MS(x) (((x) + (TIMER_LOOP_LEN - 1)) / TIMER_LOOP_LEN)
 
 #endif // _HDMITX_H_
-
