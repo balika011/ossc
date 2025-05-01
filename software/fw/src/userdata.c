@@ -278,25 +278,23 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
 	if (retval != 0)
 		return retval;
 
-	strncpy(menu_row2, "Import? 1=Y, 2=N", LCD_ROW_LEN+1);
-    osd_notification(2);
+	menu_update_status("Import? 1=Y, 2=N");
 
-    while (1) {
+	while (1) {
 		uint32_t btn_vec = SC->controls.ir_code;
 
 		if (btn_vec == rc_keymap[RC_BTN1]) {
             break;
         } else if (btn_vec == rc_keymap[RC_BTN2]) {
-            retval = UDATA_IMPT_CANCELLED;
-            strncpy(menu_row2, "Cancelled", LCD_ROW_LEN+1);
+			retval = UDATA_IMPT_CANCELLED;
+			menu_update_status("Cancelled");
 			return retval;
 		}
 
         usleep(WAITLOOP_SLEEP_US);
     }
 
-    strncpy(menu_row2, "Loading...", LCD_ROW_LEN+1);
-    osd_notification(2);
+	menu_update_status("Loading...");
 
 	// Import the userdata
 	int entries_imported = 0;
@@ -360,7 +358,9 @@ int __attribute__((noinline, __section__(".rtext"))) userdata_import()
     profile_sel = input_profiles[target_input];
     userdata_load_profile(profile_sel, 0);
 
-    sniprintf(menu_row2, LCD_ROW_LEN+1, "%d slots loaded", entries_imported);
+	char row[LCD_ROW_LEN + 1];
+	sniprintf(row, sizeof(row), "%d slots loaded", entries_imported);
+	menu_update_status(row);
 
 	return 1;
 }
@@ -435,8 +435,7 @@ int userdata_export()
 		useconds_t prompt_delay = (prompt_state == 2) ? 2000000U : ((prompt_state == 3) ? 300000U : 1000000U);
 		prompt_state = prompt_transitions[prompt_state];
 
-		strncpy(menu_row2, msg, sizeof(menu_row2));
-		osd_notification(2);
+		menu_update_status(msg);
 		if (poll_yesno(prompt_delay, &btn_vec))
 		{
 			if (btn_vec == rc_keymap[RC_BTN1])
@@ -454,9 +453,8 @@ int userdata_export()
 	}
 
 	usleep(1000000);
-	strncpy(menu_row1, "Format?", sizeof(menu_row1));
-	strncpy(menu_row2, "1=FAT16, 2=RAW", sizeof(menu_row2));
-	osd_notification(2);
+
+	osd_notification("Format?", "1=FAT16, 2=RAW");
 	if ((!poll_yesno(5000000U, &btn_vec)) || ((btn_vec != rc_keymap[RC_BTN1]) && (btn_vec != rc_keymap[RC_BTN2])))
 	{
 		retval = UDATA_EXPT_CANCELLED;
@@ -464,9 +462,7 @@ int userdata_export()
 	}
 	uint32_t sd_block_offset = (btn_vec == rc_keymap[RC_BTN1]) ? (PROF_16_DATA_OFS / SD_BLK_SIZE) : 0;
 
-	strncpy(menu_row1, "Export sett.", sizeof(menu_row1));
-	strncpy(menu_row2, LNG("Exporting...", "ｵﾏﾁｸﾀﾞｻｲ"), sizeof(menu_row2));
-	osd_notification(2);
+	menu_update_status(LNG("Exporting...", "ｵﾏﾁｸﾀﾞｻｲ"));
 
 	// RAW copy
 	if (btn_vec == rc_keymap[RC_BTN2])
@@ -543,8 +539,8 @@ out:
 		case UDATA_EXPT_CANCELLED: msg = LNG("Cancelled", "ｷｬﾝｾﾙｻﾚﾏｼﾀ"); break; // Alternative: "ｷｬﾝｾﾙｻｾﾃｲﾀﾀﾞｷﾏｽ"
 		default: msg = LNG("SD/Flash error", "SDｶFLASHﾉｴﾗｰ"); break; // ﾌﾗｯｼｭ would be NG.
 	}
-	strncpy(menu_row2, msg, sizeof(menu_row2));
-	osd_notification(2);
+
+	menu_update_status(msg);
 
 	if (!retval)
 	{

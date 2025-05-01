@@ -43,18 +43,18 @@ static void lcd_off()
 		st7032_off();
 }
 
-void lcd_write(char *row1, char *row2)
+static void lcd_reset_timeout()
 {
+	if (has_sh1107)
+		sh1107_on();
+	else
+		st7032_on();
+
 	if (timer_idx >= 0)
 	{
 		timer_cancel(timer_idx);
 		timer_idx = -1;
 	}
-
-	if (has_sh1107)
-		sh1107_write(row1, row2);
-	else
-		st7032_write(row1, row2);
 
 	if (lcd_bl_timeout)
 	{
@@ -68,6 +68,26 @@ void lcd_write(char *row1, char *row2)
 
 		timer_idx = timer_timeout(timeout, lcd_off);
 	}
+}
+
+void lcd_write_row1(const char *str)
+{
+	if (has_sh1107)
+		sh1107_write_row1(str);
+	else
+		st7032_write_row1(str);
+
+	lcd_reset_timeout();
+}
+
+void lcd_write_row2(const char *str)
+{
+	if (has_sh1107)
+		sh1107_write_row2(str);
+	else
+		st7032_write_row2(str);
+
+	lcd_reset_timeout();
 }
 
 int lcd_has_sh1107()

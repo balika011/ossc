@@ -519,9 +519,10 @@ void program_mode()
     vmode_in.timings.v_total = cm.totlines;
     vmode_in.timings.interlaced = !cm.progressive;
 
-    sniprintf(row1, LCD_ROW_LEN+1, "%s %u-%c", avinput_str[cm.avinput], (unsigned)cm.totlines, cm.progressive ? 'p' : 'i');
-    sniprintf(row2, LCD_ROW_LEN+1, "%u.%.2ukHz %u.%.2uHz", (unsigned)(h_hz/1000), (unsigned)((h_hz%1000)/10), (unsigned)(vmode_in.timings.v_hz_x100/100), (unsigned)(vmode_in.timings.v_hz_x100%100));
-    osd_status(1);
+	char row1[LCD_ROW_LEN + 1], row2[LCD_ROW_LEN + 1];
+	sniprintf(row1, sizeof(row1), "%s %u-%c", avinput_str[cm.avinput], (unsigned)cm.totlines, cm.progressive ? 'p' : 'i');
+	sniprintf(row2, sizeof(row2), "%u.%.2ukHz %u.%.2uHz", (unsigned)(h_hz / 1000), (unsigned)((h_hz % 1000) / 10), (unsigned)(vmode_in.timings.v_hz_x100 / 100), (unsigned)(vmode_in.timings.v_hz_x100 % 100));
+	osd_status(row1, row2);
 
     retval = get_pure_lm_mode(&cm.cc, &vmode_in, &vmode_out, &vm_conf);
 
@@ -709,6 +710,7 @@ int init_hw()
 			SC->sys_ctrl.remap_red_r = 1;
 	}
 
+	char row1[LCD_ROW_LEN + 1], row2[LCD_ROW_LEN + 1];
 	strcpy(row1, "      OSSC");
 	char fwver[LCD_ROW_LEN + 1];
 #if FW_VER_BETA > 0
@@ -721,7 +723,7 @@ int init_hw()
 	for (int i = 0; i < (LCD_ROW_LEN - strlen(fwver)) / 2; i++)
 		*prow2++ = ' ';
 	strcpy(prow2, fwver);
-	osd_status(1);
+	osd_status(row1, row2);
 
 	if (!ths_init())
 	{
@@ -871,7 +873,7 @@ int main()
 	memcpy(&cm.cc, &tc, sizeof(avconfig_t));
 
 	// Init menu
-	init_menu();
+	menu_init();
 
 	// Load initconfig and profile
 	userdata_load_initconfig();
@@ -883,9 +885,9 @@ int main()
 	int init_stat = init_hw();
 	if (init_stat < 0)
 	{
+		char row1[LCD_ROW_LEN + 1];
 		sniprintf(row1, sizeof(row1), "Init error  %d", init_stat);
-		strncpy(row2, "", sizeof(row2));
-		osd_status(1);
+		osd_status(row1, "");
 		while (1);
 	}
 	printf("### DIY VIDEO DIGITIZER / SCANCONVERTER INIT OK ###\n\n");
@@ -962,7 +964,7 @@ int main()
 		if (!in_standby)
 		{
 			if (menu_active)
-				display_menu(0);
+				menu_update();
 
 			// Only auto load profile when input is manually changed or when sync is active after automatic switch.
 			if ((target_input != cm.avinput && man_input_change) || (auto_input_changed && cm.sync_active))  {
@@ -1047,9 +1049,7 @@ int main()
 				tvp_source_sel(target_tvp, target_tvp_sync, target_format);
 				cm.clkcnt = 0; //TODO: proper invalidate
 				SC->sys_ctrl.vsync_type = target_format == FORMAT_RGBHV;
-				strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
-				strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
-				osd_status(1);
+				osd_status(avinput_str[cm.avinput], "    NO SYNC");
 				if (man_input_change) {
 					// record last input if it was selected manually
 					if (def_input == AV_LAST)
@@ -1093,8 +1093,6 @@ int main()
 				cm.cc.av3_alt_rgb = tc.av3_alt_rgb;
 			}
 
-			osd_update();
-
 			if (cm.avinput != AV_TESTPAT)
 			{
 				status_t status = get_status(target_tvp_sync);
@@ -1112,9 +1110,7 @@ int main()
 						cm.clkcnt = 0; //TODO: proper invalidate
 						tvp_powerdown();
 						//ths_source_sel(THS_STANDBY, 0);
-						strncpy(row1, avinput_str[cm.avinput], LCD_ROW_LEN+1);
-						strncpy(row2, "    NO SYNC", LCD_ROW_LEN+1);
-						osd_status(1);
+						osd_status(avinput_str[cm.avinput], "    NO SYNC");
 						// Set auto_input_timestamp
 						auto_input_timestamp = timer_timestamp();
 						auto_input_ctr = 0;

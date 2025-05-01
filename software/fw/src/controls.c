@@ -81,9 +81,7 @@ void controls_set_default()
 
 void controls_setup()
 {
-	osd_set_menu_active(0);
-
-	strncpy(menu_row1, "Sel. Remote", sizeof(menu_row1));
+	osd_set_menu_active(1);
 
 	const char *remote_names[] = { "Old", "L336", "Pro", "Custom" };
 	const uint16_t *remote_maps[] = { rc_keymap_old, rc_keymap_L336, rc_keymap_pro, 0 };
@@ -91,8 +89,7 @@ void controls_setup()
 
 	while (1)
 	{
-		strncpy(menu_row2, remote_names[remote_idx], sizeof(menu_row2));
-		osd_notification(1);
+		osd_notification("Sel. Remote", remote_names[remote_idx]);
 
 		controls_update();
 
@@ -108,9 +105,7 @@ void controls_setup()
 			{
 				for (int i = 0; i < REMOTE_MAX_KEYS; i++)
 				{
-					strncpy(menu_row1, "Press", sizeof(menu_row1));
-					strncpy(menu_row2, rc_keydesc[i], sizeof(menu_row2));
-					osd_notification(1);
+					osd_notification("Press", rc_keydesc[i]);
 					uint32_t remote_code_prev = 0;
 
 					while (1)
@@ -122,13 +117,11 @@ void controls_setup()
 							if (!remote_code_prev)
 							{
 								rc_keymap[i] = remote_code;
-								strncpy(menu_row1, "Confirm", sizeof(menu_row1));
-								osd_notification(1);
+								osd_notification("Confirm", rc_keydesc[i]);
 							}
 							else if (remote_code != remote_code_prev)
 							{
-								strncpy(menu_row1, "Mismatch, retry", sizeof(menu_row1));
-								osd_notification(1);
+								osd_notification("Mismatch, retry", rc_keydesc[i]);
 								remote_code_prev = 0;
 								continue;
 							}
@@ -162,14 +155,11 @@ void controls_setup()
 		usleep(WAITLOOP_SLEEP_US);
 	}
 
-	strncpy(menu_row1, "Saving...", sizeof(menu_row1));
-	menu_row2[0] = 0;
-	osd_notification(1);
+	osd_notification("Saving...", "");
 
 	userdata_save_initconfig();
 
 	osd_set_menu_active(0);
-	osd_status(0);
 }
 
 static void controls_reset_led()
@@ -275,12 +265,8 @@ int	controls_parse()
 				osd_set_menu_active(menu_active);
 				profile_sel_menu = profile_sel;
 
-				if (menu_active) {
+				if (menu_active)
 					menu_render_page();
-					display_menu(1);
-				} else {
-					osd_status(0);
-				}
 
 				break;
 			case RC_INFO:
@@ -307,10 +293,8 @@ int	controls_parse()
 				menu_scanlines_strength();
 				break;
 			case RC_LM_MODE:
-				strncpy(menu_row1, "Linemult mode:", LCD_ROW_LEN+1);
-				strncpy(menu_row2, "press 1-6", LCD_ROW_LEN+1);
 				osd_set_menu_active(1);
-				osd_notification(1);
+				osd_notification("Linemult mode:", "press 1-6");
 
 				while (1)
 				{
@@ -331,8 +315,9 @@ int	controls_parse()
 						if ((1<<i) & valid_pm[video_modes_plm[cm.id].group]) {
 							*pmcfg_ptr[video_modes_plm[cm.id].group] = i;
 						} else {
-							sniprintf(menu_row2, LCD_ROW_LEN+1, "%ux unsupported", i+1);
-							osd_notification(1);
+							char row[LCD_ROW_LEN + 1];
+							sniprintf(row, sizeof(row), "%ux unsupported", i + 1);
+							osd_notification("Linemult mode:", row);
 							usleep(500000);
 						}
 						break;
@@ -344,7 +329,6 @@ int	controls_parse()
 				}
 				menu_active = 0;
 				osd_set_menu_active(0);
-				osd_status(0);
 				break;
 			case RC_PHASE_MINUS:
 			case RC_PHASE_PLUS:
@@ -365,10 +349,10 @@ int	controls_parse()
 			case RC_PROF_HOTKEY:
 Prof_Hotkey_Prompt:
 			{
-				strncpy(menu_row1, "Profile load:", LCD_ROW_LEN+1);
-				sniprintf(menu_row2, LCD_ROW_LEN+1, "press %u-%u", prof_x10*10, ((prof_x10*10+9) > MAX_PROFILE) ? MAX_PROFILE : (prof_x10*10+9));
+				char row[LCD_ROW_LEN + 1];
+				sniprintf(row, sizeof(row), "press %u-%u", prof_x10 * 10, ((prof_x10 * 10 + 9) > MAX_PROFILE) ? MAX_PROFILE : (prof_x10 * 10 + 9));
 				osd_set_menu_active(1);
-				osd_notification(1);
+				osd_notification("Profile load:", row);
 
 				uint32_t btn_vec_prev = 1;
 				while (1)
@@ -385,8 +369,8 @@ Prof_Hotkey_Prompt:
 						if ((i == RC_BTN0) || (i < (RC_BTN1 + (prof_x10 == (MAX_PROFILE/10)) ? (MAX_PROFILE%10) : 9))) {
 							profile_sel_menu = prof_x10*10 + ((i+1)%10);
 							int retval = load_profile();
-							sniprintf(menu_row2, LCD_ROW_LEN+1, "%s", (retval==0) ? "Done" : "Failed");
-							osd_notification(1);
+							sniprintf(row, sizeof(row), "%s", (retval == 0) ? "Done" : "Failed");
+							osd_notification("Profile load:", row);
 							usleep(500000);
 							break;
 						} else if (i == RC_PROF_HOTKEY) {
@@ -404,7 +388,6 @@ Prof_Hotkey_Prompt:
 
 				menu_active = 0;
 				osd_set_menu_active(0);
-				osd_status(0);
 				break;
 			}
 			case RC_RIGHT:

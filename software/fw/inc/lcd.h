@@ -29,7 +29,8 @@ extern uint8_t lcd_bl_timeout;
 
 void lcd_init();
 
-void lcd_write(char *row1, char *row2);
+void lcd_write_row1(const char *str);
+void lcd_write_row2(const char *str);
 
 int lcd_has_sh1107();
 

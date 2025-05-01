@@ -54,28 +54,42 @@ void st7032_init()
 	SC->sys_ctrl.lcd_cs_n = 1;
 }
 
-void st7032_write(char *row1, char *row2)
+void st7032_on()
 {
 	SC->sys_ctrl.lcd_bl_on = 1;
+}
+
+void st7032_off()
+{
+	SC->sys_ctrl.lcd_bl_on = 0;
+}
+
+void st7032_write_row1(const char *str)
+{
 	SC->sys_ctrl.lcd_cs_n = 0;
 	SC->sys_ctrl.lcd_rs = 0;
-
-	lcd_cmd(0x01, CLEARDELAY); // clear display
-	usleep(400);			   // additional delay for copycat lcd module
 
 	// Set RS to enter data write mode
 	SC->sys_ctrl.lcd_rs = 1;
 
 	// ensure no empty row
-	uint8_t rowlen = strlen(row1);
+	uint8_t rowlen = strlen(str);
 	if (rowlen == 0)
-	{
-		row1[0] = ' ';
-		rowlen++;
-	}
+		lcd_cmd(' ', WRDELAY);
+	else
+		for (uint8_t i = 0; i < rowlen; i++)
+			lcd_cmd(str[i], WRDELAY);
 
-	for (uint8_t i = 0; i < rowlen; i++)
-		lcd_cmd(row1[i], WRDELAY);
+	SC->sys_ctrl.lcd_cs_n = 1;
+}
+
+void st7032_write_row2(const char *str)
+{
+	SC->sys_ctrl.lcd_cs_n = 0;
+	SC->sys_ctrl.lcd_rs = 0;
+
+	lcd_cmd(0x01, CLEARDELAY); // clear display
+	usleep(400);			   // additional delay for copycat lcd module
 
 	// second row
 	SC->sys_ctrl.lcd_rs = 0;
@@ -84,20 +98,12 @@ void st7032_write(char *row1, char *row2)
 	SC->sys_ctrl.lcd_rs = 1;
 
 	// ensure no empty row
-	rowlen = strlen(row2);
+	uint8_t rowlen = strlen(str);
 	if (rowlen == 0)
-	{
-		row2[0] = ' ';
-		rowlen++;
-	}
-
-	for (uint8_t i = 0; i < rowlen; i++)
-		lcd_cmd(row2[i], WRDELAY);
+		lcd_cmd(' ', WRDELAY);
+	else
+		for (uint8_t i = 0; i < rowlen; i++)
+			lcd_cmd(str[i], WRDELAY);
 
 	SC->sys_ctrl.lcd_cs_n = 1;
-}
-
-void st7032_off()
-{
-	SC->sys_ctrl.lcd_bl_on = 0;
 }

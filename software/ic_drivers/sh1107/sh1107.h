@@ -26,8 +26,10 @@
 
 int sh1107_init();
 
-void sh1107_write(char *row1, char *row2);
-
+void sh1107_on();
 void sh1107_off();
+
+void sh1107_write_row1(const char *str);
+void sh1107_write_row2(const char *str);
 
 #endif /* sh1107_H_ */

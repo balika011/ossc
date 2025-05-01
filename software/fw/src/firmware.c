@@ -78,16 +78,6 @@ static int check_fw_header(fw_hdr *hdr)
 	return 0;
 }
 
-char __attribute__((__section__(".data"))) Eraseing_flash[] = "Eraseing flash";
-char __attribute__((__section__(".data"))) Updating_FW[] = "Updating FW";
-char __attribute__((__section__(".data"))) Verifying_flash[] = "Verifying flash";
-char __attribute__((__section__(".data"))) please_wait[] = "please wait...";
-char __attribute__((__section__(".data"))) Firmware_updated[] = "Firmware updated";
-char __attribute__((__section__(".data"))) Update_failed[] = "Update failed";
-char __attribute__((__section__(".data"))) SD_Flash_error[] = "SD/Flash error";
-char __attribute__((__section__(".data"))) Flash_verif_fail[] = "Flash verif fail";
-char __attribute__((__section__(".data"))) Restart_in_3_sec[] = "Restart in 3 sec";
-
 int fw_update()
 {
 	int screwed = 0;
@@ -110,17 +100,16 @@ int fw_update()
 	if (retval != 0)
 		goto failure;
 
-	sniprintf(menu_row1, LCD_ROW_LEN+1, "Validating data");
-	sniprintf(menu_row2, LCD_ROW_LEN + 1, "%u bytes", (unsigned)fw_header.params.data_len);
-	osd_notification(1);
+	char row[LCD_ROW_LEN + 1];
+	sniprintf(row, sizeof(row), "%u bytes", (unsigned)fw_header.params.data_len);
+	osd_notification("Validating data", row);
 
 	retval = sdcard_check_crc(sizeof(fw_hdr), fw_header.params.data_len, fw_header.params.data_crc);
 	if (retval != 0)
 		goto failure;
 
-	sniprintf(menu_row1, LCD_ROW_LEN + 1, "%u.%.2u%s%s", fw_header.params.version_major, fw_header.params.version_minor, (fw_header.params.version_suffix[0] == 0) ? "" : "-", fw_header.params.version_suffix);
-	strncpy(menu_row2, "Update? 1=Y, 2=N", LCD_ROW_LEN+1);
-	osd_notification(1);
+	sniprintf(row, sizeof(row), "%u.%.2u%s%s", fw_header.params.version_major, fw_header.params.version_minor, (fw_header.params.version_suffix[0] == 0) ? "" : "-", fw_header.params.version_suffix);
+	osd_notification(row, "Update? 1=Y, 2=N");
 
 	while (1) {
 		uint32_t btn_vec = SC->controls.ir_code;
@@ -148,12 +137,13 @@ update_init:
 
 	screwed = 1;
 
-	lcd_write(Eraseing_flash, please_wait);
+	lcd_write_row1("Eraseing flash");
+	lcd_write_row2("please wait...");
 
 	for (int i = 0; i < FLASH_USER_OFFSET; i += 0x10000)
 		flash_erase_64k(i);
 
-	lcd_write(Updating_FW, please_wait);
+	lcd_write_row1("Updating FW");
 
 	for (int i = 0; i < fw_header.params.data_len; i += SD_BLK_SIZE)
 	{
@@ -168,7 +158,7 @@ update_init:
 
 	flash_write_protect(1);
 
-	lcd_write(Verifying_flash, please_wait);
+	lcd_write_row1("Verifying flash");
 
 	if (crc32(0, (void *)FLASH_MEM_BASE, fw_header.params.data_len) != fw_header.params.data_crc)
 	{
@@ -176,7 +166,8 @@ update_init:
 		goto failure;
 	}
 
-	lcd_write(Firmware_updated, Restart_in_3_sec);
+	lcd_write_row1("Firmware updated");
+	lcd_write_row2("Restart in 3 sec");
 
 	usleep(3000000);
 
@@ -184,7 +175,7 @@ update_init:
 	while (1);
 
 failure:
-	char *errmsg = SD_Flash_error;
+	char *errmsg = "SD/Flash error";
 	switch (retval) {
 		case SD_NOINIT: errmsg = "No SD card det."; break;
 		case FW_IMAGE_ERROR: errmsg = "Invalid image"; break;
@@ -192,18 +183,16 @@ failure:
 		case FW_HDR_CRC_ERROR: errmsg = "Invalid hdr CRC"; break;
 		case FW_DATA_CRC_ERROR: errmsg = "Invalid data CRC"; break;
 		case FW_UPD_CANCELLED: errmsg = "Update cancelled"; break;
-		case FLASH_VERIFY_ERROR: errmsg = Flash_verif_fail; break;
+		case FLASH_VERIFY_ERROR: errmsg = "Flash verif fail"; break;
 	}
 
 	if (screwed)
 	{
-		lcd_write(Update_failed, errmsg);
+		lcd_write_row1("Update failed");
+		lcd_write_row2(errmsg);
 	}
 	else
-	{
-		strncpy(menu_row2, errmsg, LCD_ROW_LEN + 1);
-		osd_notification(1);
-	}
+		osd_notification("Update failed", errmsg);
 
 	usleep(1000000);
 

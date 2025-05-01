@@ -87,18 +87,29 @@ int sh1107_init()
 	return 1;
 }
 
-void sh1107_write(char *row1, char *row2)
+void sh1107_on()
 {
 	// Turn on
 	I2C_start(I2CA_BASE, 0x3c, 0);
 	I2C_write(I2CA_BASE, 0x00, 0);
 	I2C_write(I2CA_BASE, 0xaf, 1);
+}
 
-	uint8_t row1len = LCD_ROW_LEN;
+void sh1107_off()
+{
+	// Turn off
+	I2C_start(I2CA_BASE, 0x3c, 0);
+	I2C_write(I2CA_BASE, 0x00, 0);
+	I2C_write(I2CA_BASE, 0xae, 1);
+}
+
+void sh1107_write_row1(const char *str)
+{
+	uint8_t rowlen = LCD_ROW_LEN;
 	for (int i = 0; i < LCD_ROW_LEN; i++)
-		if (!row1[i])
+		if (!str[i])
 		{
-			row1len = i;
+			rowlen = i;
 			break;
 		}
 
@@ -112,18 +123,21 @@ void sh1107_write(char *row1, char *row2)
 
 		I2C_start(I2CA_BASE, 0x3c, 0);
 		I2C_write(I2CA_BASE, 0x40, 0);
-		for (uint8_t j = 0; j < row1len; j++)
-			I2C_write(I2CA_BASE, Font12_Table[(row1[j] - 0x20) * 12 + i], j == LCD_ROW_LEN - 1);
+		for (uint8_t j = 0; j < rowlen; j++)
+			I2C_write(I2CA_BASE, Font12_Table[(str[j] - 0x20) * 12 + i], j == LCD_ROW_LEN - 1);
 
-		for (uint8_t j = row1len; j < LCD_ROW_LEN; j++)
+		for (uint8_t j = rowlen; j < LCD_ROW_LEN; j++)
 			I2C_write(I2CA_BASE, Font12_Table[i], j == LCD_ROW_LEN - 1);
 	}
+}
 
-	uint8_t row2len = LCD_ROW_LEN;
+void sh1107_write_row2(const char *str)
+{
+	uint8_t rowlen = LCD_ROW_LEN;
 	for (int i = 0; i < LCD_ROW_LEN; i++)
-		if (!row2[i])
+		if (!str[i])
 		{
-			row2len = i;
+			rowlen = i;
 			break;
 		}
 
@@ -137,18 +151,10 @@ void sh1107_write(char *row1, char *row2)
 
 		I2C_start(I2CA_BASE, 0x3c, 0);
 		I2C_write(I2CA_BASE, 0x40, 0);
-		for (uint8_t j = 0; j < row2len; j++)
-			I2C_write(I2CA_BASE, Font12_Table[(row2[j] - 0x20) * 12 + i], j == LCD_ROW_LEN - 1);
+		for (uint8_t j = 0; j < rowlen; j++)
+			I2C_write(I2CA_BASE, Font12_Table[(str[j] - 0x20) * 12 + i], j == LCD_ROW_LEN - 1);
 
-		for (uint8_t j = row2len; j < LCD_ROW_LEN; j++)
+		for (uint8_t j = rowlen; j < LCD_ROW_LEN; j++)
 			I2C_write(I2CA_BASE, Font12_Table[i], j == LCD_ROW_LEN - 1);
 	}
-}
-
-void sh1107_off()
-{
-	// Turn off
-	I2C_start(I2CA_BASE, 0x3c, 0);
-	I2C_write(I2CA_BASE, 0x00, 0);
-	I2C_write(I2CA_BASE, 0xae, 1);
 }

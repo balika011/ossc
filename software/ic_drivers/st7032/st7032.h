@@ -27,8 +27,10 @@
 
 void st7032_init();
 
-void st7032_write(char *row1, char *row2);
-
+void st7032_on();
 void st7032_off();
+
+void st7032_write_row1(const char *str);
+void st7032_write_row2(const char *str);
 
 #endif /* st7032_H_ */

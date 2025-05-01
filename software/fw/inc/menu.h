@@ -42,8 +42,8 @@ typedef enum
 
 typedef int (*func_call)(void);
 typedef void (*arg_func)(void);
-typedef void (*disp_func)(uint8_t);
-typedef void (*disp_func_u16)(uint16_t *);
+typedef void (*disp_func)(uint8_t, char *);
+typedef void (*disp_func_u16)(uint16_t *, char *);
 
 typedef struct
 {
@@ -123,12 +123,11 @@ extern uint16_t tc_sampler_phase;
 extern uint8_t vm_sel, vm_edit;
 extern uint8_t menu_active;
 
-menunavi* get_current_menunavi();
-void init_menu();
+void menu_init();
 void menu_render_page();
-void display_menu(uint8_t forcedisp);
-static void vm_select();
-static void vm_tweak(uint16_t *v);
+void menu_update();
+
+void menu_update_status(const char *str);
 
 void menu_sampler_phase(uint8_t v);
 void menu_scanlines_mode();

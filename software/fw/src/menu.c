@@ -29,6 +29,9 @@
 #include "firmware.h"
 #include "osd.h"
 
+static void vm_select();
+static void vm_tweak(uint16_t *v, char *row);
+
 #define SETTING_ITEM(x) 0, sizeof(x)/sizeof(char*)-1, x
 #define MENU(X, Y) menuitem_t X##_items[] = Y; static const menu_t X = { sizeof(X##_items)/sizeof(menuitem_t), X##_items };
 #define P99_PROTECT(...) __VA_ARGS__
@@ -87,27 +90,27 @@ static const char *lumacode_mode_desc[] = { "Off", "C64", "Spectrum", "Coleco/MS
 static const char *adc_pll_bw_desc[] = { "High", "Medium", "Low", "Ultra low" };
 static const char *fpga_pll_bw_desc[] = { "High", "Low" };
 
-static void sync_vth_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d mV", (v*1127)/100); }
-static void intclks_to_time_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%.2u us", (unsigned)(((1000000U*v)/(TVP_INTCLK_HZ/1000))/1000), (unsigned)((((1000000U*v)/(TVP_INTCLK_HZ/1000))%1000)/10)); }
-static void extclks_to_time_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%.2u us", (unsigned)(((1000000U*v)/(TVP_EXTCLK_HZ/1000))/1000), (unsigned)((((1000000U*v)/(TVP_EXTCLK_HZ/1000))%1000)/10)); }
-static void sl_str_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u%%", ((v+1)*625)/100); }
-static void sl_cust_str_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u%%", ((v)*625)/100); }
-static void sl_cust_iv_x_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%s%u%s", (v ? "" : "Auto ("), (v ? v : sl_def_iv_x)+1, (v ? "" : ")")); }
-static void sl_cust_iv_y_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%s%u%s", (v ? "" : "Auto ("), (v ? v : sl_def_iv_y)+1, (v ? "" : ")")); }
-static void sl_hybr_str_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u%%", (v*625)/100); }
-static void lines_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, LNG("%u lines","%u ﾗｲﾝ"), v); }
-static void pixels_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, LNG("%u pixels","%u ﾄﾞｯﾄ"), v); }
-static void value_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u", v); }
-static void signed_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d", (int8_t)(v-SIGNED_NUMVAL_ZERO)); }
-static void lt_disp(uint8_t v) { strncpy(menu_row2, lt_desc[v], LCD_ROW_LEN+1); }
-static void aud_db_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d dB", ((int8_t)v-AUDIO_GAIN_0DB)); }
-static void vm_display_name (uint8_t v) { strncpy(menu_row2, video_modes_plm[v].name, LCD_ROW_LEN+1); }
-static void link_av_desc (avinput_t v) { strncpy(menu_row2, v == AV_LAST ? "No link" : avinput_str[v], LCD_ROW_LEN+1); }
-static void profile_disp(uint8_t v) { userdata_load_profile(v, 1); sniprintf(menu_row2, LCD_ROW_LEN+1, "%u: %s", v, (target_profile_name[0] == 0) ? "<empty>" : target_profile_name); }
-static void alc_v_filter_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, LNG("%u lines","%u ﾗｲﾝ"), (1<<v)); }
-static void alc_h_filter_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, LNG("%u pixels","%u ﾄﾞｯﾄ"), (1<<(v+1))); }
-void sampler_phase_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d deg", (v*11250)/1000); }
-//static void coarse_gain_disp(uint8_t v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%u", ((v*10)+50)/100, (((v*10)+50)%100)/10); }
+static void sync_vth_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%d mV", (v * 1127) / 100); }
+static void intclks_to_time_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%u.%.2u us", (unsigned)(((1000000U * v) / (TVP_INTCLK_HZ / 1000)) / 1000), (unsigned)((((1000000U * v) / (TVP_INTCLK_HZ / 1000)) % 1000) / 10)); }
+static void extclks_to_time_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%u.%.2u us", (unsigned)(((1000000U * v) / (TVP_EXTCLK_HZ / 1000)) / 1000), (unsigned)((((1000000U * v) / (TVP_EXTCLK_HZ / 1000)) % 1000) / 10)); }
+static void sl_str_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%u%%", ((v + 1) * 625) / 100); }
+static void sl_cust_str_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%u%%", ((v) * 625) / 100); }
+static void sl_cust_iv_x_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%s%u%s", (v ? "" : "Auto ("), (v ? v : sl_def_iv_x) + 1, (v ? "" : ")")); }
+static void sl_cust_iv_y_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%s%u%s", (v ? "" : "Auto ("), (v ? v : sl_def_iv_y) + 1, (v ? "" : ")")); }
+static void sl_hybr_str_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%u%%", (v * 625) / 100); }
+static void lines_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, LNG("%u lines", "%u ﾗｲﾝ"), v); }
+static void pixels_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, LNG("%u pixels", "%u ﾄﾞｯﾄ"), v); }
+static void value_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%u", v); }
+static void signed_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%d", (int8_t)(v - SIGNED_NUMVAL_ZERO)); }
+static void lt_disp(uint8_t v, char *row) { strncpy(row, lt_desc[v], OSD_CHAR_COLS + 1); }
+static void aud_db_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%d dB", ((int8_t)v - AUDIO_GAIN_0DB)); }
+static void vm_display_name(uint8_t v, char *row) { strncpy(row, video_modes_plm[v].name, OSD_CHAR_COLS + 1); }
+static void link_av_desc(avinput_t v, char *row) { strncpy(row, v == AV_LAST ? "No link" : avinput_str[v], OSD_CHAR_COLS + 1); }
+static void profile_disp(uint8_t v, char *row) { userdata_load_profile(v, 1); sniprintf(row, OSD_CHAR_COLS + 1, "%u: %s", v, (target_profile_name[0] == 0) ? "<empty>" : target_profile_name); }
+static void alc_v_filter_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, LNG("%u lines", "%u ﾗｲﾝ"), (1 << v)); }
+static void alc_h_filter_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, LNG("%u pixels", "%u ﾄﾞｯﾄ"), (1 << (v + 1))); }
+void sampler_phase_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%d deg", (v * 11250) / 1000); }
+// static void coarse_gain_disp(uint8_t v, char *row) { sniprintf(row, OSD_CHAR_COLS + 1, "%u.%u", ((v*10)+50)/100, (((v*10)+50)%100)/10); }
 
 static arg_info_t vm_arg_info = {&vm_sel, 0, vm_display_name};
 static const arg_info_t profile_arg_info = {&profile_sel_menu, MAX_PROFILE, profile_disp};
@@ -274,7 +277,7 @@ MENU(menu_main, P99_PROTECT({ \
 menunavi navi[] = {{&menu_main, 0}, {NULL, 0}, {NULL, 0}};
 uint8_t navlvl = 0;
 
-void init_menu()
+void menu_init()
 {
 	// Set max ids for adv timing
 	vm_arg_info.max = VIDEO_MODE_COUNT - 1;
@@ -283,39 +286,34 @@ void init_menu()
 	osd_init();
 }
 
-menunavi* get_current_menunavi()
-{
-	return &navi[navlvl];
-}
-
-void write_option_value(menuitem_t *item, int func_called, int retval)
+void write_option_value(menuitem_t *item, int func_called, int retval, char *row)
 {
 	switch (item->type) {
 		case OPT_AVCONFIG_SELECTION:
-			strncpy(menu_row2, item->sel.setting_str[*(item->sel.data)], LCD_ROW_LEN+1);
+			strncpy(row, item->sel.setting_str[*(item->sel.data)], OSD_CHAR_COLS + 1);
 			break;
 		case OPT_AVCONFIG_NUMVALUE:
-			item->num.df(*(item->num.data));
+			item->num.df(*(item->num.data), row);
 			break;
 		case OPT_AVCONFIG_NUMVAL_U16:
-			item->num_u16.df(item->num_u16.data);
+			item->num_u16.df(item->num_u16.data, row);
 			break;
 		case OPT_SUBMENU:
 			if (item->sub.arg_info)
-				item->sub.arg_info->df(*item->sub.arg_info->data);
+				item->sub.arg_info->df(*item->sub.arg_info->data, row);
 			else
-				menu_row2[0] = 0;
+				row[0] = 0;
 			break;
 		case OPT_FUNC_CALL:
 			if (func_called) {
 				if (retval == 0)
-					strncpy(menu_row2, "Done", LCD_ROW_LEN+1);
+					strncpy(row, "Done", OSD_CHAR_COLS + 1);
 				else if (retval < 0)
-					sniprintf(menu_row2, LCD_ROW_LEN+1, "Failed (%d)", retval);
+					sniprintf(row, OSD_CHAR_COLS + 1, "Failed (%d)", retval);
 			} else if (item->fun.arg_info) {
-				item->fun.arg_info->df(*item->fun.arg_info->data);
+				item->fun.arg_info->df(*item->fun.arg_info->data, row);
 			} else {
-				menu_row2[0] = 0;
+				row[0] = 0;
 			}
 			break;
 		default:
@@ -325,32 +323,63 @@ void write_option_value(menuitem_t *item, int func_called, int retval)
 
 void menu_render_row(uint8_t row)
 {
+	if (!menu_active)
+		return;
+
+	if (osd_enable == 0 && row == navi[navlvl].mp)
+	{
+		menuitem_t *item = &navi[navlvl].m->items[row];
+		char row_text[OSD_CHAR_COLS + 1];
+		write_option_value(item, 0, 0, row_text);
+		lcd_write_row1(item->name);
+		lcd_write_row2(row_text);
+	}
+	else if (osd_enable == 1)
+{
 	menuitem_t *item = &navi[navlvl].m->items[row];
 
 	osd_draw_text(row, 0, 1, (row == navi[navlvl].mp) ? 3 : 2, item->name);
 
+		if (row == navi[navlvl].mp)
+			lcd_write_row1(item->name);
+
 	if ((item->type != OPT_SUBMENU) && (item->type != OPT_FUNC_CALL))
 	{
-		write_option_value(item, 0, 0);
-		osd_draw_text(row, 1, 1, (row == navi[navlvl].mp) ? 3 : 2, menu_row2);
+			char row_text[OSD_CHAR_COLS + 1];
+			write_option_value(item, 0, 0, row_text);
+			if (row_text[0])
+				osd_draw_text(row, 1, 1, (row == navi[navlvl].mp) ? 3 : 2, row_text);
+
+			if (row == navi[navlvl].mp)
+				lcd_write_row2(row_text);
 	}
 	else
 		osd_draw_text(row, 1, 0, 0, "");
+	}
+	else if (osd_enable == 2 && row == navi[navlvl].mp)
+	{
+		menuitem_t *item = &navi[navlvl].m->items[row];
+		char row_text[OSD_CHAR_COLS + 1];
+		write_option_value(item, 0, 0, row_text);
+		osd_notification(item->name, row_text);
+	}
 }
 
 void menu_render_page()
 {
-	if (!menu_active || (osd_enable != 1))
+	if (!menu_active)
 		return;
-
 
 	osd_clear();
 
+	if (osd_enable == 1)
 	for (int i = 0; i < navi[navlvl].m->num_items; i++)
 		menu_render_row(i);
+	else
+		menu_render_row(navi[navlvl].mp);
 }
 
-void display_menu(uint8_t forcedisp)
+void menu_update()
 {
 	menucode_id code = NO_ACTION;
 	menuitem_t *item;
@@ -358,15 +387,15 @@ void display_menu(uint8_t forcedisp)
 	uint16_t *val_u16, val_u16_min, val_u16_max;
 	int i, func_called = 0, retval = 0;
 
+	if (!remote_code)
+		return;
+
 	for (i=RC_OK; i < RC_INFO; i++) {
 		if (remote_code == rc_keymap[i]) {
 			code = i;
 			break;
 		}
 	}
-
-	if (!forcedisp && !remote_code)
-		return;
 
 	item = &navi[navlvl].m->items[navi[navlvl].mp];
 
@@ -381,7 +410,6 @@ void display_menu(uint8_t forcedisp)
 		else
 			navi[navlvl].mp = (navi[navlvl].mp + 1) % navi[navlvl].m->num_items;
 		menu_render_row(last_page);
-		menu_render_row(navi[navlvl].mp);
 		break;
 	}
 	case PREV_MENU:
@@ -391,7 +419,6 @@ void display_menu(uint8_t forcedisp)
 		} else {
 			menu_active = 0;
 			osd_set_menu_active(0);
-			osd_status(0);
 			return;
 		}
 		break;
@@ -430,6 +457,8 @@ void display_menu(uint8_t forcedisp)
 					*val = (*val > val_min) ? (*val-1) : (val_wrap ? val_max : val_min);
 				else
 					*val = (*val < val_max) ? (*val+1) : (val_wrap ? val_min : val_max);
+				if (val == &osd_enable)
+					menu_render_page();
 				break;
 			case OPT_AVCONFIG_NUMVAL_U16:
 				val_u16 = item->num_u16.data;
@@ -467,18 +496,22 @@ void display_menu(uint8_t forcedisp)
 				break;
 		}
 		break;
-	default:
-		break;
 	}
 
-	// Generate menu text
-	item = &navi[navlvl].m->items[navi[navlvl].mp];
-	strncpy(menu_row1, item->name, LCD_ROW_LEN+1);
-	write_option_value(item, func_called, retval);
-	if (menu_row2[0])
-		osd_draw_text(navi[navlvl].mp, 1, 1, 3, menu_row2);
+	menu_render_row(navi[navlvl].mp);
+}
 
-	lcd_write(menu_row1, menu_row2);
+void menu_update_status(const char *str)
+{
+	if (str[0])
+	{
+		if (osd_enable == 1)
+			osd_draw_text(navi[navlvl].mp, 1, 1, 3, str);
+		else if (osd_enable == 2)
+			osd_draw_text(1, 0, 1, 2, str);
+	}
+
+	lcd_write_row2(str);
 }
 
 static void vm_select() {
@@ -496,7 +529,8 @@ static void vm_select() {
 	tc_sampler_phase = video_modes_plm[vm_edit].sampler_phase;
 }
 
-static void vm_tweak(uint16_t *v) {
+static void vm_tweak(uint16_t *v, char *row)
+{
 	int active_mode = (cm.sync_active && (cm.id == vm_edit));
 
 	if (active_mode) {
@@ -527,23 +561,22 @@ static void vm_tweak(uint16_t *v) {
 	video_modes_plm[vm_edit].sampler_phase = tc_sampler_phase;
 
 	if (v == &tc_sampler_phase)
-		sampler_phase_disp(*v);
+		sampler_phase_disp(*v, row);
 	else if ((v == &tc_h_samplerate) || (v == &tc_h_samplerate_adj))
-		sniprintf(menu_row2, LCD_ROW_LEN+1, "%u.%.2u", video_modes_plm[vm_edit].timings.h_total, video_modes_plm[vm_edit].timings.h_total_adj*5);
+		sniprintf(row, OSD_CHAR_COLS + 1, "%u.%.2u", video_modes_plm[vm_edit].timings.h_total, video_modes_plm[vm_edit].timings.h_total_adj * 5);
 	else
-		sniprintf(menu_row2, LCD_ROW_LEN+1, "%u", *v);
+		sniprintf(row, OSD_CHAR_COLS + 1, "%u", *v);
 }
 
 void menu_sampler_phase(uint8_t v)
 {
 	if (!menu_active)
 	{
-		strncpy(menu_row1, LNG("Sampling phase", "ｻﾝﾌﾟﾘﾝｸﾞﾌｪｰｽﾞ"), OSD_CHAR_COLS);
-		sampler_phase_disp(v);
-		osd_notification(1);
-		osd_status_refresh();
+		char row[OSD_CHAR_COLS + 1];
+		sampler_phase_disp(v, row);
+		osd_status(LNG("Sampling phase", "ｻﾝﾌﾟﾘﾝｸﾞﾌｪｰｽﾞ"), row);
 	}
-	else if (get_current_menunavi()->m == &menu_advtiming)
+	else if (navi[navlvl].m == &menu_advtiming)
 	{
 		menu_render_page();
 	}
@@ -553,12 +586,9 @@ void menu_scanlines_mode()
 {
 	if (!menu_active)
 	{
-		strncpy(menu_row1, LNG("Scanlines", "ｽｷｬﾝﾗｲﾝ"), OSD_CHAR_COLS);
-		strncpy(menu_row2, sl_mode_desc[tc.sl_mode], OSD_CHAR_COLS);
-		osd_notification(1);
-		osd_status_refresh();
+		osd_status(LNG("Scanlines", "ｽｷｬﾝﾗｲﾝ"), sl_mode_desc[tc.sl_mode]);
 	}
-	else if (get_current_menunavi()->m == &menu_scanlines)
+	else if (navi[navlvl].m == &menu_scanlines)
 	{
 		menu_render_page();
 	}
@@ -568,12 +598,9 @@ void menu_scanlines_type()
 {
 	if (!menu_active)
 	{
-		strncpy(menu_row1, LNG("Sl. type", "ｽｷｬﾝﾗｲﾝﾙｲ"), OSD_CHAR_COLS);
-		strncpy(menu_row2, sl_type_desc[tc.sl_type], OSD_CHAR_COLS);
-		osd_notification(1);
-		osd_status_refresh();
+		osd_status(LNG("Sl. type", "ｽｷｬﾝﾗｲﾝﾙｲ"), sl_type_desc[tc.sl_type]);
 	}
-	else if (get_current_menunavi()->m == &menu_scanlines)
+	else if (navi[navlvl].m == &menu_scanlines)
 	{
 		menu_render_page();
 	}
@@ -583,12 +610,11 @@ void menu_scanlines_strength()
 {
 	if (!menu_active)
 	{
-		strncpy(menu_row1, LNG("Sl. strength", "ｽｷｬﾝﾗｲﾝﾂﾖｻ"), OSD_CHAR_COLS);
-		sl_str_disp(tc.sl_str);
-		osd_notification(1);
-		osd_status_refresh();
+		char row[OSD_CHAR_COLS + 1];
+		sl_str_disp(tc.sl_str, row);
+		osd_status(LNG("Sl. strength", "ｽｷｬﾝﾗｲﾝﾂﾖｻ"), row);
 	}
-	else if (get_current_menunavi()->m == &menu_scanlines)
+	else if (navi[navlvl].m == &menu_scanlines)
 	{
 		menu_render_page();
 	}
