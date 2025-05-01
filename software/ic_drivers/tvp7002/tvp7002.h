@@ -39,38 +39,42 @@
 #define TVP_INTCLK_HZ           6500000UL
 #define TVP_EXTCLK_HZ           27000000UL
 
-typedef enum {
-    TVP_INPUT1 = 0,
-    TVP_INPUT2 = 1,
-    TVP_INPUT3 = 2
+typedef enum
+{
+	TVP_INPUT1 = 0,
+	TVP_INPUT2 = 1,
+	TVP_INPUT3 = 2
 } tvp_input_t;
 
-typedef enum {
-    TVP_SOG1 = 0,
-    TVP_SOG2 = 1,
-    TVP_SOG3 = 2,
-    TVP_HV_A = 3,
-    TVP_HV_B = 4,
-    TVP_CS_A = 5,
-    TVP_CS_B = 6
+typedef enum
+{
+	TVP_SOG1 = 0,
+	TVP_SOG2 = 1,
+	TVP_SOG3 = 2,
+	TVP_HV_A = 3,
+	TVP_HV_B = 4,
+	TVP_CS_A = 5,
+	TVP_CS_B = 6
 } tvp_sync_input_t;
 
-typedef enum {
-    REFCLK_EXT27    = 0,
-    REFCLK_INTCLK   = 1
+typedef enum
+{
+	REFCLK_EXT27 = 0,
+	REFCLK_INTCLK = 1
 } tvp_refclk_t;
 
-typedef struct {
-    const char *name;
-    uint16_t R_Y;
-    uint16_t R_Pb;
-    uint16_t R_Pr;
-    uint16_t G_Y;
-    uint16_t G_Pb;
-    uint16_t G_Pr;
-    uint16_t B_Y;
-    uint16_t B_Pb;
-    uint16_t B_Pr;
+typedef struct
+{
+	const char *name;
+	uint16_t R_Y;
+	uint16_t R_Pb;
+	uint16_t R_Pr;
+	uint16_t G_Y;
+	uint16_t G_Pb;
+	uint16_t G_Pr;
+	uint16_t B_Y;
+	uint16_t B_Pb;
+	uint16_t B_Pr;
 } ypbpr_to_rgb_csc_t;
 
 extern const ypbpr_to_rgb_csc_t csc_coeffs[];
