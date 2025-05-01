@@ -237,7 +237,6 @@ set_global_assignment -name VERILOG_FILE rtl/ossc.v
 set_global_assignment -name VERILOG_FILE rtl/scanconverter.v
 set_global_assignment -name VERILOG_FILE rtl/linebuf_top.v
 set_global_assignment -name VERILOG_FILE rtl/tvp7002_frontend.v
-set_global_assignment -name VERILOG_FILE rtl/lat_tester.v
 set_global_assignment -name QIP_FILE sys/synthesis/sys.qip
 set_global_assignment -name QIP_FILE rtl/linebuf.qip
 set_global_assignment -name QIP_FILE rtl/pll_2x.qip

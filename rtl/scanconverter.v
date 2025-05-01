@@ -361,8 +361,8 @@ linebuf_top #(
 
 videogen vg0 (
     .pclk           (PCLK_OUT_i),
-    .lt_active      (1'b0),
-    .lt_mode        (2'h0),
+    .H_ACTIVE       (H_ACTIVE),
+    .V_ACTIVE       (V_ACTIVE),
     .xpos           (xpos_pp[PP_TP_START]),
     .ypos           (ypos_pp[PP_TP_START]),
     .R_out          (R_vg),
