@@ -51,7 +51,9 @@ const ypbpr_to_rgb_csc_t csc_coeffs[] = {
 };
 
 static const uint8_t Kvco[] = {75, 85, 150, 200};
+#ifdef TVP7002_DEBUG
 static const char *Kvco_str[] = { "Ultra low", "Low", "Medium", "High" };
+#endif
 
 static void tvp_set_clamp_type(video_format fmt)
 {
