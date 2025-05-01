@@ -3,19 +3,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "hdmitx.h"
-#include "it6613_sys.h" // richard add
-#include "edid.h" // richard add
+#include "it6613_sys.h"
+#include "edid.h"
 
-extern int TX_HDP;  // richard add
-int gEnableColorDepth = 1; //richard add
+extern int TX_HDP;
+int gEnableColorDepth = 1;
 
 ////////////////////////////////////////////////////////////////////////////////
 // EDID
 ////////////////////////////////////////////////////////////////////////////////
 static _XDATA unsigned char EDID_Buf[128] ;
-// richard static RX_CAP _XDATA RxCapability ;
 RX_CAP _XDATA RxCapability ;
-// richard static BOOL bChangeMode = FALSE ;
 BOOL bChangeMode = FALSE ;
 _XDATA AVI_InfoFrame AviInfo;
 _XDATA Audio_InfoFrame AudioInfo ;
@@ -24,7 +22,6 @@ _XDATA Audio_InfoFrame AudioInfo ;
 // Program utility.
 ////////////////////////////////////////////////////////////////////////////////
 // move to .h BOOL ParseEDID() ;
-// richard static BOOL ParseCEAEDID(BYTE *pCEAEDID) ;
 void ConfigAVIInfoFrame(BYTE VIC, BYTE pixelrep) ;
 void ConfigAudioInfoFrm() ;
 
@@ -54,10 +51,6 @@ BOOL bHDMIMode, bAudioEnable ;
 // Function Body.
 ////////////////////////////////////////////////////////////////////////////////
 
-//richard, move to .h void HDMITX_ChangeDisplayOption(HDMI_Video_Type VideoMode, HDMI_OutputColorMode OutputColorMode) ;
-//richard, move to .hvoid HDMITX_SetOutput() ;
-//richard richard, move to .h void HDMITX_DevLoopProc() ;
-
 void
 HDMITX_SetOutput()
 {
@@ -68,7 +61,6 @@ HDMITX_SetOutput()
     ProgramSyncEmbeddedVideoMode(VIC, bInputSignalType) ; // inf CCIR656 input
     #endif
     
-    //TMDSClock = 745000000;  //????? richard
     if( TMDSClock>80000000 )
     {
         level = PCLK_HIGH ;
@@ -86,7 +78,7 @@ HDMITX_SetOutput()
 
     //BOOL EnableVideoOutput(VIDEOPCLKLEVEL level,BYTE inputColorMode,BYTE outputColorMode,BYTE bHDMI) ;
     //EnableVideoOutput(level,bInputColorMode, bInputSignalType, bOutputColorMode,bHDMIMode) ;
-    EnableVideoOutput(level,bInputColorMode, bOutputColorMode,bHDMIMode) ; // richard modify
+    EnableVideoOutput(level,bInputColorMode, bOutputColorMode,bHDMIMode) ;
     
     if( bHDMIMode )
     {
@@ -99,7 +91,7 @@ HDMITX_SetOutput()
             //BOOL EnableAudioOutput(ULONG VideoPixelClock,BYTE bAudioSampleFreq,BYTE ChannelNumber,BYTE bAudSWL,BYTE bSPDIF)
             //EnableAudioOutput(TMDSClock,48000, 2, FALSE);
             bool bSPDIF = FALSE;
-            EnableAudioOutput(TMDSClock,AUDFS_48KHz, 2, 16, bSPDIF);  // richard modify
+            EnableAudioOutput(TMDSClock,AUDFS_48KHz, 2, 16, bSPDIF);
             ConfigAudioInfoFrm() ;
 		}
     }
@@ -241,7 +233,7 @@ HDMITX_ChangeDisplayOption(HDMI_Video_Type OutputVideoTiming, HDMI_OutputColorMo
         aspec = HDMI_16x9 ;
         Colorimetry = HDMI_ITU709 ;
         break ;
-    case HDMI_1080i120:// richard add
+    case HDMI_1080i120:
         VIC = 46 ;
         VideoPixelClock = 148500000 ;
         pixelrep = 0 ;
@@ -251,7 +243,7 @@ HDMITX_ChangeDisplayOption(HDMI_Video_Type OutputVideoTiming, HDMI_OutputColorMo
         
         
     default:
-        VIC = 0; // richard add
+        VIC = 0;
         bChangeMode = FALSE ;                
         return ;
     }
@@ -383,7 +375,6 @@ ParseEDID()
 
     RxCapability.ValidCEA = FALSE ;
 	
-    // richard GetEDIDData(0, EDID_Buf);
     if (!GetEDIDData(0, EDID_Buf))
         return FALSE;
 
@@ -433,8 +424,6 @@ ParseEDID()
         {  
            if( !bValidCEA && EDID_Buf[0] == 0x2 && EDID_Buf[1] == 0x3 )  //EDID_Buf[0] == 0x2  ==> Additional timing data type 2
             {
-                // richard change
-                //err = ParseCEAEDID(EDID_Buf) ;
                 err = ParseCEAEDID(EDID_Buf, &RxCapability);
                 if( err )
                 {
@@ -454,97 +443,6 @@ ParseEDID()
         }
     }
 
-    return err?FALSE:TRUE ;  // richard modify
+    return err?FALSE:TRUE ;
 
 }
-
-/* richard: use the one defined edid.c
-static BOOL
-ParseCEAEDID(BYTE *pCEAEDID)
-{
-    BYTE offset,End ;
-    BYTE count ;
-    BYTE tag ;
-    int i ;
-
-// richard     if( pCEAEDID[0] != 0x02 || pCEAEDID[1] != 0x03 ) return ER_SUCCESS ; // not a CEA BLOCK.
-    if( pCEAEDID[0] != 0x02 || pCEAEDID[1] != 0x03 )  // not a CEA BLOCK.
- 	  return FALSE;
-    End = pCEAEDID[2]  ; // CEA description.
-    RxCapability.VideoMode = pCEAEDID[3] ;
-
-	RxCapability.VDOModeCount = 0 ;
-    RxCapability.idxNativeVDOMode = 0xff ;
-    
-    for( offset = 4 ; offset < End ; )
-    {
-        tag = pCEAEDID[offset] >> 5 ;
-        count = pCEAEDID[offset] & 0x1f ;
-        switch( tag )
-        {
-        case 0x01: // Audio Data Block ;
-            RxCapability.AUDDesCount = count/3 ;
-            offset++ ;
-            for( i = 0 ; i < RxCapability.AUDDesCount ; i++ )
-            {
-                RxCapability.AUDDes[i].uc[0] = pCEAEDID[offset++] ;
-                RxCapability.AUDDes[i].uc[1] = pCEAEDID[offset++] ;
-                RxCapability.AUDDes[i].uc[2] = pCEAEDID[offset++] ;
-            }
-
-            break ;
-
-        case 0x02: // Video Data Block ;
-            //RxCapability.VDOModeCount = 0 ;
-            offset ++ ;
-            for( i = 0,RxCapability.idxNativeVDOMode = 0xff ; i < count ; i++, offset++ )
-            {
-            	BYTE VIC ;
-            	VIC = pCEAEDID[offset] & (~0x80) ;
-            	// if( FindModeTableEntryByVIC(VIC) != -1 )
-            	{
-	                RxCapability.VDOMode[RxCapability.VDOModeCount] = VIC ;
-	                if( pCEAEDID[offset] & 0x80 )
-	                {
-	                    RxCapability.idxNativeVDOMode = (BYTE)RxCapability.VDOModeCount ;
-	                    iVideoModeSelect = RxCapability.VDOModeCount ;
-	                }
-
-	                RxCapability.VDOModeCount++ ;
-            	}
-            }
-            break ;
-
-        case 0x03: // Vendor Specific Data Block ;
-            offset ++ ;
-            RxCapability.IEEEOUI = (ULONG)pCEAEDID[offset+2] ;
-            RxCapability.IEEEOUI <<= 8 ;
-            RxCapability.IEEEOUI += (ULONG)pCEAEDID[offset+1] ;
-            RxCapability.IEEEOUI <<= 8 ;
-            RxCapability.IEEEOUI += (ULONG)pCEAEDID[offset] ;
-            offset += count ; // ignore the remaind.
-
-            break ;
-
-        case 0x04: // Speaker Data Block ;
-            offset ++ ;
-            RxCapability.SpeakerAllocBlk.uc[0] = pCEAEDID[offset] ;
-            RxCapability.SpeakerAllocBlk.uc[1] = pCEAEDID[offset+1] ;
-            RxCapability.SpeakerAllocBlk.uc[2] = pCEAEDID[offset+2] ;
-            offset += 3 ;
-            break ;
-        case 0x05: // VESA Data Block ;
-            offset += count+1 ;
-            break ;
-        case 0x07: // Extended Data Block ;
-            offset += count+1 ; //ignore
-            break ;
-        default:
-            offset += count+1 ; // ignore
-        }
-    }
-    RxCapability.ValidCEA = TRUE ;
-    return TRUE ;
-}
-*/
-

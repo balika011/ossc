@@ -86,7 +86,7 @@ typedef union _tag_DCSUPPORT {
         BYTE SUPPORT_AI:1 ;    
     } info ;
     BYTE uc ;
-} DCSUPPORT ;   // Richard Note: Color Depth
+} DCSUPPORT ;
 
 typedef union _LATENCY_SUPPORT{
     struct {
@@ -100,7 +100,7 @@ typedef union _LATENCY_SUPPORT{
 #define HDMI_IEEEOUI 0x0c03
 
 typedef struct _RX_CAP{
-    BYTE Valid; // richard add
+    BYTE Valid;
     BYTE VideoMode ;
     BYTE VDOModeCount ;
     BYTE idxNativeVDOMode ;

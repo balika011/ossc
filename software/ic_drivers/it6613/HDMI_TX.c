@@ -226,10 +226,9 @@ bool HDMITX_DevLoopProc()
     static BYTE PreHPD = 0;
     BYTE HPD, HPDChange ;
 
-    // Richard CheckHDMI(&HPD,&HPDChange) ;
-    CheckHDMITX(&HPD,&HPDChange) ;
+    CheckHDMITX(&HPD,&HPDChange);
 
-    if (HPD == PreHPD && HPDChange)  // richard add
+    if (HPD == PreHPD && HPDChange)
         return FALSE;
 
     TX_HDP = HPD;
@@ -243,7 +242,6 @@ bool HDMITX_DevLoopProc()
         {
             OS_PRINTF("HPD=ON\n");
             RxCapability.Valid = ParseEDID() ;
-            //bOutputColorMode = F_MODE_YUV444; //F_MODE_RGB444; // richard node. users can change color space here according to HDMI sink
 
             if( RxCapability.Valid && RxCapability.ValidHDMI )
             {
@@ -254,19 +252,6 @@ bool HDMITX_DevLoopProc()
                 {
                     bAudioEnable = TRUE ;
                 }
-
-#if 0    // richard, don't care edid, the output always RGB444
-                if( RxCapability.VideoMode & (1<<5))
-                {
-                    bOutputColorMode &= ~F_MODE_CLRMOD_MASK ;
-                    bOutputColorMode |= F_MODE_YUV444;
-                }
-                else if (RxCapability.VideoMode & (1<<4))
-                {
-                    bOutputColorMode &= ~F_MODE_CLRMOD_MASK ;
-                    bOutputColorMode |= F_MODE_YUV422 ;
-                }
-#endif
             }
             else if (!RxCapability.Valid)
             {
@@ -293,9 +278,9 @@ bool HDMITX_DevLoopProc()
             // unplug mode, ...
             OS_PRINTF("DisableVideoOutput\n");
             //DisableVideoOutput() ;
-            RxCapability.Valid = FALSE; // richard add
-            RxCapability.ValidHDMI = FALSE; // richard add
-            RxCapability.ValidCEA = FALSE; // richard add
+            RxCapability.Valid = FALSE;
+            RxCapability.ValidHDMI = FALSE;
+            RxCapability.ValidCEA = FALSE;
         }
     }
     else // no stable but need to process mode change procedure

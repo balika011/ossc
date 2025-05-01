@@ -6,9 +6,9 @@
 //////////////////////////////////////////////////
 #ifdef _MCU_
 typedef bit BOOL ;
-#define _CODE //richard code
-#define _IDATA //richard idata
-#define _XDATA //richard xdata
+#define _CODE
+#define _IDATA
+#define _XDATA
 #else
 typedef int BOOL ;
 #define _CODE
@@ -126,8 +126,8 @@ typedef enum {
 #define F_MODE_EN_UDFILT (1<<6) // output mode only,and loaded from EEPROM
 #define F_MODE_EN_DITHER (1<<7) // output mode only,and loaded from EEPROM
 
-#define F_VIDMODE_ITU709    F_MODE_ITU709   // richard add
-#define F_VIDMODE_16_235    F_MODE_16_235   // richard add
+#define F_VIDMODE_ITU709    F_MODE_ITU709
+#define F_VIDMODE_16_235    F_MODE_16_235
 
 
 typedef union _VideoFormatCode

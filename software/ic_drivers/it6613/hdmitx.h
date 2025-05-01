@@ -12,7 +12,7 @@
 //#define SUPPORT_INPUTYUV422
 //#define SUPPORT_SYNCEMBEDDED
 //#define SUPPORT_DEGEN
-//#define SUPPORT_INPUTYUV    // richard add
+//#define SUPPORT_INPUTYUV
 //#define INVERT_VID_LATCHEDGE //latch at falling edge
 
 

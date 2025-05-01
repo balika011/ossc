@@ -92,7 +92,6 @@ static void HDCP_Auth_Fire() ;
 static void HDCP_StartAnCipher() ;
 static void HDCP_StopAnCipher() ;
 static void HDCP_GenerateAn() ;
-// RICHARD static SYS_STATUS HDCP_GetVr(ULONG *pVr) ;
 static SYS_STATUS HDCP_GetBCaps(PBYTE pBCaps ,PUSHORT pBStatus) ;
 static SYS_STATUS HDCP_GetBKSV(BYTE *pBKSV) ;
 static SYS_STATUS HDCP_Authenticate() ;
@@ -269,8 +268,8 @@ static BYTE InitIT6613_HDCPROM()
     Switch_HDMITX_Bank(0) ;
     HDMITX_WriteI2C_Byte(0xF8,0xC3) ;	//password
     HDMITX_WriteI2C_Byte(0xF8,0xA5) ;	// password
-    HDMITX_WriteI2C_Byte(REG_TX_LISTCTRL,0x60) ; // Richard, ????
-    I2C_Read_ByteN(0xE0,0x00,uc,5) ;  // richard note. internal rom is used
+    HDMITX_WriteI2C_Byte(REG_TX_LISTCTRL,0x60) ; 
+    I2C_Read_ByteN(0xE0,0x00,uc,5) ;  
 
     if(uc[0] == 1 &&
         uc[1] == 1 &&
@@ -286,11 +285,10 @@ static BYTE InitIT6613_HDCPROM()
     {
         // with external ROM
         HDMITX_WriteI2C_Byte(REG_TX_ROM_HEADER,0xA0) ;  // ROMHeader
-        HDMITX_WriteI2C_Byte(REG_TX_LISTCTRL,0x00) ; // Richard, ????
+        HDMITX_WriteI2C_Byte(REG_TX_LISTCTRL,0x00) ;
     }
     HDMITX_WriteI2C_Byte(0xF8,0xFF) ;  // password
 
-    // richard add
     return ER_SUCCESS;
 }
 
@@ -305,20 +303,10 @@ void InitIT6613()
     DelayMS(1) ;
     HDMITX_WriteI2C_Byte(REG_TX_SW_RST,B_VID_RST|B_AUD_RST|B_AREF_RST|B_HDCP_RST) ;
 
-#if 0
-    // Enable clock ring (richard add according toe programming guide)
-    HDMITX_WriteI2C_Byte(REG_TX_AFE_DRV_CTRL, 0x10);
-
-    // Set default DVI mode (richard add according toe programming guide)
-//    HDMITX_WriteI2C_Byte(REG_TX_HDMI_MODE, 0x01);  // set HDMI mode
-    HDMITX_WriteI2C_Byte(REG_TX_HDMI_MODE, 0x00);  // set DVI mode
-#endif
-
     // Avoid power loading in un play status.
     HDMITX_WriteI2C_Byte(REG_TX_AFE_DRV_CTRL,B_AFE_DRV_RST|B_AFE_DRV_PWD) ;
 
     // set interrupt mask,mask value 0 is interrupt available.
-// richard    HDMITX_WriteI2C_Byte(REG_TX_INT_MASK1,0xB2) ;  // enable interrupt: HPD, DDCBusHangMask,
     HDMITX_WriteI2C_Byte(REG_TX_INT_MASK1,0xB2) ;  // enable interrupt: HPD, DDCBusHangMask,
     HDMITX_WriteI2C_Byte(REG_TX_INT_MASK2,0xF8) ;  // enable interrupt: AuthFailMask, AUthDoneMask, KSVListChkMask
     HDMITX_WriteI2C_Byte(REG_TX_INT_MASK3,0x37) ; //  enable interrupt: PktAudMask, PktDBDMask, PkMpgMask, AUdCTSMask, HDCPSynDetMask
@@ -439,7 +427,6 @@ BOOL EnableVideoOutput(VIDEOPCLKLEVEL level,BYTE inputColorMode,BYTE outputColor
 BOOL EnableAudioOutput(ULONG VideoPixelClock,BYTE bAudioSampleFreq,BYTE ChannelNumber,BYTE bAudSWL,BYTE bSPDIF)
 {
     BYTE bAudioChannelEnable ;
-  // richard   unsigned long N ;
 
     Instance[0].TMDSClock = VideoPixelClock ;
     Instance[0].bAudFs = bAudioSampleFreq ;
@@ -810,7 +797,6 @@ EnableAudioInfoFrame(BYTE bEnable,BYTE *pAudioInfoFrame)
 {
     if(!bEnable)
     {
-        // richard modify, DISABLE_AVI_INFOFRM_PKT() ;
         DISABLE_AUD_INFOFRM_PKT();
         return TRUE ;
     }
@@ -1621,7 +1607,6 @@ SetAudioFormat(BYTE NumChannel,BYTE AudioEnable,BYTE bSampleFreq,BYTE AudSWL,BYT
     ErrorF("SetAudioFormat(%d channel,%02X,SampleFreq %d,AudSWL %d,%02X)\n",NumChannel,AudioEnable,bSampleFreq,AudSWL,AudioCatCode) ;
 
 
-//richard remove    Instance[0].bOutputAudioMode |= 0x41 ;
     if(NumChannel > 6)
     {
         SourceValid = B_AUD_ERR2FLAT | B_AUD_S3VALID | B_AUD_S2VALID | B_AUD_S1VALID ;
@@ -1703,7 +1688,6 @@ SetAudioFormat(BYTE NumChannel,BYTE AudioEnable,BYTE bSampleFreq,BYTE AudSWL,BYT
     HDMITX_WriteI2C_Byte(REG_TX_AUDCHST_OFS_WL,(fs<<4)|SWL) ;
     Switch_HDMITX_Bank(0) ;
 
-    // richard modify (could be bug), if(!(AudioEnable | B_AUD_SPDIF))
     if(!(AudioEnable & B_AUD_SPDIF))
     {
         HDMITX_WriteI2C_Byte(REG_TX_AUDIO_CTRL0,AudioEnable) ;
@@ -2436,7 +2420,6 @@ HDCP_Authenticate()
     USHORT BStatus ;
     USHORT TimeOut ;
 
-  // richard   BYTE revoked = FALSE ;
     BYTE BKSV[5] ;
 
     Instance[0].bAuthenticated = FALSE ;
@@ -2581,7 +2564,6 @@ HDCP_Authenticate()
 static SYS_STATUS
 HDCP_VerifyIntegration()
 {
- // richard   BYTE ucdata ;
     // if any interrupt issued a Auth fail,returned the Verify Integration fail.
 
     if(HDMITX_ReadI2C_Byte(REG_TX_INT_STAT1) & B_INT_AUTH_FAIL)
@@ -2687,7 +2669,6 @@ HDCP_GetVr(BYTE *pVr)
 
 	if(pVr == NULL)
 	{
-	   // richard  return NULL ;
        return ER_FAIL;
 	}
 
@@ -2776,7 +2757,7 @@ static _XDATA ULONG sha[5] ;
 
 #define rol(x,y) (((x) << (y)) | (((ULONG)x) >> (32-y)))
 
-static void SHATransform(ULONG * h); // richard add
+static void SHATransform(ULONG * h);
 void SHATransform(ULONG * h)
 {
 	LONG t;
@@ -2962,8 +2943,8 @@ HDCP_Authenticate_Repeater()
     BYTE revoked ;
     int i ;
     #else
-    int i; // richard add
-    BYTE revoked; // richard add
+    int i;
+    BYTE revoked;
     #endif // _DSS_SHA_
 	// BYTE test;
 	// BYTE test06;

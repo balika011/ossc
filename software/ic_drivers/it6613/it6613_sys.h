@@ -26,7 +26,7 @@ typedef enum tagHDMI_Video_Type {
     /*HDMI_1080p24,
     HDMI_1080p25,
     HDMI_1080p30,
-    HDMI_1080i120 = 46,*/ // richard add
+    HDMI_1080i120 = 46,*/
 } HDMI_Video_Type ;
 
 typedef enum tagHDMI_Aspec {
