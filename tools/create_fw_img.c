@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2015-2016  Markus Hiienkari <mhiienka@niksula.hut.fi>
-// Copyright (C) 2025  Balázs Triszka <info@balika011.hu>
+// Copyright (C) 2025       Balázs Triszka   <info@balika011.hu>
 //
 // This file is part of Open Source Scan Converter project.
 //
