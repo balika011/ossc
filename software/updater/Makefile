@@ -127,6 +127,9 @@ ELF := updater.elf
 
 # Paths to C, C++, and assembly source files.
 C_SRCS += main.c
+C_SRCS += src/flash.c
+C_SRCS += src/sdcard.c
+C_SRCS += src/utils.c
 
 CXX_SRCS :=
 ASM_SRCS := crt0_init.S

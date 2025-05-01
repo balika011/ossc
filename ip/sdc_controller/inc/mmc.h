@@ -227,8 +227,6 @@ struct mmc_data {
 };
 
 struct mmc {
-//	struct list_head link;
-	char name[32];
 	void *priv;
 	uint voltages;
 	uint version;

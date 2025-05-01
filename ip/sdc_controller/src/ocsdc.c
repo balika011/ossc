@@ -278,7 +278,6 @@ struct mmc * ocsdc_mmc_init(int base_addr, int clk_freq, unsigned int host_caps)
 	priv.iobase = base_addr;
 	priv.clk_freq = clk_freq;
 
-	sprintf(mmc.name, "ocsdc");
 	mmc.priv = &priv;
 	mmc.send_cmd = ocsdc_send_cmd;
 	mmc.set_ios = ocsdc_set_ios;

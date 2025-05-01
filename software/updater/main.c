@@ -25,17 +25,9 @@
 #include <i2c_opencores.h>
 #include <lcd.h>
 
-#if 0
-#include "firmware.h"
 #include "sdcard.h"
 #include "flash.h"
-#include "controls.h"
-#include "tvp7002.h"
-#include "av_controller.h"
-#include "lcd.h"
 #include "utils.h"
-#include "menu.h"
-#include "osd.h"
 
 #define FW_UPDATE_RETRIES 3
 
@@ -66,26 +58,13 @@ typedef union
 
 #pragma pack(pop)
 
-static int check_fw_header(fw_hdr *hdr)
+int main(fw_hdr *fw_header)
 {
-	if (hdr->params.magic != __builtin_bswap32('OSSC'))
-		return FW_IMAGE_ERROR;
+	I2C_init(I2CA_BASE, ALT_CPU_FREQ, 400000);
 
-	if (__builtin_bswap32(hdr->params.hdr_len) < 26 || __builtin_bswap32(hdr->params.hdr_len) > 508)
-		return FW_HDR_ERROR;
+	lcd_init();
 
-	if (crc32(0, (uint8_t *)hdr, __builtin_bswap32(hdr->params.hdr_len)) != __builtin_bswap32(hdr->raw.hdr_crc))
-		return FW_HDR_CRC_ERROR;
-
-	hdr->params.data_len = __builtin_bswap32(hdr->params.data_len);
-	hdr->params.data_crc = __builtin_bswap32(hdr->params.data_crc);
-
-	return 0;
-}
-
-int fw_update()
-{
-	int screwed = 0;
+	sdcard_init();
 
 	int retval = sdcard_check();
 	if (retval != 0) {
@@ -93,49 +72,11 @@ int fw_update()
 		goto failure;
 	}
 
-	fw_hdr fw_header;
-	retval = sdcard_read(0, (uint8_t *)&fw_header, sizeof(fw_header));
-	if (retval != 0)
-	{
-		retval = -retval;
-		goto failure;
-	}
-
-	retval = check_fw_header(&fw_header);
-	if (retval != 0)
-		goto failure;
-
-	char row[LCD_ROW_LEN + 1];
-	sniprintf(row, sizeof(row), "%u bytes", (unsigned)fw_header.params.data_len);
-	osd_notification("Validating data", row);
-
-	retval = sdcard_check_crc(sizeof(fw_hdr), fw_header.params.data_len, fw_header.params.data_crc);
-	if (retval != 0)
-		goto failure;
-
-	sniprintf(row, sizeof(row), "%u.%.2u%s%s", fw_header.params.version_major, fw_header.params.version_minor, (fw_header.params.version_suffix[0] == 0) ? "" : "-", fw_header.params.version_suffix);
-	osd_notification(row, "Update? 1=Y, 2=N");
-
-	while (1) {
-		uint32_t btn_vec = SC->controls.ir_code;
-
-		if (btn_vec == rc_keymap[RC_BTN1]) {
-			break;
-		} else if (btn_vec == rc_keymap[RC_BTN2]) {
-			retval = FW_UPD_CANCELLED;
-			goto failure;
-		}
-
-		usleep(WAITLOOP_SLEEP_US);
-	}
-
 	int retries = FW_UPDATE_RETRIES;
 
 update_init:
 
 	flash_write_protect(0);
-
-	screwed = 1;
 
 	lcd_write_row1("Eraseing flash");
 	lcd_write_row2("please wait...");
@@ -145,7 +86,7 @@ update_init:
 
 	lcd_write_row1("Updating FW");
 
-	for (int i = 0; i < fw_header.params.data_len; i += SD_BLK_SIZE)
+	for (int i = 0; i < fw_header->params.data_len; i += SD_BLK_SIZE)
 	{
 		uint8_t databuf[SD_BLK_SIZE];
 		retval = sdcard_read(sizeof(fw_hdr) + i, databuf, SD_BLK_SIZE);
@@ -160,7 +101,7 @@ update_init:
 
 	lcd_write_row1("Verifying flash");
 
-	if (crc32(0, (void *)FLASH_MEM_BASE, fw_header.params.data_len) != fw_header.params.data_crc)
+	if (crc32(0, (void *)FLASH_MEM_BASE, fw_header->params.data_len) != fw_header->params.data_crc)
 	{
 		retval = FLASH_VERIFY_ERROR;
 		goto failure;
@@ -186,13 +127,8 @@ failure:
 		case FLASH_VERIFY_ERROR: errmsg = "Flash verif fail"; break;
 	}
 
-	if (screwed)
-	{
-		lcd_write_row1("Update failed");
-		lcd_write_row2(errmsg);
-	}
-	else
-		osd_notification("Update failed", errmsg);
+	lcd_write_row1("Update failed");
+	lcd_write_row2(errmsg);
 
 	usleep(1000000);
 
@@ -202,23 +138,6 @@ failure:
 		goto update_init;
 	}
 
-	if (screwed)
-	{
-		SC->sys_ctrl.hw_reset = 1;
-		while(1);
-	}
-
-	menu_render_page();
-	return -1;
-}
-#endif
-
-int main()
-{
-	I2C_init(I2CA_BASE, ALT_CPU_FREQ, 400000);
-
-	lcd_init();
-
-	lcd_write_row1("Hello");
-	lcd_write_row2("There");
+	SC->sys_ctrl.hw_reset = 1;
+	while(1);
 }
