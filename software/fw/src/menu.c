@@ -351,7 +351,10 @@ void menu_render_row(uint8_t row)
 				lcd_write_row2(row_text);
 		}
 		else
+		{
 			osd_draw_text(row, 1, 0, 0, "");
+			lcd_write_row2("");
+		}
 	}
 	else if (osd_enable == 2 && row == navi[navlvl].mp)
 	{
