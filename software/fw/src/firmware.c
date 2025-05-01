@@ -33,7 +33,7 @@ int fw_update()
 	usleep(10000);
 
 	// copy the updater into the frame buffer then jump to it
-	memcpy(OSDFB8, (void *) (FLASH_MEM_BASE + FLASH_UPDATER_OFFSET), 0x1000);
+	memcpy(OSDFB8, (void *) (FLASH_MEM_BASE + FLASH_UPDATER_OFFSET), 0x3000);
 	((void (*)())(OSDFB8 + 0x80))();
 
 	return 0;

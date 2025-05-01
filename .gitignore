@@ -12,6 +12,9 @@ software/*/obj/*
 software/fw/fw.elf
 software/fw/fw.map
 software/fw/fw.bin
+software/updater/updater.elf
+software/updater/updater.map
+software/updater/updater.bin
 db/*
 sys/*
 output_files/*

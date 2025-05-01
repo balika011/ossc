@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 	uint32_t updater_len = ftell(updater);
 	fseek(updater, 0, SEEK_SET);
 
-	if (updater_len > 0x1000)
+	if (updater_len > 0x3000)
 	{
 		printf("updater too big!\n");
 		fclose(rbf);
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 	fread(&combined_buf[0x80000], 1, fw_len, fw);
 	fclose(fw);
 
-	fread(&combined_buf[0xFF000], 1, updater_len, updater);
+	fread(&combined_buf[0xFD000], 1, updater_len, updater);
 	fclose(updater);
 
 	char version_suffix[FW_SUFFIX_MAX_SIZE + 1];
@@ -214,11 +214,11 @@ int main(int argc, char **argv)
 	hdr.params.version_minor = fw_version_minor;
 	memcpy(hdr.params.version_suffix, version_suffix, sizeof(hdr.params.version_suffix));
 	hdr.params.hdr_len = htonl(sizeof(hdr.params));
-	hdr.params.data_len = htonl(0xFF000 + updater_len);
-	hdr.params.data_crc = htonl(crc32(0, combined_buf, 0xFF000 + updater_len));
+	hdr.params.data_len = htonl(0xFD000 + updater_len);
+	hdr.params.data_crc = htonl(crc32(0, combined_buf, 0xFD000 + updater_len));
 	hdr.raw.hdr_crc = htonl(crc32(0, &hdr, sizeof(hdr.params)));
 
-	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 6) ? "-" : "", version_suffix, 0xFF000 + updater_len);
+	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 6) ? "-" : "", version_suffix, 0xFD000 + updater_len);
 	printf("Header CRC32: %.8x\n", hdr.raw.hdr_crc);
 	printf("DATA CRC32: %.8x\n", hdr.params.data_crc);
 
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 	}
 	fwrite(&hdr, 1, sizeof(hdr), bin);
 	fseek(bin, HDR_SIZE, SEEK_SET);
-	fwrite(combined_buf, 1, 0xFF000 + updater_len, bin);
+	fwrite(combined_buf, 1, 0xFD000 + updater_len, bin);
 	fclose(bin);
 
 	free(combined_buf);

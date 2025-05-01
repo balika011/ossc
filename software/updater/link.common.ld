@@ -3,8 +3,8 @@ __DYNAMIC  =  0;
 
 MEMORY
 {
-    FRAM : ORIGIN = 0xA0000000, LENGTH = 0x1000
-    IRAM : ORIGIN = 0xA0001000, LENGTH = 0x5000
+    FRAM : ORIGIN = 0xA0000000, LENGTH = 0x3000
+    IRAM : ORIGIN = 0xA0003000, LENGTH = 0x3000
 }
 
 /* Stack information variables */
