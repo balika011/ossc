@@ -113,15 +113,15 @@ uint32_t crc32(uint32_t crc, const void *buf, size_t size)
 
 int main(int argc, char **argv)
 {
-	if (argc < 4 || argc > 5)
+	if (argc < 5 || argc > 6)
 	{
-		printf("Usage: %s <rbf> <fw> <version> [version_suffix]\n", argv[0]);
+		printf("Usage: %s <rbf> <fw> <updater> <version> [version_suffix]\n", argv[0]);
 		return -1;
 	}
 
 	unsigned fw_version_major;
 	unsigned fw_version_minor;
-	if ((sscanf(argv[3], "%u.%u", &fw_version_major, &fw_version_minor) != 2) || (fw_version_major > 255) || (fw_version_minor > 255))
+	if ((sscanf(argv[4], "%u.%u", &fw_version_major, &fw_version_minor) != 2) || (fw_version_major > 255) || (fw_version_minor > 255))
 	{
 		printf("Invalid version format specified\n");
 		return -1;
@@ -137,7 +137,17 @@ int main(int argc, char **argv)
 	FILE *fw = fopen(argv[2], "rb");
 	if (!fw)
 	{
+		fclose(rbf);
 		printf("Failed to open fw\n");
+		return -1;
+	}
+
+	FILE *updater = fopen(argv[3], "rb");
+	if (!updater)
+	{
+		fclose(rbf);
+		fclose(fw);
+		printf("Failed to open updater\n");
 		return -1;
 	}
 
@@ -150,6 +160,7 @@ int main(int argc, char **argv)
 		printf("rbf too big!\n");
 		fclose(rbf);
 		fclose(fw);
+		fclose(updater);
 		return -1;
 	}
 
@@ -157,16 +168,30 @@ int main(int argc, char **argv)
 	uint32_t fw_len = ftell(fw);
 	fseek(fw, 0, SEEK_SET);
 
-	if (fw_len > 0x80000)
+	if (fw_len > 0x7F000)
 	{
 		printf("fw too big!\n");
 		fclose(rbf);
 		fclose(fw);
+		fclose(updater);
 		return -1;
 	}
 
-	uint8_t *combined_buf = malloc(0x80000 + fw_len);
-	memset(combined_buf, 0xFF, 0x80000 + fw_len);
+	fseek(updater, 0, SEEK_END);
+	uint32_t updater_len = ftell(updater);
+	fseek(updater, 0, SEEK_SET);
+
+	if (updater_len > 0x1000)
+	{
+		printf("updater too big!\n");
+		fclose(rbf);
+		fclose(fw);
+		fclose(updater);
+		return -1;
+	}
+
+	uint8_t *combined_buf = malloc(0x100000);
+	memset(combined_buf, 0xFF, 0x100000);
 
 	fread(combined_buf, 1, rbf_len, rbf);
 	fclose(rbf);
@@ -174,10 +199,13 @@ int main(int argc, char **argv)
 	fread(&combined_buf[0x80000], 1, fw_len, fw);
 	fclose(fw);
 
+	fread(&combined_buf[0xFF000], 1, updater_len, updater);
+	fclose(updater);
+
 	char version_suffix[FW_SUFFIX_MAX_SIZE + 1];
 	memset(version_suffix, 0, sizeof(version_suffix));
-	if (argc == 5)
-		strncpy(version_suffix, argv[4], sizeof(version_suffix));
+	if (argc == 6)
+		strncpy(version_suffix, argv[5], sizeof(version_suffix));
 
 	fw_hdr hdr;
 	memset(&hdr, 0, sizeof(hdr));
@@ -186,16 +214,16 @@ int main(int argc, char **argv)
 	hdr.params.version_minor = fw_version_minor;
 	memcpy(hdr.params.version_suffix, version_suffix, sizeof(hdr.params.version_suffix));
 	hdr.params.hdr_len = htonl(sizeof(hdr.params));
-	hdr.params.data_len = htonl(0x80000 + fw_len);
-	hdr.params.data_crc = htonl(crc32(0, combined_buf, 0x80000 + fw_len));
+	hdr.params.data_len = htonl(0xFF000 + updater_len);
+	hdr.params.data_crc = htonl(crc32(0, combined_buf, 0xFF000 + updater_len));
 	hdr.raw.hdr_crc = htonl(crc32(0, &hdr, sizeof(hdr.params)));
 
-	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", version_suffix, 0x80000 + fw_len);
+	printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 6) ? "-" : "", version_suffix, 0xFF000 + updater_len);
 	printf("Header CRC32: %.8x\n", hdr.raw.hdr_crc);
 	printf("DATA CRC32: %.8x\n", hdr.params.data_crc);
 
 	char bin_name[MAX_FILENAME];
-	snprintf(bin_name, sizeof(bin_name), "ossc_%s%s%s.bin", argv[3], (argc == 5) ? "-" : "", (argc == 5) ? argv[4] : "");
+	snprintf(bin_name, sizeof(bin_name), "ossc_%s%s%s.bin", argv[4], (argc == 6) ? "-" : "", (argc == 6) ? argv[5] : "");
 
 	FILE *bin = fopen(bin_name, "wb");
 	if (!bin)
@@ -206,7 +234,7 @@ int main(int argc, char **argv)
 	}
 	fwrite(&hdr, 1, sizeof(hdr), bin);
 	fseek(bin, HDR_SIZE, SEEK_SET);
-	fwrite(combined_buf, 1, 0x80000 + fw_len, bin);
+	fwrite(combined_buf, 1, 0xFF000 + updater_len, bin);
 	fclose(bin);
 
 	free(combined_buf);

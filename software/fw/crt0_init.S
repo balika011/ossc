@@ -96,7 +96,6 @@ sleep_loop:
 	.section .vectors, "ax"
 	.option norvc;
 
-	// All unimplemented interrupts/exceptions go to the default_exc_handler.
 	.org 0x00
 	.rept 32
 	j .

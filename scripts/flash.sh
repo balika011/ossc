@@ -7,6 +7,11 @@ make clean
 make generate_bin
 cd -
 
+cd software/updater
+make clean
+make generate_bin
+cd -
+
 quartus_cpf --convert --frequency=10MHz --voltage=3.3V --operation=p output_files/ossc.sof output_files/ossc.svf
 openocd -f scripts/openocd_load.cfg
 

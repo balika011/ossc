@@ -3,8 +3,8 @@ __DYNAMIC  =  0;
 
 MEMORY
 {
-    FLASH : ORIGIN = 0x10080000, LENGTH = 0x7F000
-    IRAM  : ORIGIN = 0x10200000, LENGTH = 0x4000
+    FRAM : ORIGIN = 0xA0000000, LENGTH = 0x1000
+    IRAM : ORIGIN = 0xA0001000, LENGTH = 0x5000
 }
 
 /* Stack information variables */
@@ -19,13 +19,15 @@ SECTIONS
     .vectors :
     {
         KEEP(*(.vectors))
-    } > FLASH
+    } > FRAM
 
     .text : {
         . = ALIGN(4);
         _stext = .;
         *(.text)
         *(.text.*)
+        *(.rtext);
+        *(.rtext.*)
         _etext  =  .;
         __CTOR_LIST__ = .;
         LONG((__CTOR_END__ - __CTOR_LIST__) / 4 - 2)
@@ -40,25 +42,7 @@ SECTIONS
         *(.lit)
         *(.shdata)
         _etext = .;
-    } > FLASH
-
-    .rvectors :
-    {
-        . = ALIGN(256);
-        _srvectors  =  .;
-        KEEP(*(.rvectors))
-        . = ALIGN(4);
-        _ervectors  =  .;
-    } > IRAM AT> FLASH
-
-    .rtext : {
-        . = ALIGN(4);
-        _srtext  =  .;
-        *(.rtext);
-        *(.rtext.*)
-        . = ALIGN(4);
-        _ertext  =  .;
-    } > IRAM AT> FLASH
+    } > FRAM
 
     /*--------------------------------------------------------------------*/
     /* Global constructor/destructor segement                             */
@@ -69,7 +53,7 @@ SECTIONS
       PROVIDE_HIDDEN (__preinit_array_start = .);
       KEEP (*(.preinit_array))
       PROVIDE_HIDDEN (__preinit_array_end = .);
-    } > FLASH
+    } > FRAM
 
     .init_array     :
     {
@@ -77,7 +61,7 @@ SECTIONS
       KEEP (*(SORT(.init_array.*)))
       KEEP (*(.init_array ))
       PROVIDE_HIDDEN (__init_array_end = .);
-    } > FLASH
+    } > FRAM
 
     .fini_array     :
     {
@@ -85,13 +69,13 @@ SECTIONS
       KEEP (*(SORT(.fini_array.*)))
       KEEP (*(.fini_array ))
       PROVIDE_HIDDEN (__fini_array_end = .);
-    } > FLASH
+    } > FRAM
 
     .rodata : {
         . = ALIGN(4);
         *(.rodata);
         *(.rodata.*)
-    } > FLASH
+    } > FRAM
 
     .data : {
         . = ALIGN(4);
@@ -103,7 +87,7 @@ SECTIONS
         *(.sdata2);
         *(.sdata2.*)
         _edata  =  .;
-    } > IRAM AT> FLASH
+    } > FRAM
 
     .bss :
     {
@@ -136,9 +120,7 @@ SECTIONS
         [ .stabstr ]
     }
 
-    _frvectors = LOADADDR(.rvectors);
     _fdata = LOADADDR(.data);
-    _frtext = LOADADDR(.rtext);
 }
 
 _siram   = ORIGIN(IRAM);

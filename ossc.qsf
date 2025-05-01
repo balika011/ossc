@@ -245,7 +245,6 @@ set_global_assignment -name QIP_FILE rtl/lpm_mult_sl.qip
 set_global_assignment -name SDC_FILE ossc.sdc
 set_global_assignment -name CDF_FILE output_files/Chain1.cdf
 set_global_assignment -name SIGNALTAP_FILE output_files/ossc_la.stp
-set_global_assignment -name QIP_FILE rtl/char_array.qip
 set_global_assignment -name SEARCH_PATH rtl
 set_global_assignment -name SEARCH_PATH ip/ibex_qsys/rtl_extra
 set_global_assignment -name VERILOG_MACRO "SYNTHESIS=<None>"

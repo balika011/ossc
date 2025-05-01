@@ -8,7 +8,11 @@ cd software/fw
 make generate_bin
 cd -
 
-quartus_cdb ossc -c ossc --update_mif
+cd software/updater
+make clean
+make generate_bin
+cd -
+
 quartus_asm --read_settings_files=on --write_settings_files=off ossc -c ossc
 
-tools/create_fw_img output_files/ossc.rbf software/fw/fw.bin 2.00 beta-1
+tools/create_fw_img output_files/ossc.rbf software/fw/fw.bin software/updater/updater.bin 2.00 beta-1

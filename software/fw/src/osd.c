@@ -78,6 +78,17 @@ void osd_init()
 #endif
 }
 
+void osd_deinit()
+{
+	if (timer_idx >= 0)
+	{
+		timer_cancel(timer_idx);
+		timer_idx = -1;
+	}
+	osd_enable = 0;
+	OSD->enable = 0;
+}
+
 void osd_notification(const char *row1, const char *row2)
 {
 	OSD->ysize = OSC_WIDTH;

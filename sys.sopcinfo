@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="sys" kind="sys" version="1.0" fabric="QSYS">
  <!-- Format version 24.1 1077 (Future versions may contain additional information.) -->
- <!-- 2025.05.01.14:32:18 -->
+ <!-- 2025.05.01.18:58:29 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1746102738</value>
+  <value>1746118709</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -4224,6 +4224,14 @@ parameters are a RESULT of the module parameters. -->
     <name>onchip_memory2_0.s1</name>
     <baseAddress>270532608</baseAddress>
     <span>16384</span>
+   </memoryBlock>
+   <memoryBlock>
+    <isBridge>false</isBridge>
+    <moduleName>onchip_memory2_1</moduleName>
+    <slaveName>s1</slaveName>
+    <name>onchip_memory2_1.s1</name>
+    <baseAddress>2684354560</baseAddress>
+    <span>24576</span>
    </memoryBlock>
   </interface>
   <interface name="avalon_master_bus_data" kind="avalon_master" version="24.1">
@@ -16045,6 +16053,57 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>s1</endConnectionPoint>
  </connection>
  <connection
+   name="ibex_0.avalon_master_bus_instr/onchip_memory2_1.s1"
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_instr"
+   end="onchip_memory2_1.s1">
+  <parameter name="arbitrationPriority">
+   <type>int</type>
+   <value>1</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="baseAddress">
+   <type>java.math.BigInteger</type>
+   <value>0xa0000000</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="defaultConnection">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>ibex_0</startModule>
+  <startConnectionPoint>avalon_master_bus_instr</startConnectionPoint>
+  <endModule>onchip_memory2_1</endModule>
+  <endConnectionPoint>s1</endConnectionPoint>
+ </connection>
+ <connection
    name="altpll_0.c0/sdc_controller_0.sd_clk_i"
    kind="clock"
    version="24.1"
@@ -17273,7 +17332,7 @@ parameters are a RESULT of the module parameters. -->
   <version>24.1</version>
  </plugin>
  <plugin>
-  <instanceCount>33</instanceCount>
+  <instanceCount>34</instanceCount>
   <name>avalon</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IConnection</subtype>

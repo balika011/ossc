@@ -28,6 +28,7 @@
 extern uint8_t osd_enable, osd_status_timeout;
 
 void osd_init();
+void osd_deinit();
 void osd_notification(const char *row1, const char *row2);
 void osd_status(const char *row1, const char *row2);
 void osd_set_menu_active(char active);

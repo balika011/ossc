@@ -1041,6 +1041,15 @@
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
+   kind="avalon"
+   version="24.1"
+   start="ibex_0.avalon_master_bus_instr"
+   end="onchip_memory2_1.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0xa0000000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
    kind="clock"
    version="24.1"
    start="altpll_0.c0"
