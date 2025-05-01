@@ -23,6 +23,18 @@
 #include "i2c_opencores.h"
 #include "tvp7002.h"
 
+#ifndef TVP7002_DEBUG
+#define OS_PRINTF(...)
+#define ErrorF(...)
+#define printf(...)
+#else
+#include <stdio.h>
+#include "utils.h"
+#define OS_PRINTF printf
+#define ErrorF printf
+#define printf dd_printf
+#endif
+
 static void tvp_writereg(uint32_t regaddr, uint8_t data);
 
 // #define SYNCBYPASS    // Bypass VGA syncs (for debug - needed for interlace?)

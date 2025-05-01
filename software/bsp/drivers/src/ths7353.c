@@ -23,6 +23,18 @@
 #include "i2c_opencores.h"
 #include "ths7353.h"
 
+#ifndef THS7353_DEBUG
+#define OS_PRINTF(...)
+#define ErrorF(...)
+#define printf(...)
+#else
+#include <stdio.h>
+#include "utils.h"
+#define OS_PRINTF printf
+#define ErrorF printf
+#define printf dd_printf
+#endif
+
 static uint32_t ths_readreg(uint8_t channel)
 {
 	// Phase 1
