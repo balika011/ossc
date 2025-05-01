@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////
 #include <unistd.h>
 #include "it6613_drv.h"
-#include "hdmitx.h"
+#include "it6613_hdmitx.h"
 #include <it6613_i2c.h>
 
 #define MSCOUNT 1000

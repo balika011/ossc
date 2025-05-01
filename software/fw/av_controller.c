@@ -20,12 +20,21 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include "system.h"
-#include "i2c_opencores.h"
+
+#include <system.h>
+#include <timer.h>
+#include <i2c_opencores.h>
+#include <it6613.h>
+#include <it6613_sys.h>
+#include <it6613_i2c.h>
+#include <it6613_HDMI_TX.h>
+#include <it6613_hdmitx.h>
+#include <tvp7002.h>
+#include <ths7353.h>
+#include <pcm1862.h>
+
+#include "osd.h"
 #include "av_controller.h"
-#include "tvp7002.h"
-#include "ths7353.h"
-#include "pcm1862.h"
 #include "video_modes.h"
 #include "lcd.h"
 #include "flash.h"
@@ -33,13 +42,7 @@
 #include "menu.h"
 #include "avconfig.h"
 #include "userdata.h"
-#include "it6613.h"
-#include "it6613_sys.h"
-#include <it6613_i2c.h>
-#include "HDMI_TX.h"
-#include "hdmitx.h"
-#include "timer.h"
-#include "osd.h"
+
 
 #define MIN_LINES_PROGRESSIVE   200
 #define MIN_LINES_INTERLACED    400

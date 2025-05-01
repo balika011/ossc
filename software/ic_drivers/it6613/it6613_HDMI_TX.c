@@ -2,9 +2,9 @@
 //#include "mcu.h"
 #include <unistd.h>
 #include "it6613_sys.h"
-#include "hdmitx.h"
-#include "HDMI_TX.h"
-#include "edid.h"
+#include "it6613_hdmitx.h"
+#include "it6613_HDMI_TX.h"
+#include "it6613_edid.h"
 #include <it6613_i2c.h>
 
 int TX_HDP = false;

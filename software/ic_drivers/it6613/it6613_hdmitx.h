@@ -1,36 +1,9 @@
 #ifndef _HDMITX_H_
 #define _HDMITX_H_
 
-#ifdef EXTERN_HDCPROM
-#pragma message("Defined EXTERN_HDCPROM")
-#endif // EXTERN_HDCPROM
-
-#define SUPPORT_EDID
-//#define SUPPORT_HDCP
-#define SUPPORT_INPUTRGB
-//#define SUPPORT_INPUTYUV444
-//#define SUPPORT_INPUTYUV422
-//#define SUPPORT_SYNCEMBEDDED
-//#define SUPPORT_DEGEN
-//#define SUPPORT_INPUTYUV
-//#define INVERT_VID_LATCHEDGE //latch at falling edge
-
-
-#ifdef SUPPORT_SYNCEMBEDDED
-#pragma message("defined SUPPORT_SYNCEMBEDDED for Sync Embedded timing input or CCIR656 input.") 
-#endif
-
-#ifndef _MCU_ // DSSSHA need large computation data rather than 8051 supported.
-#define SUPPORT_DSSSHA
-#endif
-
-#if defined(SUPPORT_INPUTYUV444) || defined(SUPPORT_INPUTYUV422)
-#define SUPPORT_INPUTYUV
-#endif
-
+#include "it6613_config.h"
 #include "it6613_types.h"
-#include "HDMI_COMMON.h"
-#include "sysconfig.h"
+#include "it6613_HDMI_COMMON.h"
 #include "it6613_drv.h"
 
 // Hardwired to CPU reset

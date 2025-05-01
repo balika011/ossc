@@ -1,7 +1,7 @@
 #ifndef _EDID_H_
 #define _EDID_H_
 
-#include "hdmitx.h"
+#include "it6613_hdmitx.h"
 
 #ifdef SUPPORT_EDID
 

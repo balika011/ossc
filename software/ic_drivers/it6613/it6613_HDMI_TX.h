@@ -1,11 +1,8 @@
 #ifndef HDMI_TX_H_
 #define HDMI_TX_H_
 
-#include "HDMI_COMMON.h"
-#include <stdint.h>
-#include "hdmitx.h"
-
-
+#include "it6613_HDMI_COMMON.h"
+#include "it6613_hdmitx.h"
 
 bool HDMITX_Init(void);
 bool HDMITX_ChipVerify(void);

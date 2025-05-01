@@ -2,9 +2,9 @@
 // This is the sample program for CAT6611 driver usage.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "hdmitx.h"
+#include "it6613_hdmitx.h"
 #include "it6613_sys.h"
-#include "edid.h"
+#include "it6613_edid.h"
 
 extern int TX_HDP;
 int gEnableColorDepth = 1;

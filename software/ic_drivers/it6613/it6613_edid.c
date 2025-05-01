@@ -1,5 +1,5 @@
-#include "hdmitx.h"
-#include "edid.h"
+#include "it6613_hdmitx.h"
+#include "it6613_edid.h"
 
 #ifdef SUPPORT_EDID
 static SYS_STATUS EDIDCheckSum(uint8_t *pEDID) ;

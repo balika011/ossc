@@ -147,17 +147,24 @@ endif
 C_SRCS += src/utils.c
 C_SRCS += src/video_modes.c
 C_SRCS += src/osd.c
-C_SRCS += ../ic_drivers/it6613/edid.c
-C_SRCS += ../ic_drivers/it6613/HDMI_TX.c
+
+C_SRCS += ../ic_drivers/it6613/it6613_edid.c
+C_SRCS += ../ic_drivers/it6613/it6613_HDMI_TX.c
 C_SRCS += ../ic_drivers/it6613/it6613_i2c.c
 C_SRCS += ../ic_drivers/it6613/it6613.c
 C_SRCS += ../ic_drivers/it6613/it6613_drv.c
 C_SRCS += ../ic_drivers/it6613/it6613_sys.c
+
 C_SRCS += ../ic_drivers/tvp7002/tvp7002.c
+
 C_SRCS += ../ic_drivers/ths7353/ths7353.c
+
 C_SRCS += ../ic_drivers/pcm1862/pcm1862.c
+
 C_SRCS += ../ic_drivers/st7032/st7032.c
+
 C_SRCS += ../ic_drivers/sh1107/sh1107.c
+
 CXX_SRCS :=
 ASM_SRCS := crt0_init.S crt0_ram.S
 
