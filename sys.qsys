@@ -379,12 +379,12 @@
    type="conduit"
    dir="end" />
  <interface
- name="sdc_controller_0_sd"
- internal="sdc_controller_0.sd"
+   name="sdc_controller_0_sd"
+   internal="sdc_controller_0.sd"
    type="conduit"
    dir="end" />
  <interface
- name="sdc_controller_0_sd_clk_o"
+   name="sdc_controller_0_sd_clk_o"
    internal="sdc_controller_0.sd_clk_o"
    type="clock"
    dir="start" />
@@ -584,7 +584,7 @@
  </module>
  <module name="ibex_0" kind="ibex" version="1.0" enabled="1">
   <parameter name="AUTO_EXTERNAL_IRQ_INTERRUPTS_USED" value="0" />
-  <parameter name="AUTO_FAST_IRQ_INTERRUPTS_USED" value="3" />
+  <parameter name="AUTO_FAST_IRQ_INTERRUPTS_USED" value="15" />
   <parameter name="AUTO_NOT_MASKABLE_IRQ_INTERRUPTS_USED" value="0" />
   <parameter name="AUTO_SOFTWARE_IRQ_INTERRUPTS_USED" value="0" />
   <parameter name="AUTO_TIMER_IRQ_INTERRUPTS_USED" value="1" />
@@ -714,7 +714,7 @@
    name="sdc_controller_0"
    kind="sdc_controller"
    version="1.0"
-   enabled="0" />
+   enabled="1" />
  <module name="timer_0" kind="altera_avalon_timer" version="24.1" enabled="1">
   <parameter name="alwaysRun" value="true" />
   <parameter name="counterSize" value="32" />
