@@ -23,11 +23,12 @@
 #include "pcm1862_regs.h"
 #include "sysconfig.h"
 
-typedef enum {
-    PCM_INPUT1 = 0,
-    PCM_INPUT2 = 1,
-    PCM_INPUT3 = 2,
-    PCM_INPUT4 = 3
+typedef enum
+{
+	PCM_INPUT1 = 0,
+	PCM_INPUT2 = 1,
+	PCM_INPUT3 = 2,
+	PCM_INPUT4 = 3
 } pcm_input_t;
 
 void pcm_source_sel(pcm_input_t input);
