@@ -50,7 +50,7 @@ typedef enum
 #define OPT_NOWRAP	0
 #define OPT_WRAP	1
 
-uint16_t tc_h_samplerate, tc_h_samplerate_adj, tc_h_synclen, tc_h_bporch, tc_h_active, tc_v_synclen, tc_v_bporch, tc_v_active, tc_sampler_phase, tc_h_mask, tc_v_mask;
+uint16_t tc_h_samplerate, tc_h_samplerate_adj, tc_h_synclen, tc_h_bporch, tc_h_active, tc_v_synclen, tc_v_bporch, tc_v_active, tc_sampler_phase, tc_h_ar, tc_v_ar;
 uint8_t menu_active;
 uint8_t vm_sel, vm_edit;
 
@@ -125,8 +125,8 @@ MENU(menu_advtiming, P99_PROTECT({ \
 	{ LNG("V. synclen","V. ﾄﾞｳｷﾅｶﾞｻ"),       OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_v_synclen,    V_SYNCLEN_MIN, V_SYNCLEN_MAX, vm_tweak } } },
 	{ LNG("V. backporch","V. ﾊﾞｯｸﾎﾟｰﾁ"),       OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_v_bporch,     V_BPORCH_MIN,  V_BPORCH_MAX, vm_tweak } } },
 	{ LNG("V. active","V. ｱｸﾃｨﾌﾞ"),            OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_v_active,     V_ACTIVE_MIN,  V_ACTIVE_MAX, vm_tweak } } },
-	{ "H. border",                              OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_h_mask,    0, H_MASK_MAX, vm_tweak } } },
-	{ "V. border",                              OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_v_mask,    0, V_MASK_MAX, vm_tweak } } },
+	{ "H. border",                              OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_h_ar,    0, H_AR_MAX, vm_tweak } } },
+	{ "V. border",                              OPT_AVCONFIG_NUMVAL_U16,{ .num_u16 = { &tc_v_ar,    0, V_AR_MAX, vm_tweak } } },
 	{ LNG("Sampling phase","ｻﾝﾌﾟﾘﾝｸﾞﾌｪｰｽﾞ"),     OPT_AVCONFIG_NUMVAL_U16,  { .num_u16 = { &tc_sampler_phase, 0, SAMPLER_PHASE_MAX, vm_tweak } } },
 }))
 
@@ -335,16 +335,16 @@ void menu_render_row(uint8_t row)
 		lcd_write_row2(row_text);
 	}
 	else if (osd_enable == 1)
-{
-	menuitem_t *item = &navi[navlvl].m->items[row];
+	{
+		menuitem_t *item = &navi[navlvl].m->items[row];
 
-	osd_draw_text(row, 0, 1, (row == navi[navlvl].mp) ? 3 : 2, item->name);
+		osd_draw_text(row, 0, 1, (row == navi[navlvl].mp) ? 3 : 2, item->name);
 
 		if (row == navi[navlvl].mp)
 			lcd_write_row1(item->name);
 
-	if ((item->type != OPT_SUBMENU) && (item->type != OPT_FUNC_CALL))
-	{
+		if ((item->type != OPT_SUBMENU) && (item->type != OPT_FUNC_CALL))
+		{
 			char row_text[OSD_CHAR_COLS + 1];
 			write_option_value(item, 0, 0, row_text);
 			if (row_text[0])
@@ -352,9 +352,9 @@ void menu_render_row(uint8_t row)
 
 			if (row == navi[navlvl].mp)
 				lcd_write_row2(row_text);
-	}
-	else
-		osd_draw_text(row, 1, 0, 0, "");
+		}
+		else
+			osd_draw_text(row, 1, 0, 0, "");
 	}
 	else if (osd_enable == 2 && row == navi[navlvl].mp)
 	{
@@ -373,8 +373,8 @@ void menu_render_page()
 	osd_clear();
 
 	if (osd_enable == 1)
-	for (int i = 0; i < navi[navlvl].m->num_items; i++)
-		menu_render_row(i);
+		for (int i = 0; i < navi[navlvl].m->num_items; i++)
+			menu_render_row(i);
 	else
 		menu_render_row(navi[navlvl].mp);
 }
@@ -524,8 +524,8 @@ static void vm_select() {
 	tc_v_synclen = (uint16_t)video_modes_plm[vm_edit].timings.v_synclen;
 	tc_v_bporch = video_modes_plm[vm_edit].timings.v_backporch;
 	tc_v_active = video_modes_plm[vm_edit].timings.v_active;
-	tc_h_mask = (uint16_t)video_modes_plm[vm_edit].mask.h;
-	tc_v_mask = (uint16_t)video_modes_plm[vm_edit].mask.v;
+	tc_h_ar = (uint16_t)video_modes_plm[vm_edit].ar.h;
+	tc_v_ar = (uint16_t)video_modes_plm[vm_edit].ar.v;
 	tc_sampler_phase = video_modes_plm[vm_edit].sampler_phase;
 }
 
@@ -542,8 +542,8 @@ static void vm_tweak(uint16_t *v, char *row)
 			(video_modes_plm[cm.id].timings.v_synclen != (uint8_t)tc_v_synclen) ||
 			(video_modes_plm[cm.id].timings.v_backporch != tc_v_bporch) ||
 			(video_modes_plm[cm.id].timings.v_active != tc_v_active) ||
-			(video_modes_plm[cm.id].mask.h != tc_h_mask) ||
-			(video_modes_plm[cm.id].mask.v != tc_v_mask))
+			(video_modes_plm[cm.id].ar.h != tc_h_ar) ||
+			(video_modes_plm[cm.id].ar.v != tc_v_ar))
 			update_cur_vm = 1;
 		if (video_modes_plm[cm.id].sampler_phase != tc_sampler_phase)
 			set_sampler_phase(tc_sampler_phase, 1);
@@ -556,8 +556,8 @@ static void vm_tweak(uint16_t *v, char *row)
 	video_modes_plm[vm_edit].timings.v_synclen = (uint8_t)tc_v_synclen;
 	video_modes_plm[vm_edit].timings.v_backporch = tc_v_bporch;
 	video_modes_plm[vm_edit].timings.v_active = tc_v_active;
-	video_modes_plm[vm_edit].mask.h = tc_h_mask;
-	video_modes_plm[vm_edit].mask.v = tc_v_mask;
+	video_modes_plm[vm_edit].ar.h = tc_h_ar;
+	video_modes_plm[vm_edit].ar.v = tc_v_ar;
 	video_modes_plm[vm_edit].sampler_phase = tc_sampler_phase;
 
 	if (v == &tc_sampler_phase)
