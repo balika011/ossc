@@ -212,9 +212,7 @@ MENU(menu_scanlines, P99_PROTECT({ \
 	{ "Sl. alternating",                          OPT_AVCONFIG_SELECTION, { .sel = { &tc.sl_altern,   OPT_WRAP,   SETTING_ITEM(off_on_desc) } } },
 	{ LNG("Sl. alignment","ｽｷｬﾝﾗｲﾝﾎﾟｼﾞｼｮﾝ"),        OPT_AVCONFIG_SELECTION, { .sel = { &tc.sl_id,       OPT_WRAP,   SETTING_ITEM(sl_id_desc) } } },
 	{ LNG("Sl. type","ｽｷｬﾝﾗｲﾝﾙｲ"),                 OPT_AVCONFIG_SELECTION, { .sel = { &tc.sl_type,     OPT_WRAP,   SETTING_ITEM(sl_type_desc) } } },
-#ifndef DEBUG
 	{ "<  Custom Sl.  >",                         OPT_SUBMENU,            { .sub = { &menu_cust_sl, NULL, NULL } } },
-#endif
 }))
 
 MENU(menu_postproc, P99_PROTECT({ \
@@ -253,11 +251,9 @@ MENU(menu_settings, P99_PROTECT({ \
 	{ LNG("<Load profile  >","<ﾌﾟﾛﾌｧｲﾙﾛｰﾄﾞ   >"),   OPT_FUNC_CALL,         { .fun = { load_profile, &profile_arg_info } } },
 	{ LNG("<Save profile  >","<ﾌﾟﾛﾌｧｲﾙｾｰﾌﾞ   >"),  OPT_FUNC_CALL,          { .fun = { save_profile, &profile_arg_info } } },
 	{ LNG("<Reset settings>","<ｾｯﾃｲｦｼｮｷｶ     >"),  OPT_FUNC_CALL,          { .fun = { avconfig_set_default, NULL } } },
-#ifndef DEBUG
 	{ LNG("<Import sett.  >","<ｾｯﾃｲﾖﾐｺﾐ      >"), OPT_FUNC_CALL,        { .fun = { userdata_import, NULL } } },
 	{ LNG("<Export sett.  >","<ｾｯﾃｲｶｷｺﾐ      >"), OPT_FUNC_CALL,        { .fun = { userdata_export, NULL } } },
 	{ LNG("<Fw. update    >","<ﾌｧｰﾑｳｪｱｱｯﾌﾟﾃﾞｰﾄ>"), OPT_FUNC_CALL,        { .fun = { fw_update, NULL } } },
-#endif
 }))
 
 

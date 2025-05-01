@@ -38,8 +38,6 @@
 #define FW_SUFFIX              ""
 #endif
 
-//#define I2C_DEBUG
-
 #ifndef DEBUG
 #define OS_PRINTF(...)
 #define ErrorF(...)
@@ -49,8 +47,6 @@
 #include "utils.h"
 #define OS_PRINTF printf
 #define ErrorF printf
-// use reduced printf
-//#define printf alt_printf
 #define printf dd_printf
 #endif
 

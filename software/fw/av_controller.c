@@ -110,6 +110,7 @@ inline void SetupAudio(tx_mode_t mode)
     if (mode != TX_DVI) {
         EnableAudioOutput4OSSC(cm.pclk_o_hz, tc.audio_dw_sampl, tc.audio_swap_lr);
         HDMITX_SetAudioInfoFrame(tc.audio_dw_sampl);
+
 #ifdef DEBUG
         Switch_HDMITX_Bank(1);
         usleep(1000);
@@ -510,6 +511,7 @@ void program_mode()
 
     //h_syncinlen = tvp_readreg(TVP_HSINWIDTH);
     h_syncinlen = cm.hsync_width;
+
 #ifdef DEBUG
     v_syncinlen = tvp_readreg(TVP_VSINWIDTH);
     macrovis = !!(tvp_readreg(TVP_LINECNT2) & (1<<6));
