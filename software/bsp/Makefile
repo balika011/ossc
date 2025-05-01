@@ -150,11 +150,12 @@ COMPONENT_C_LIB_SRCS += \
 	drivers/src/it6613.c \
 	drivers/src/it6613_drv.c \
 	drivers/src/it6613_sys.c \
-	drivers/src//tvp7002.c \
-	drivers/src//ths7353.c \
-	drivers/src//pcm1862.c \
-	drivers/src//st7032.c \
-	drivers/src//sh1107.c
+	drivers/src/tvp7002.c \
+	drivers/src/ths7353.c \
+	drivers/src/pcm1862.c \
+	drivers/src/st7032.c \
+	drivers/src/sh1107.c \
+	drivers/src/lcd.c
 
 # Assemble all component assembly source files 
 COMPONENT_ASM_LIB_SRCS += \

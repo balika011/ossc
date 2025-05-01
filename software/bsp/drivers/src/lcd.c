@@ -20,7 +20,6 @@
 #include "lcd.h"
 #include "st7032.h"
 #include "sh1107.h"
-#include "av_controller.h"
 #include "timer.h"
 
 static int has_sh1107;

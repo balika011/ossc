@@ -132,7 +132,6 @@ C_SRCS += src/controls.c
 C_SRCS += src/fat16_export.c
 C_SRCS += src/firmware.c
 C_SRCS += src/flash.c
-C_SRCS += src/lcd.c
 ifeq ($(OSDLANG),JP)
 C_SRCS += src/menu_sjis.c
 else
