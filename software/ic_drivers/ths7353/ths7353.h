@@ -22,16 +22,17 @@
 
 #include "sysconfig.h"
 
-#define THS_BASE (0x58>>1)
+#define THS_BASE (0x58 >> 1)
 
 #define THS_CH1 0x01
 #define THS_CH2 0x02
 #define THS_CH3 0x03
 
-typedef enum {
-    THS_INPUT_A = 0,
-    THS_INPUT_B = 1,
-    THS_STANDBY = 2
+typedef enum
+{
+	THS_INPUT_A = 0,
+	THS_INPUT_B = 1,
+	THS_STANDBY = 2
 } ths_input_t;
 
 #define THS_LPF_9MHZ 0x00
