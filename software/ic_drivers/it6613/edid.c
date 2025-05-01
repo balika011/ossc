@@ -2,12 +2,12 @@
 #include "edid.h"
 
 #ifdef SUPPORT_EDID
-static SYS_STATUS EDIDCheckSum(BYTE *pEDID) ;
+static SYS_STATUS EDIDCheckSum(uint8_t *pEDID) ;
 
 static SYS_STATUS
-EDIDCheckSum(BYTE *pEDID)
+EDIDCheckSum(uint8_t *pEDID)
 {
-    BYTE CheckSum ;
+    uint8_t CheckSum ;
     int i ;
 
 	if( !pEDID )
@@ -23,7 +23,7 @@ EDIDCheckSum(BYTE *pEDID)
 }
 
 SYS_STATUS
-ParseVESAEDID(BYTE *pEDID)
+ParseVESAEDID(uint8_t *pEDID)
 {
     if( ER_SUCCESS != EDIDCheckSum(pEDID) ) return ER_FAIL ;
     
@@ -48,16 +48,16 @@ ParseVESAEDID(BYTE *pEDID)
 }
 
 SYS_STATUS
-ParseCEAEDID(BYTE *pCEAEDID, RX_CAP *pRxCap)
+ParseCEAEDID(uint8_t *pCEAEDID, RX_CAP *pRxCap)
 {
-    BYTE offset,End ;
-    BYTE count ;
-    BYTE tag ;
+    uint8_t offset,End ;
+    uint8_t count ;
+    uint8_t tag ;
     int i ;
 
 	if( !pCEAEDID || !pRxCap ) return ER_FAIL ;
 
-    pRxCap->ValidCEA = FALSE ;
+    pRxCap->ValidCEA = false ;
     
     if( ER_SUCCESS != EDIDCheckSum(pCEAEDID) ) return ER_FAIL ;
 
@@ -113,7 +113,7 @@ ParseCEAEDID(BYTE *pCEAEDID, RX_CAP *pRxCap)
             offset ++ ;
             for( i = 0,pRxCap->idxNativeVDOMode = 0xff ; i < count ; i++, offset++ )
             {
-            	BYTE VIC ;
+            	uint8_t VIC ;
             	VIC = pCEAEDID[offset] & (~0x80) ;
             	OS_PRINTF("HDMI Sink VIC(Video Identify Code)=%d\n", VIC);
             	// if( FindModeTableEntryByVIC(VIC) != -1 )
@@ -121,7 +121,7 @@ ParseCEAEDID(BYTE *pCEAEDID, RX_CAP *pRxCap)
 	                pRxCap->VDOMode[pRxCap->VDOModeCount] = VIC ;
 	                if( pCEAEDID[offset] & 0x80 )
 	                {
-	                    pRxCap->idxNativeVDOMode = (BYTE)pRxCap->VDOModeCount ;
+	                    pRxCap->idxNativeVDOMode = pRxCap->VDOModeCount ;
 	                    // iVideoModeSelect = pRxCap->VDOModeCount ;
 	                }
 
@@ -131,11 +131,11 @@ ParseCEAEDID(BYTE *pCEAEDID, RX_CAP *pRxCap)
             break ;
         case 0x03: // Vendor Specific Data Block ;
             offset ++ ;
-            pRxCap->IEEEOUI = (ULONG)pCEAEDID[offset+2] ;
+            pRxCap->IEEEOUI = pCEAEDID[offset+2] ;
             pRxCap->IEEEOUI <<= 8 ;
-            pRxCap->IEEEOUI += (ULONG)pCEAEDID[offset+1] ;
+            pRxCap->IEEEOUI += pCEAEDID[offset+1] ;
             pRxCap->IEEEOUI <<= 8 ;
-            pRxCap->IEEEOUI += (ULONG)pCEAEDID[offset] ;
+            pRxCap->IEEEOUI += pCEAEDID[offset] ;
 
             ///////////////////////////////////////////////////////////
             // For HDMI 1.3 extension handling.
@@ -144,7 +144,7 @@ ParseCEAEDID(BYTE *pCEAEDID, RX_CAP *pRxCap)
             pRxCap->dc.uc = 0 ;
             pRxCap->MaxTMDSClock = 0  ;
             pRxCap->lsupport.uc = 0 ;
-            pRxCap->ValidHDMI = (pRxCap->IEEEOUI==HDMI_IEEEOUI)? TRUE:FALSE ;
+            pRxCap->ValidHDMI = pRxCap->IEEEOUI == HDMI_IEEEOUI;
             if( (pRxCap->ValidHDMI) && (count > 5 ))
             {
                 // HDMI 1.3 extension
@@ -187,7 +187,7 @@ ParseCEAEDID(BYTE *pCEAEDID, RX_CAP *pRxCap)
         }
     }
 
-    pRxCap->ValidCEA = TRUE ;
+    pRxCap->ValidCEA = true ;
     return ER_SUCCESS ;
 }
 

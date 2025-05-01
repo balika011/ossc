@@ -12,40 +12,37 @@ int gEnableColorDepth = 1;
 ////////////////////////////////////////////////////////////////////////////////
 // EDID
 ////////////////////////////////////////////////////////////////////////////////
-static _XDATA unsigned char EDID_Buf[128] ;
-RX_CAP _XDATA RxCapability ;
-BOOL bChangeMode = FALSE ;
-_XDATA AVI_InfoFrame AviInfo;
-_XDATA Audio_InfoFrame AudioInfo ;
+static unsigned char EDID_Buf[128] ;
+RX_CAP RxCapability ;
+int bChangeMode = false ;
+AVI_InfoFrame AviInfo;
+Audio_InfoFrame AudioInfo ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Program utility.
 ////////////////////////////////////////////////////////////////////////////////
-// move to .h BOOL ParseEDID() ;
-void ConfigAVIInfoFrame(BYTE VIC, BYTE pixelrep) ;
+void ConfigAVIInfoFrame(uint8_t VIC, uint8_t pixelrep) ;
 void ConfigAudioInfoFrm() ;
 
 
 #ifndef SUPPORT_SYNCEMB
-_IDATA BYTE bInputColorMode = F_MODE_RGB444; //F_MODE_RGB444;
-_IDATA BYTE bInputSignalType = 0 ;
-// BYTE bInputSignalType = T_MODE_INDDR ; // for DDR mode input
+uint8_t bInputColorMode = F_MODE_RGB444; //F_MODE_RGB444;
+uint8_t bInputSignalType = 0 ;
 #else
-// BYTE bInputSignalType = T_MODE_SYNCEMB ; // for 16 bit sync embedded
-_IDATA BYTE bInputColorMode = F_MODE_YUV422 ;
-_IDATA BYTE bInputSignalType = T_MODE_SYNCEMB | T_MODE_CCIR656 ; // for 16 bit sync embedded
+uint8_t bInputColorMode = F_MODE_YUV422 ;
+uint8_t bInputSignalType = T_MODE_SYNCEMB | T_MODE_CCIR656 ; // for 16 bit sync embedded
 #endif // SUPPORT_SYNCEMB
 
-_IDATA BYTE iVideoModeSelect=0 ;
+uint8_t iVideoModeSelect=0 ;
 
-_IDATA BYTE bOutputColorMode = F_MODE_RGB444; //F_MODE_RGB444 ;
-_XDATA ULONG VideoPixelClock ; 
-_XDATA BYTE VIC ; // 480p60
-_XDATA BYTE pixelrep ; // no pixelrepeating
-_XDATA HDMI_Aspec aspec ;
-_XDATA HDMI_Colorimetry Colorimetry ;
+uint8_t bOutputColorMode = F_MODE_RGB444; //F_MODE_RGB444 ;
+uint32_t  VideoPixelClock ; 
+uint8_t VIC ; // 480p60
+uint8_t pixelrep ; // no pixelrepeating
+HDMI_Aspec aspec ;
+HDMI_Colorimetry Colorimetry ;
 
-BOOL bHDMIMode, bAudioEnable ;
+int bHDMIMode, bAudioEnable ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Function Body.
@@ -76,7 +73,7 @@ HDMITX_SetOutput()
     
 
 
-    //BOOL EnableVideoOutput(VIDEOPCLKLEVEL level,BYTE inputColorMode,BYTE outputColorMode,BYTE bHDMI) ;
+    //int EnableVideoOutput(VIDEOPCLKLEVEL level,uint8_t inputColorMode,uint8_t outputColorMode,uint8_t bHDMI) ;
     //EnableVideoOutput(level,bInputColorMode, bInputSignalType, bOutputColorMode,bHDMIMode) ;
     EnableVideoOutput(level,bInputColorMode, bOutputColorMode,bHDMIMode) ;
     
@@ -85,18 +82,18 @@ HDMITX_SetOutput()
     	OS_PRINTF("ConfigAVIInfoFrame, VIC=%d\n", VIC);
         ConfigAVIInfoFrame(VIC, pixelrep) ;
 
-        EnableHDCP(TRUE) ;
+        EnableHDCP(true) ;
 		if( bAudioEnable )
 		{
-            //BOOL EnableAudioOutput(ULONG VideoPixelClock,BYTE bAudioSampleFreq,BYTE ChannelNumber,BYTE bAudSWL,BYTE bSPDIF)
-            //EnableAudioOutput(TMDSClock,48000, 2, FALSE);
-            bool bSPDIF = FALSE;
+            //int EnableAudioOutput(uint32_t  VideoPixelClock,uint8_t bAudioSampleFreq,uint8_t ChannelNumber,uint8_t bAudSWL,uint8_t bSPDIF)
+            //EnableAudioOutput(TMDSClock,48000, 2, false);
+            bool bSPDIF = false;
             EnableAudioOutput(TMDSClock,AUDFS_48KHz, 2, 16, bSPDIF);
             ConfigAudioInfoFrm() ;
 		}
     }
-    SetAVMute(FALSE) ;
-    bChangeMode = FALSE ;
+    SetAVMute(false) ;
+    bChangeMode = false ;
 }
 
 
@@ -244,7 +241,7 @@ HDMITX_ChangeDisplayOption(HDMI_Video_Type OutputVideoTiming, HDMI_OutputColorMo
         
     default:
         VIC = 0;
-        bChangeMode = FALSE ;                
+        bChangeMode = false ;                
         return ;
     }
 
@@ -280,12 +277,12 @@ HDMITX_ChangeDisplayOption(HDMI_Video_Type OutputVideoTiming, HDMI_OutputColorMo
         bInputColorMode &= ~F_VIDMODE_16_235 ;
     }
 
-    bChangeMode = TRUE ;
+    bChangeMode = true ;
 }
 
 
 void
-ConfigAVIInfoFrame(BYTE VIC, BYTE pixelrep)
+ConfigAVIInfoFrame(uint8_t VIC, uint8_t pixelrep)
 {
 //     AVI_InfoFrame AviInfo;
 
@@ -324,7 +321,7 @@ ConfigAVIInfoFrame(BYTE VIC, BYTE pixelrep)
     AviInfo.pktbyte.AVI_DB[11] = 0 ;
     AviInfo.pktbyte.AVI_DB[12] = 0 ;
 
-    EnableAVIInfoFrame(TRUE, (unsigned char *)&AviInfo) ;
+    EnableAVIInfoFrame(true, (unsigned char *)&AviInfo) ;
 }
 
 
@@ -353,7 +350,7 @@ ConfigAudioInfoFrm()
     {
         AudioInfo.pktbyte.AUD_DB[i] = 0 ;
     }
-    EnableAudioInfoFrame(TRUE, (unsigned char *)&AudioInfo) ;
+    EnableAudioInfoFrame(true, (unsigned char *)&AudioInfo) ;
 }
 
 
@@ -363,20 +360,20 @@ ConfigAudioInfoFrm()
 // Check EDID check sum and EDID 1.3 extended segment.
 /////////////////////////////////////////////////////////////////////
 
-BOOL
+int
 ParseEDID()
 {
     // collect the EDID ucdata of segment 0
-    BYTE CheckSum ;
-    BYTE BlockCount ;
-    BOOL err = FALSE ;
-    BOOL bValidCEA = FALSE ;
+    uint8_t CheckSum ;
+    uint8_t BlockCount ;
+    int err = false ;
+    int bValidCEA = false ;
     int i ;
 
-    RxCapability.ValidCEA = FALSE ;
+    RxCapability.ValidCEA = false ;
 	
     if (!GetEDIDData(0, EDID_Buf))
-        return FALSE;
+        return false;
 
 
     for( i = 0, CheckSum = 0 ; i < 128 ; i++ )
@@ -387,7 +384,7 @@ ParseEDID()
 			//Eep_Write(0x80, 0x80, EDID_Buf) ;
 	if( CheckSum != 0 )	// 128-byte EDID sum shall equal zero
 	{
-		return FALSE ;
+		return false ;
 	}
 	
 	// check EDID Header
@@ -400,7 +397,7 @@ ParseEDID()
 	    EDID_Buf[6] != 0xFF ||
 	    EDID_Buf[7] != 0x00)
     {
-        return FALSE ;
+        return false ;
     }
 
 
@@ -408,7 +405,7 @@ ParseEDID()
 
     if( BlockCount == 0 )
     {
-        return TRUE ; // do nothing.
+        return true ; // do nothing.
     }
     else if ( BlockCount > 4 )
     {
@@ -430,12 +427,12 @@ ParseEDID()
  
 				    if(RxCapability.IEEEOUI==0x0c03)
 				    {
-				    	RxCapability.ValidHDMI = TRUE ;
-				    	bValidCEA = TRUE ;
+				    	RxCapability.ValidHDMI = true ;
+				    	bValidCEA = true ;
 					}
 				    else
 				    {
-				    	RxCapability.ValidHDMI = FALSE ;
+				    	RxCapability.ValidHDMI = false ;
 				    }
 				                   
                 }
@@ -443,6 +440,6 @@ ParseEDID()
         }
     }
 
-    return err?FALSE:TRUE ;
+    return err?false:true ;
 
 }

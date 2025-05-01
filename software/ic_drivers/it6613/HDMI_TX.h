@@ -26,8 +26,8 @@ bool HDMITX_IsSinkSupportColorDepth36(void);
 bool HDMITX_IsSinkSupportColorDepth30(void);
 void HDMITX_SetOutputColorDepth(int ColorDepth);
 
-void HDMITX_SetAudioInfoFrame(BYTE bAudioDwSampling);
-void HDMITX_SetHDRInfoFrame(BYTE enableHDR);
-void HDMITX_SetVRRInfoFrame(BYTE enable);
+void HDMITX_SetAudioInfoFrame(uint8_t bAudioDwSampling);
+void HDMITX_SetHDRInfoFrame(uint8_t enableHDR);
+void HDMITX_SetVRRInfoFrame(uint8_t enable);
 
 #endif /*HDMI_TX_H_*/

@@ -5,16 +5,16 @@
 #include "hdmitx.h"
 #include "HDMI_TX.h"
 #include "edid.h"
+#include <it6613_i2c.h>
 
-
-int TX_HDP = FALSE;
-extern BYTE bOutputColorMode;
-extern BYTE bInputColorMode;
-extern BOOL bChangeMode;
+int TX_HDP = false;
+extern uint8_t bOutputColorMode;
+extern uint8_t bInputColorMode;
+extern int bChangeMode;
 extern RX_CAP RxCapability;
-extern BOOL bHDMIMode;
-extern BOOL bAudioEnable;
-BOOL ParseEDID();
+extern int bHDMIMode;
+extern int bAudioEnable;
+int ParseEDID();
 
 INSTANCE InitInstanceData =
 {
@@ -28,14 +28,14 @@ INSTANCE InitInstanceData =
         B_AUD_EN_I2S0 | B_AUD_I2S | M_AUD_16BIT, // bAudioChannelEnable, 0x01, REG[0xE0], defined in it6613_drv.h
         AUDFS_48KHz, //0, //bAudFs,
         0,  // TMDSClock
-        TRUE,//bAuthenticated
-        TRUE,// bHDMIMode
-        FALSE,// bIntPOL
-        FALSE // bHPD
+        true,//bAuthenticated
+        true,// bHDMIMode
+        false,// bIntPOL
+        false // bHPD
 } ;
 
 bool HDMITX_ChipVerify(void){
-    bool bPass = FALSE;
+    bool bPass = false;
     uint8_t szID[4];
     int i;
 
@@ -45,7 +45,7 @@ bool HDMITX_ChipVerify(void){
 
 //    if (szID[0] == 0x00 && szID[1] == 0xCA && szID[1] == 0x13 && szID[1] == 0x06) szID[0] ???
     if ((szID[1] == 0xCA && szID[2] == 0x13 && szID[3] == 0x06) || (szID[1] == 0xCA && szID[2] == 0x13 && szID[3] == 0x16)){
-        bPass = TRUE;
+        bPass = true;
         printf("TX Chip Revision ID: %d\n", szID[0]);
     }else{
         printf("NG, Read TX Chip ID:%02X%02X%02X%02Xh (expected:00CA1306h)\n", szID[0], szID[1], szID[2], szID[3]);
@@ -55,12 +55,12 @@ bool HDMITX_ChipVerify(void){
 }
 
 bool HDMITX_Init(void){
-    bool bSuccess = TRUE;
+    bool bSuccess = true;
     HDMITX_Reset();
     usleep(500*1000);
     if (!HDMITX_ChipVerify()){
         OS_PRINTF("Failed to find IT6613 HDMI-TX Chip.\n");
-        bSuccess = FALSE;
+        bSuccess = false;
         //return 0;
     }
 
@@ -73,8 +73,8 @@ bool HDMITX_Init(void){
 
 bool HDMITX_HPD(void){
     if (TX_HDP)
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
 
@@ -122,7 +122,7 @@ void HDMITX_SetAVIInfoFrame(uint8_t VIC, uint8_t OutputColorMode, bool b16x9, bo
     AviInfo.pktbyte.AVI_DB[11] = 0 ;
     AviInfo.pktbyte.AVI_DB[12] = 0 ;
 
-    EnableAVIInfoFrame(TRUE, (unsigned char *)&AviInfo) ;
+    EnableAVIInfoFrame(true, (unsigned char *)&AviInfo) ;
 }
 
 void HDMITX_ChangeVideoTiming(int VIC){
@@ -182,35 +182,35 @@ void HDMITX_SetColorSpace(COLOR_TYPE InputColor, COLOR_TYPE OutputColor){
 }
 
 bool HDMITX_IsSinkSupportYUV444(void){
-    bool bSupport = FALSE;
+    bool bSupport = false;
     if (RxCapability.Valid && RxCapability.ValidHDMI && RxCapability.ValidCEA &&
        (RxCapability.VideoMode & CEA_SUPPORT_YUV444))
-        bSupport = TRUE;
+        bSupport = true;
     return bSupport;
 }
 
 bool HDMITX_IsSinkSupportYUV422(void){
-    bool bSupport = FALSE;
+    bool bSupport = false;
     if (RxCapability.Valid && RxCapability.ValidHDMI && RxCapability.ValidCEA &&
        (RxCapability.VideoMode & CEA_SUPPORT_YUV422))
-        bSupport = TRUE;
+        bSupport = true;
     return bSupport;
 }
 
 bool HDMITX_IsSinkSupportColorDepth36(void){
-    bool bSupport = FALSE;
+    bool bSupport = false;
     if (RxCapability.Valid && RxCapability.ValidHDMI && RxCapability.ValidCEA &&
        RxCapability.dc.info.DC_36Bit)
-        bSupport = TRUE;
+        bSupport = true;
     return bSupport;
 }
 
 
 bool HDMITX_IsSinkSupportColorDepth30(void){
-    bool bSupport = FALSE;
+    bool bSupport = false;
     if (RxCapability.Valid && RxCapability.ValidHDMI && RxCapability.ValidCEA &&
        RxCapability.dc.info.DC_30Bit)
-        bSupport = TRUE;
+        bSupport = true;
     return bSupport;
 }
 
@@ -222,14 +222,14 @@ void HDMITX_SetOutputColorDepth(int ColorDepth){
 
 bool HDMITX_DevLoopProc()
 {
-    static BYTE PreHPDChange = 0;
-    static BYTE PreHPD = 0;
-    BYTE HPD, HPDChange ;
+    static uint8_t PreHPDChange = 0;
+    static uint8_t PreHPD = 0;
+    uint8_t HPD, HPDChange ;
 
     CheckHDMITX(&HPD,&HPDChange);
 
     if (HPD == PreHPD && HPDChange)
-        return FALSE;
+        return false;
 
     TX_HDP = HPD;
     PreHPD = HPD;
@@ -246,11 +246,11 @@ bool HDMITX_DevLoopProc()
             if( RxCapability.Valid && RxCapability.ValidHDMI )
             {
                 OS_PRINTF("HDMI Display found\n");
-                bHDMIMode = TRUE ;
+                bHDMIMode = true ;
 
                 if(RxCapability.VideoMode & (1<<6))
                 {
-                    bAudioEnable = TRUE ;
+                    bAudioEnable = true ;
                 }
             }
             else if (!RxCapability.Valid)
@@ -258,14 +258,14 @@ bool HDMITX_DevLoopProc()
                 OS_PRINTF("Failed to read EDID\n");
 
                 // enable it when edid fail
-                bHDMIMode = TRUE ;
-                bAudioEnable = TRUE ;
+                bHDMIMode = true ;
+                bAudioEnable = true ;
             }
             else
             {
                 OS_PRINTF("Invalid HDMI Display\n");
-                bHDMIMode = FALSE ;
-                bAudioEnable = FALSE ;
+                bHDMIMode = false ;
+                bAudioEnable = false ;
             }
 
             OS_PRINTF("HDMITX_SetOutput\n");
@@ -278,9 +278,9 @@ bool HDMITX_DevLoopProc()
             // unplug mode, ...
             OS_PRINTF("DisableVideoOutput\n");
             //DisableVideoOutput() ;
-            RxCapability.Valid = FALSE;
-            RxCapability.ValidHDMI = FALSE;
-            RxCapability.ValidCEA = FALSE;
+            RxCapability.Valid = false;
+            RxCapability.ValidHDMI = false;
+            RxCapability.ValidCEA = false;
         }
     }
     else // no stable but need to process mode change procedure
@@ -295,7 +295,7 @@ bool HDMITX_DevLoopProc()
     return HPDChange;
 }
 
-void HDMITX_SetAudioInfoFrame(BYTE bAudioDwSampling)
+void HDMITX_SetAudioInfoFrame(uint8_t bAudioDwSampling)
 {
     int i;
     Audio_InfoFrame AudioInfo;
@@ -320,10 +320,10 @@ void HDMITX_SetAudioInfoFrame(BYTE bAudioDwSampling)
     //AudioInfo.info.LevelShiftValue = 0;
     //AudioInfo.info.DM_INH = 0; // Down-mix Inhibit Flag; 0=Permitted or no information about any assertion of this
 
-    EnableAudioInfoFrame(TRUE, (BYTE *) &AudioInfo);
+    EnableAudioInfoFrame(true, (uint8_t *) &AudioInfo);
 }
 
-void HDMITX_SetHDRInfoFrame(BYTE HDR_TF)
+void HDMITX_SetHDRInfoFrame(uint8_t HDR_TF)
 {
     int i;
     HDR_InfoFrame HDRInfo;
@@ -343,10 +343,10 @@ void HDMITX_SetHDRInfoFrame(BYTE HDR_TF)
     HDRInfo.pktbyte.HDR_DB[24] = 0xfa;
     HDRInfo.pktbyte.HDR_DB[25] = 0x00;*/
 
-    EnableGPInfoFrame(TRUE, (BYTE *) &HDRInfo);
+    EnableGPInfoFrame(true, (uint8_t *) &HDRInfo);
 }
 
-void HDMITX_SetVRRInfoFrame(BYTE enable)
+void HDMITX_SetVRRInfoFrame(uint8_t enable)
 {
     int i;
     Freesync_InfoFrame VRRInfo;
@@ -364,6 +364,6 @@ void HDMITX_SetVRRInfoFrame(BYTE enable)
         VRRInfo.pktbyte.FS_DB[i] = 0;
     }
 
-    EnableGPInfoFrame(TRUE, (BYTE *) &VRRInfo);
+    EnableGPInfoFrame(true, (uint8_t *) &VRRInfo);
 }
 

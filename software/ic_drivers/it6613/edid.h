@@ -9,10 +9,10 @@
 // RX Capability.
 /////////////////////////////////////////
 typedef struct {
-    BYTE b16bit:1 ;
-    BYTE b20bit:1 ;
-    BYTE b24bit:1 ;
-    BYTE Rsrv:5 ;
+    uint8_t b16bit:1 ;
+    uint8_t b20bit:1 ;
+    uint8_t b24bit:1 ;
+    uint8_t Rsrv:5 ;
 } LPCM_BitWidth ;
 
 typedef enum {
@@ -36,37 +36,37 @@ typedef enum {
 
 typedef union {
     struct {
-        BYTE channel:3 ;
-        BYTE AudioFormatCode:4 ;
-        BYTE Rsrv1:1 ;
+        uint8_t channel:3 ;
+        uint8_t AudioFormatCode:4 ;
+        uint8_t Rsrv1:1 ;
 
-        BYTE b32KHz:1 ;
-        BYTE b44_1KHz:1 ;
-        BYTE b48KHz:1 ;
-        BYTE b88_2KHz:1 ;
-        BYTE b96KHz:1 ;
-        BYTE b176_4KHz:1 ;
-        BYTE b192KHz:1 ;
-        BYTE Rsrv2:1 ;
-        BYTE ucCode ;
+        uint8_t b32KHz:1 ;
+        uint8_t b44_1KHz:1 ;
+        uint8_t b48KHz:1 ;
+        uint8_t b88_2KHz:1 ;
+        uint8_t b96KHz:1 ;
+        uint8_t b176_4KHz:1 ;
+        uint8_t b192KHz:1 ;
+        uint8_t Rsrv2:1 ;
+        uint8_t ucCode ;
     } s ;
-    BYTE uc[3] ;
+    uint8_t uc[3] ;
 
 } AUDDESCRIPTOR ;
 
 typedef union {
     struct {
-        BYTE FL_FR:1 ;
-        BYTE LFE:1 ;
-        BYTE FC:1 ;
-        BYTE RL_RR:1 ;
-        BYTE RC:1 ;
-        BYTE FLC_FRC:1 ;
-        BYTE RLC_RRC:1 ;
-        BYTE Reserve:1 ;
-        BYTE Unuse[2] ;
+        uint8_t FL_FR:1 ;
+        uint8_t LFE:1 ;
+        uint8_t FC:1 ;
+        uint8_t RL_RR:1 ;
+        uint8_t RC:1 ;
+        uint8_t FLC_FRC:1 ;
+        uint8_t RLC_RRC:1 ;
+        uint8_t Reserve:1 ;
+        uint8_t Unuse[2] ;
     } s ;
-    BYTE uc[3] ;
+    uint8_t uc[3] ;
 } SPK_ALLOC ;
 
 #define CEA_SUPPORT_UNDERSCAN (1<<7)
@@ -77,51 +77,51 @@ typedef union {
 
 typedef union _tag_DCSUPPORT {
     struct {
-        BYTE DVI_Dual:1 ;
-        BYTE Rsvd:2 ;
-        BYTE DC_Y444:1 ;
-        BYTE DC_30Bit:1 ;    
-        BYTE DC_36Bit:1 ;    
-        BYTE DC_48Bit:1 ;    
-        BYTE SUPPORT_AI:1 ;    
+        uint8_t DVI_Dual:1 ;
+        uint8_t Rsvd:2 ;
+        uint8_t DC_Y444:1 ;
+        uint8_t DC_30Bit:1 ;    
+        uint8_t DC_36Bit:1 ;    
+        uint8_t DC_48Bit:1 ;    
+        uint8_t SUPPORT_AI:1 ;    
     } info ;
-    BYTE uc ;
+    uint8_t uc ;
 } DCSUPPORT ;
 
 typedef union _LATENCY_SUPPORT{
     struct {
-        BYTE Rsvd:6 ;
-        BYTE I_Latency_Present:1 ;
-        BYTE Latency_Present:1 ;
+        uint8_t Rsvd:6 ;
+        uint8_t I_Latency_Present:1 ;
+        uint8_t Latency_Present:1 ;
     } info ;
-    BYTE uc ;
+    uint8_t uc ;
 } LATENCY_SUPPORT ;
 
 #define HDMI_IEEEOUI 0x0c03
 
 typedef struct _RX_CAP{
-    BYTE Valid;
-    BYTE VideoMode ;
-    BYTE VDOModeCount ;
-    BYTE idxNativeVDOMode ;
-    BYTE VDOMode[128] ;
-    BYTE AUDDesCount ;
+    uint8_t Valid;
+    uint8_t VideoMode ;
+    uint8_t VDOModeCount ;
+    uint8_t idxNativeVDOMode ;
+    uint8_t VDOMode[128] ;
+    uint8_t AUDDesCount ;
     AUDDESCRIPTOR AUDDes[32] ;
-    ULONG IEEEOUI ;
+    uint32_t  IEEEOUI ;
     DCSUPPORT dc ;
-    BYTE MaxTMDSClock ;
+    uint8_t MaxTMDSClock ;
     LATENCY_SUPPORT lsupport ;
-    BYTE V_Latency ;
-    BYTE A_Latency ;
-    BYTE V_I_Latency ;
-    BYTE A_I_Latency ;
+    uint8_t V_Latency ;
+    uint8_t A_Latency ;
+    uint8_t V_I_Latency ;
+    uint8_t A_I_Latency ;
     SPK_ALLOC   SpeakerAllocBlk ;
-    BYTE ValidCEA:1 ;
-    BYTE ValidHDMI:1 ;
+    uint8_t ValidCEA:1 ;
+    uint8_t ValidHDMI:1 ;
 } RX_CAP ;
 
-SYS_STATUS ParseVESAEDID(BYTE *pEDID) ;
-SYS_STATUS ParseCEAEDID(BYTE *pCEAEDID, RX_CAP *pRxCap) ;
+SYS_STATUS ParseVESAEDID(uint8_t *pEDID) ;
+SYS_STATUS ParseCEAEDID(uint8_t *pCEAEDID, RX_CAP *pRxCap) ;
 
 
 

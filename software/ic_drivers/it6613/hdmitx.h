@@ -28,32 +28,10 @@
 #define SUPPORT_INPUTYUV
 #endif
 
-/*#ifdef _MCU_
-    #include "mcu.h"
-#else // not MCU
-    #include <windows.h>
-    #include <winioctl.h>
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include <stdarg.h>
-    #include "ioaccess.h"
-    #include "install.h"
-    #include "pc.h"
-#endif // MCU*/
-
-#include "typedef.h"
+#include "it6613_types.h"
 #include "HDMI_COMMON.h"
-/*typedef unsigned char  BYTE;
-#define _CODE const
-#define SYS_STATUS unsigned int
-#define TRUE 1
-#define FALSE 0*/
-//#define NULL 0
-
-//typedef unsigned char bool;
-typedef unsigned char  bool;
 #include "sysconfig.h"
+#include "it6613_drv.h"
 
 // Hardwired to CPU reset
 #define HDMITX_Reset(x)
@@ -77,12 +55,6 @@ HDCP_ResumeAuthentication()
 	return;
 }
 #endif
-
-void DelayMS(unsigned int ms);
-
-//#include "edid.h"
-// #include "dss_sha.h"
-#include "it6613_drv.h"
 
 #define HDMITX_INSTANCE_MAX 1
 

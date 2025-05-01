@@ -1,6 +1,9 @@
 #ifndef _IT6613_H_
 #define _IT6613_H_
 
+#include <stdint.h>
+#include <it6613_types.h>
+
 //#define EXTERN_HDCPROM
 /////////////////////////////////////////
 // DDC Address
@@ -689,29 +692,29 @@
 /////////////////////////////////////////////////////////////////////
 typedef struct _INSTANCE_STRUCT {
 
-	BYTE I2C_DEV ;
-	BYTE I2C_ADDR ;
+	uint8_t I2C_DEV ;
+	uint8_t I2C_ADDR ;
 
 	/////////////////////////////////////////////////
 	// Interrupt Type
 	/////////////////////////////////////////////////
-	BYTE bIntType ; // = 0 ;
+	uint8_t bIntType ; // = 0 ;
 	/////////////////////////////////////////////////
 	// Video Property
 	/////////////////////////////////////////////////
-	BYTE bInputVideoSignalType ; // for Sync Embedded,CCIR656,InputDDR
+	uint8_t bInputVideoSignalType ; // for Sync Embedded,CCIR656,InputDDR
 	/////////////////////////////////////////////////
 	// Audio Property
 	/////////////////////////////////////////////////
-	BYTE bOutputAudioMode ; // = 0 ;
-	BYTE bAudioChannelSwap ; // = 0 ;
-    BYTE bAudioChannelEnable ;
-    BYTE bAudFs ;
+	uint8_t bOutputAudioMode ; // = 0 ;
+	uint8_t bAudioChannelSwap ; // = 0 ;
+    uint8_t bAudioChannelEnable ;
+    uint8_t bAudFs ;
     unsigned long TMDSClock ;
-	BYTE bAuthenticated:1 ;
-	BYTE bHDMIMode: 1;
-	BYTE bIntPOL:1 ; // 0 = Low Active
-	BYTE bHPD:1 ;
+	uint8_t bAuthenticated:1 ;
+	uint8_t bHDMIMode: 1;
+	uint8_t bIntPOL:1 ; // 0 = Low Active
+	uint8_t bHPD:1 ;
 
 } INSTANCE ;
 
@@ -809,43 +812,30 @@ typedef enum _mode_id {
 //////////////////////////////////////////////////////////////////////
 void InitIT6613();
 void HDMITX_InitInstance(INSTANCE *pInstance) ;
-BOOL EnableVideoOutput(VIDEOPCLKLEVEL level,BYTE inputColorMode,BYTE outputColorMode,BYTE bHDMI) ;
-BOOL SetupVideoInputSignal(BYTE inputSignalType) ;
+int EnableVideoOutput(VIDEOPCLKLEVEL level,uint8_t inputColorMode,uint8_t outputColorMode,uint8_t bHDMI) ;
+int SetupVideoInputSignal(uint8_t inputSignalType) ;
 
 #ifdef SUPPORT_DEGEN
-BOOL ProgramDEGenModeByID(MODE_ID id,BYTE bInputSignalType) ;
+int ProgramDEGenModeByID(MODE_ID id,uint8_t bInputSignalType) ;
 #endif // SUPPORT_DEGEN
 #ifdef SUPPORT_SYNCEMBEDDED
-BOOL ProgramSyncEmbeddedVideoMode(BYTE VIC,BYTE bInputType) ;
+int ProgramSyncEmbeddedVideoMode(uint8_t VIC,uint8_t bInputType) ;
 #endif
-BOOL EnableAudioOutput(unsigned long VideoPixelClock,BYTE bAudioSampleFreq,BYTE ChannelNumber,BYTE bAudSWL,BYTE bSPDIF) ;
-BOOL EnableAudioOutput4OSSC(ULONG VideoPixelClock,BYTE bAudioDwSampl,BYTE bAudioSwapLR) ;
+int EnableAudioOutput(unsigned long VideoPixelClock,uint8_t bAudioSampleFreq,uint8_t ChannelNumber,uint8_t bAudSWL,uint8_t bSPDIF) ;
+int EnableAudioOutput4OSSC(uint32_t  VideoPixelClock,uint8_t bAudioDwSampl,uint8_t bAudioSwapLR) ;
 void DisableIT6613() ;
 void DisableVideoOutput() ;
 void DisableAudioOutput() ;
-BOOL GetEDIDData(int EDIDBlockID,BYTE *pEDIDData);
-BOOL CheckHDMITX(BYTE *pHPD,BYTE *pHPDChange) ;
-BOOL EnableHDCP(BYTE bEnable) ;
-BOOL EnableAVIInfoFrame(BYTE bEnable,BYTE *pAVIInfoFrame);
-BOOL EnableAudioInfoFrame(BYTE bEnable,BYTE *pAudioInfoFrame);
-BOOL EnableGPInfoFrame(BYTE bEnable, BYTE *pInfoFrame);
-// BOOL EnableVideoOutputIndirect(BYTE xCnt,BYTE inputColorMode,BYTE outputColorMode,BYTE bHDMI) ;
-void SetAVMute(BYTE bEnable) ;
-void SetOutputColorDepthPhase(BYTE ColorDepth,BYTE bPhase) ;
-void Get6613Reg(BYTE *pReg) ;
-void TX_SetPixelRepetition(BYTE pixelrep, BYTE via_infoframe);
-
-////////////////////////////////////////////////////////////////////
-// Required Interfance
-////////////////////////////////////////////////////////////////////
-BYTE I2C_Read_Byte(BYTE Addr,BYTE RegAddr);
-SYS_STATUS I2C_Write_Byte(BYTE Addr,BYTE RegAddr,BYTE Data);
-SYS_STATUS I2C_Read_ByteN(BYTE Addr,BYTE RegAddr,BYTE *pData,int N) ;
-SYS_STATUS I2C_Write_ByteN(BYTE Addr,BYTE RegAddr,BYTE *pData,int N) ;
-
-BYTE HDMITX_ReadI2C_Byte(BYTE RegAddr);
-SYS_STATUS HDMITX_WriteI2C_Byte(BYTE RegAddr,BYTE val);
-SYS_STATUS HDMITX_ReadI2C_ByteN(BYTE RegAddr,BYTE *pData,int N);
-SYS_STATUS HDMITX_WriteI2C_ByteN(BYTE RegAddr,BYTE *pData,int N);
+int GetEDIDData(int EDIDBlockID,uint8_t *pEDIDData);
+int CheckHDMITX(uint8_t *pHPD,uint8_t *pHPDChange) ;
+int EnableHDCP(uint8_t bEnable) ;
+int EnableAVIInfoFrame(uint8_t bEnable,uint8_t *pAVIInfoFrame);
+int EnableAudioInfoFrame(uint8_t bEnable,uint8_t *pAudioInfoFrame);
+int EnableGPInfoFrame(uint8_t bEnable, uint8_t *pInfoFrame);
+// int EnableVideoOutputIndirect(uint8_t xCnt,uint8_t inputColorMode,uint8_t outputColorMode,uint8_t bHDMI) ;
+void SetAVMute(uint8_t bEnable) ;
+void SetOutputColorDepthPhase(uint8_t ColorDepth,uint8_t bPhase) ;
+void Get6613Reg(uint8_t *pReg) ;
+void TX_SetPixelRepetition(uint8_t pixelrep, uint8_t via_infoframe);
 
 #endif // _IT6613_H_

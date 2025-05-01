@@ -35,6 +35,7 @@
 #include "userdata.h"
 #include "it6613.h"
 #include "it6613_sys.h"
+#include <it6613_i2c.h>
 #include "HDMI_TX.h"
 #include "hdmitx.h"
 #include "timer.h"
@@ -104,11 +105,11 @@ inline void SetupAudio(tx_mode_t mode)
 {
     // shut down audio-tx before setting new config (recommended for changing audio-tx config)
     DisableAudioOutput();
-    EnableAudioInfoFrame(FALSE, NULL);
+    EnableAudioInfoFrame(false, NULL);
 
     if (mode != TX_DVI) {
         EnableAudioOutput4OSSC(cm.pclk_o_hz, tc.audio_dw_sampl, tc.audio_swap_lr);
-        HDMITX_SetAudioInfoFrame((BYTE)tc.audio_dw_sampl);
+        HDMITX_SetAudioInfoFrame(tc.audio_dw_sampl);
 #ifdef DEBUG
         Switch_HDMITX_Bank(1);
         usleep(1000);
@@ -125,9 +126,9 @@ inline void SetupAudio(tx_mode_t mode)
 inline void TX_enable(tx_mode_t mode)
 {
     // shut down TX before setting new config
-    SetAVMute(TRUE);
+    SetAVMute(true);
     DisableVideoOutput();
-    EnableAVIInfoFrame(FALSE, NULL);
+    EnableAVIInfoFrame(false, NULL);
 
     //Setup TX configuration
     //TODO: set pclk target and VIC dynamically
@@ -145,7 +146,7 @@ inline void TX_enable(tx_mode_t mode)
     SetupAudio(mode);
 
     // start TX
-    SetAVMute(FALSE);
+    SetAVMute(false);
 }
 
 int pll_reconfigure(uint8_t mult, uint32_t pclk_i_hz, uint8_t bwsel)
@@ -1072,7 +1073,7 @@ int main()
 			}
 			if (tc.tx_mode != TX_DVI) {
 				if (tc.hdmi_itc != cm.cc.hdmi_itc) {
-					//EnableAVIInfoFrame(FALSE, NULL);
+					//EnableAVIInfoFrame(false, NULL);
 					printf("setting ITC to %d\n", tc.hdmi_itc);
 					HDMITX_SetAVIInfoFrame(vmode_out.vic, (tc.tx_mode == TX_HDMI_RGB) ? F_MODE_RGB444 : F_MODE_YUV444, 0, 0, tc.hdmi_itc, vm_conf.hdmitx_pixr_ifr);
 					cm.cc.hdmi_itc = tc.hdmi_itc;

@@ -1,43 +1,12 @@
-#ifndef _TYPEDEF_H_
-#define _TYPEDEF_H_
+#ifndef _IT6613_TYPES_H_
+#define _IT6613_TYPES_H_
+
+#include <stdint.h>
+#include <stdbool.h>
 
 //////////////////////////////////////////////////
 // data type
 //////////////////////////////////////////////////
-#ifdef _MCU_
-typedef bit BOOL ;
-#define _CODE
-#define _IDATA
-#define _XDATA
-#else
-typedef int BOOL ;
-#define _CODE
-#define _IDATA
-#define _XDATA
-#endif // _MCU_
-
-
-
-typedef char CHAR,*PCHAR ;
-typedef unsigned char uchar,*puchar ;
-typedef unsigned char UCHAR,*PUCHAR ;
-typedef unsigned char byte,*pbyte ;
-typedef unsigned char BYTE,*PBYTE ;
-
-typedef short SHORT,*PSHORT ;
-typedef unsigned short ushort,*pushort ;
-typedef unsigned short USHORT,*PUSHORT ;
-typedef unsigned short word,*pword ;
-typedef unsigned short WORD,*PWORD ;
-
-typedef long LONG,*PLONG ;
-typedef unsigned long ulong,*pulong ;
-typedef unsigned long ULONG,*PULONG ;
-typedef unsigned long dword,*pdword ;
-typedef unsigned long DWORD,*PDWORD ;
-
-#define FALSE 0
-#define TRUE 1
 
 #define SUCCESS 0
 #define FAIL -1
@@ -134,12 +103,12 @@ typedef union _VideoFormatCode
 {
     struct _VFC
     {
-        BYTE colorfmt:2 ;
-        BYTE interlace:1 ;
-        BYTE Colorimetry:1 ;
-        BYTE Quantization:1 ;
-        BYTE UpDownFilter:1 ;
-        BYTE Dither:1 ;
+        uint8_t colorfmt:2 ;
+        uint8_t interlace:1 ;
+        uint8_t Colorimetry:1 ;
+        uint8_t Quantization:1 ;
+        uint8_t UpDownFilter:1 ;
+        uint8_t Dither:1 ;
     } VFCCode ;
     unsigned char VFCByte ;
 } VideoFormatCode ;
@@ -218,63 +187,63 @@ typedef union _VideoFormatCode
 typedef union _AVI_InfoFrame
 {
     struct {
-        BYTE Type ;
-        BYTE Ver ;
-        BYTE Len ;
+        uint8_t Type ;
+        uint8_t Ver ;
+        uint8_t Len ;
 
-        BYTE Scan:2 ;
-        BYTE BarInfo:2 ;
-        BYTE ActiveFmtInfoPresent:1 ;
-        BYTE ColorMode:2 ;
-        BYTE FU1:1 ;
+        uint8_t Scan:2 ;
+        uint8_t BarInfo:2 ;
+        uint8_t ActiveFmtInfoPresent:1 ;
+        uint8_t ColorMode:2 ;
+        uint8_t FU1:1 ;
 
-        BYTE ActiveFormatAspectRatio:4 ;
-        BYTE PictureAspectRatio:2 ;
-        BYTE Colorimetry:2 ;
+        uint8_t ActiveFormatAspectRatio:4 ;
+        uint8_t PictureAspectRatio:2 ;
+        uint8_t Colorimetry:2 ;
 
-        BYTE Scaling:2 ;
-        BYTE FU2:6 ;
+        uint8_t Scaling:2 ;
+        uint8_t FU2:6 ;
 
-        BYTE VIC:7 ;
-        BYTE FU3:1 ;
+        uint8_t VIC:7 ;
+        uint8_t FU3:1 ;
 
-        BYTE PixelRepetition:4 ;
-        BYTE FU4:4 ;
+        uint8_t PixelRepetition:4 ;
+        uint8_t FU4:4 ;
 
-        SHORT Ln_End_Top ;
-        SHORT Ln_Start_Bottom ;
-        SHORT Pix_End_Left ;
-        SHORT Pix_Start_Right ;
+        uint16_t Ln_End_Top ;
+        uint16_t Ln_Start_Bottom ;
+        uint16_t Pix_End_Left ;
+        uint16_t Pix_Start_Right ;
     } info ;
     struct {
-        BYTE AVI_HB[3] ;
-        BYTE AVI_DB[AVI_INFOFRAME_LEN] ;
+        uint8_t AVI_HB[3] ;
+        uint8_t AVI_DB[AVI_INFOFRAME_LEN] ;
     } pktbyte ;
 } AVI_InfoFrame ;
 
 typedef union _Freesync_InfoFrame {
 
     struct {
-        BYTE Type ;
-        BYTE Ver ;
-        BYTE Len ;
+        uint8_t Type ;
+        uint8_t Ver ;
+        uint8_t Len ;
 
-        BYTE Enable ;
+        uint8_t Enable ;
 
-        BYTE Rsvd1 ;
-        BYTE Rsvd2 ;
-        BYTE Rsvd3 ;
-        BYTE Rsvd4 ;
+        uint8_t Rsvd1 ;
+        uint8_t Rsvd2 ;
+        uint8_t Rsvd3 ;
+        uint8_t Rsvd4 ;
 
-        BYTE Mode2 ;
+        uint8_t Mode2 ;
 
-        BYTE min_rate ;
-        BYTE max_rate ;
+        uint8_t min_rate ;
+        uint8_t max_rate ;
     } info ;
 
     struct {
-        BYTE FS_HB[3] ;
-        BYTE FS_DB[VENDORSPEC_INFOFRAME_LEN] ;
+        uint8_t FS_HB[3] ;
+        uint8_t FS_DB[VENDORSPEC_INFOFRAME_LEN] ;
     } pktbyte ;
 
 } Freesync_InfoFrame ;
@@ -282,84 +251,84 @@ typedef union _Freesync_InfoFrame {
 typedef union _Audio_InfoFrame {
 
     struct {
-        BYTE Type ;
-        BYTE Ver ;
-        BYTE Len ;
+        uint8_t Type ;
+        uint8_t Ver ;
+        uint8_t Len ;
 
-        BYTE AudioChannelCount:3 ;
-        BYTE RSVD1:1 ;
-        BYTE AudioCodingType:4 ;
+        uint8_t AudioChannelCount:3 ;
+        uint8_t RSVD1:1 ;
+        uint8_t AudioCodingType:4 ;
 
-        BYTE SampleSize:2 ;
-        BYTE SampleFreq:3 ;
-        BYTE Rsvd2:3 ;
+        uint8_t SampleSize:2 ;
+        uint8_t SampleFreq:3 ;
+        uint8_t Rsvd2:3 ;
 
-        BYTE FmtCoding ;
+        uint8_t FmtCoding ;
 
-        BYTE SpeakerPlacement ;
+        uint8_t SpeakerPlacement ;
 
-        BYTE Rsvd3:3 ;
-        BYTE LevelShiftValue:4 ;
-        BYTE DM_INH:1 ;
+        uint8_t Rsvd3:3 ;
+        uint8_t LevelShiftValue:4 ;
+        uint8_t DM_INH:1 ;
     } info ;
 
     struct {
-        BYTE AUD_HB[3] ;
-        BYTE AUD_DB[AUDIO_INFOFRAME_LEN] ;
+        uint8_t AUD_HB[3] ;
+        uint8_t AUD_DB[AUDIO_INFOFRAME_LEN] ;
     } pktbyte ;
 
 } Audio_InfoFrame ;
 
 typedef union _MPEG_InfoFrame {
     struct {
-        BYTE Type ;
-        BYTE Ver ;
-        BYTE Len ;
+        uint8_t Type ;
+        uint8_t Ver ;
+        uint8_t Len ;
 
-        ULONG MpegBitRate ;
+        uint32_t  MpegBitRate ;
 
-        BYTE MpegFrame:2 ;
-        BYTE Rvsd1:2 ;
-        BYTE FieldRepeat:1 ;
-        BYTE Rvsd2:3 ;
+        uint8_t MpegFrame:2 ;
+        uint8_t Rvsd1:2 ;
+        uint8_t FieldRepeat:1 ;
+        uint8_t Rvsd2:3 ;
     } info ;
     struct {
-        BYTE MPG_HB[3] ;
-        BYTE MPG_DB[MPEG_INFOFRAME_LEN] ;
+        uint8_t MPG_HB[3] ;
+        uint8_t MPG_DB[MPEG_INFOFRAME_LEN] ;
     } pktbyte ;
 } MPEG_InfoFrame ;
 
 // Source Product Description
 typedef union _SPD_InfoFrame {
     struct {
-        BYTE Type ;
-        BYTE Ver ;
-        BYTE Len ;
+        uint8_t Type ;
+        uint8_t Ver ;
+        uint8_t Len ;
 
         char VN[8] ; // vendor name character in 7bit ascii characters
         char PD[16] ; // product description character in 7bit ascii characters
-        BYTE SourceDeviceInfomation ;
+        uint8_t SourceDeviceInfomation ;
     } info ;
     struct {
-        BYTE SPD_HB[3] ;
-        BYTE SPD_DB[SPD_INFOFRAME_LEN] ;
+        uint8_t SPD_HB[3] ;
+        uint8_t SPD_DB[SPD_INFOFRAME_LEN] ;
     } pktbyte ;
 } SPD_InfoFrame ;
 
 // HDR
 typedef union _HDR_InfoFrame {
     struct {
-        BYTE Type ;
-        BYTE Ver ;
-        BYTE Len ;
+        uint8_t Type ;
+        uint8_t Ver ;
+        uint8_t Len ;
 
-        BYTE TF ;
-        BYTE DESC_ID ;
-        BYTE DESC[24] ;
+        uint8_t TF ;
+        uint8_t DESC_ID ;
+        uint8_t DESC[24] ;
     } info ;
     struct {
-        BYTE HDR_HB[3] ;
-        BYTE HDR_DB[HDR_INFOFRAME_LEN] ;
+        uint8_t HDR_HB[3] ;
+        uint8_t HDR_DB[HDR_INFOFRAME_LEN] ;
     } pktbyte ;
 } HDR_InfoFrame ;
 
@@ -367,10 +336,10 @@ typedef union _HDR_InfoFrame {
 // Using for interface.
 ///////////////////////////////////////////////////////////////////////////
 struct VideoTiming {
-    ULONG VideoPixelClock ;
-    BYTE VIC ;
-    BYTE pixelrep ;
-	BYTE outputVideoMode ;
+    uint32_t  VideoPixelClock ;
+    uint8_t VIC ;
+    uint8_t pixelrep ;
+	uint8_t outputVideoMode ;
 } ;
 
 #endif // _TYPEDEF_H_
