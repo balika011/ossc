@@ -270,7 +270,6 @@
 #define B_OSF_LOCK (1 << 5)
 
 #define REG_TX_AFE_DRV_CTRL 0x61
-
 #define B_AFE_DRV_PWD (1 << 5)
 #define B_AFE_DRV_RST (1 << 4)
 #define B_AFE_DRV_PDRXDET (1 << 2)
@@ -295,7 +294,6 @@
 #define B_AFE_DRV_ISWK 7
 
 #define REG_TX_AFE_IP_CTRL 0x64
-
 #define B_AFE_IP_GAINBIT (1 << 7)
 #define B_AFE_IP_PWDPLL (1 << 6)
 #define M_AFE_IP_CKSEL (3 << 4)
@@ -322,51 +320,6 @@
 #define B_AFE_AFELFSR_VAL (1 << 7)
 #define B_AFE_DIS_AFELFSR (1 << 6)
 #define M_AFE_RTERM_VAOUE 0xF
-
-//
-// #define REG_TX_AFE_DRV_CTRL    0x61
-//    #define M_AFE_DRV_SR (3<<2)
-//    #define O_AFE_DRV_SR 2
-//	#define B_AFE_DRV_RST (1<<4)
-//	#define B_AFE_DRV_PWD (1<<5)
-//	#define B_AFE_DRV_ENBIST (1<<6)
-//
-// #define REG_TX_AFE_XP_CTRL1 0x62
-//	#define B_AFE_XP_GAINBIT (1<<7)
-//	#define B_AFE_XP_PWDPLL (1<<6)
-//	#define B_AFE_XP_ENI (1<<5)
-//	#define B_AFE_XP_ER0 (1<<4)
-//	#define B_AFE_XP_RESETB (1<<3)
-//	#define B_AFE_XP_PWDI (1<<2)
-//	#define B_AFE_XP_DEI (1<<1)
-//	#define B_AFE_XP_BYPASS (1<<0)
-//
-// #define REG_TX_AFE_XP_CTRL2 0x63
-//    #define B_XP_ENCLKX5    (1<<3)
-//    #define M_XP_CLKSEL 3
-//    #define B_XP_CLKSEL_HALF_PCLKHV 0
-//    #define B_XP_CLKSEL_1_PCLKHV 1
-//    #define B_XP_CLKSEL_2_PCLKHV 2
-//    #define B_XP_CLKSEL_4_PCLKHV 3
-//
-//
-// #define REG_TX_AFE_IP_CTRL 0x64
-//	#define B_AFE_IP_GAINBIT (1<<6)
-//	#define B_AFE_IP_PWDPLL (1<<5)
-//	#define B_AFE_IP_SEDB (1<<4)
-//	#define B_AFE_IP_ER0 (1<<3)
-//	#define B_AFE_IP_RESETB (1<<2)
-//	#define B_AFE_IP_PDIV1 (1<<1)
-//	#define B_AFE_IP_ENCB (1<<0)
-//
-// #define REG_TX_AFE_RING    0x65
-//	#define B_AFE_RING_FAST (1<<0)
-//	#define B_AFE_RING_SLOW (1<<1)
-//    #define M_AFE_DRV_VSW (3<<2)
-//    #define B_AFE_VSW_NOENH 0
-//    #define B_AFE_VSW_12ENH (1<<2)
-//    #define B_AFE_VSW_24ENH (2<<2)
-//    #define B_AFE_VSW_35ENH (3<<2)
 
 // Input Data Format Register
 #define REG_TX_INPUT_MODE 0x70
@@ -824,7 +777,9 @@ void DisableVideoOutput();
 void DisableAudioOutput();
 int GetEDIDData(int EDIDBlockID, uint8_t *pEDIDData);
 int CheckHDMITX(uint8_t *pHPD, uint8_t *pHPDChange);
+#ifdef SUPPORT_HDCP
 int EnableHDCP(uint8_t bEnable);
+#endif
 int EnableAVIInfoFrame(uint8_t bEnable, uint8_t *pAVIInfoFrame);
 int EnableAudioInfoFrame(uint8_t bEnable, uint8_t *pAudioInfoFrame);
 int EnableGPInfoFrame(uint8_t bEnable, uint8_t *pInfoFrame);

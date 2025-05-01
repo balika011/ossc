@@ -6,29 +6,6 @@
 #include "it6613_HDMI_COMMON.h"
 #include "it6613_drv.h"
 
-// Hardwired to CPU reset
-#define HDMITX_Reset(x)
-
-#ifndef SUPPORT_HDCP
-static SYS_STATUS
-HDCP_Authenticate()
-{
-	return ER_SUCCESS;
-}
-
-static void
-HDCP_ResetAuth()
-{
-	return;
-}
-
-static void
-HDCP_ResumeAuthentication()
-{
-	return;
-}
-#endif
-
 #define HDMITX_INSTANCE_MAX 1
 
 #define SIZEOF_CSCMTX 18

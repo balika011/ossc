@@ -143,7 +143,18 @@ sdc_controller_SRCS := \
 COMPONENT_C_LIB_SRCS += \
 	$(altera_avalon_timer_driver_C_LIB_SRCS) \
 	$(i2c_opencores_driver_C_LIB_SRCS) \
-	$(sdc_controller_SRCS)
+	$(sdc_controller_SRCS) \
+	drivers/src/it6613_edid.c \
+	drivers/src/it6613_HDMI_TX.c \
+	drivers/src/it6613_i2c.c \
+	drivers/src/it6613.c \
+	drivers/src/it6613_drv.c \
+	drivers/src/it6613_sys.c \
+	drivers/src//tvp7002.c \
+	drivers/src//ths7353.c \
+	drivers/src//pcm1862.c \
+	drivers/src//st7032.c \
+	drivers/src//sh1107.c
 
 # Assemble all component assembly source files 
 COMPONENT_ASM_LIB_SRCS += \

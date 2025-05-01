@@ -23,7 +23,7 @@
 #include "i2c_opencores.h"
 #include "pcm1862.h"
 
-inline uint32_t pcm1862_readreg(uint8_t regaddr)
+static uint32_t pcm1862_readreg(uint8_t regaddr)
 {
 	// Phase 1
 	I2C_start(I2CA_BASE, PCM1862_BASE, 0);
@@ -34,7 +34,7 @@ inline uint32_t pcm1862_readreg(uint8_t regaddr)
 	return I2C_read(I2CA_BASE, 1);
 }
 
-inline void pcm1862_writereg(uint8_t regaddr, uint8_t data)
+static void pcm1862_writereg(uint8_t regaddr, uint8_t data)
 {
 	I2C_start(I2CA_BASE, PCM1862_BASE, 0);
 	I2C_write(I2CA_BASE, regaddr, 0);

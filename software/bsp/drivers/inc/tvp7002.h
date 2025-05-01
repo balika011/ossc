@@ -21,8 +21,6 @@
 #define TVP7002_H_
 
 #include "tvp7002_regs.h"
-#include "video_modes.h"
-#include "sysconfig.h"
 
 #define DEFAULT_VSYNC_THOLD     0x44
 #define DEFAULT_LINELEN_TOL     0x06
@@ -77,27 +75,46 @@ typedef struct
 	uint16_t B_Pr;
 } ypbpr_to_rgb_csc_t;
 
+typedef struct
+{
+	uint8_t r_f_off;
+	uint8_t g_f_off;
+	uint8_t b_f_off;
+	uint8_t r_f_gain;
+	uint8_t g_f_gain;
+	uint8_t b_f_gain;
+	uint8_t c_gain;
+} __attribute__((packed)) color_setup_t;
+
+typedef enum
+{
+    VIDEO_SDTV      = (1<<0),
+    VIDEO_EDTV      = (1<<1),
+    VIDEO_HDTV      = (1<<2),
+    VIDEO_PC        = (1<<3),
+} video_type;
+
+typedef enum
+{
+    FORMAT_RGBS = 0,
+    FORMAT_RGBHV = 1,
+    FORMAT_RGsB = 2,
+    FORMAT_YPbPr = 3
+} video_format;
+
 extern const ypbpr_to_rgb_csc_t csc_coeffs[];
 
-inline uint32_t tvp_readreg(uint32_t regaddr);
+uint32_t tvp_readreg(uint32_t regaddr);
 
-inline void tvp_writereg(uint32_t regaddr, uint8_t data);
+void tvp_powerdown();
 
-inline void tvp_reset();
+void tvp_powerup();
 
-inline void tvp_disable_output();
+void tvp_set_hpllcoast(uint8_t pre, uint8_t post);
 
-inline void tvp_enable_output();
+void tvp_set_linelen_tol(uint8_t val);
 
-inline void tvp_powerdown();
-
-inline void tvp_powerup();
-
-inline void tvp_set_hpllcoast(uint8_t pre, uint8_t post);
-
-inline void tvp_set_linelen_tol(uint8_t val);
-
-inline void tvp_set_ssthold(uint8_t vsdetect_thold);
+void tvp_set_ssthold(uint8_t vsdetect_thold);
 
 void tvp_init();
 

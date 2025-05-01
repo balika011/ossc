@@ -69,8 +69,6 @@ uint8_t pcm1862_active;
 
 uint8_t sl_def_iv_x, sl_def_iv_y;
 
-uint32_t read_it2(uint32_t regaddr);
-
 mode_data_t vmode_in, vmode_out;
 vm_proc_config_t vm_conf;
 
@@ -118,10 +116,10 @@ inline void SetupAudio(tx_mode_t mode)
         Switch_HDMITX_Bank(1);
         usleep(1000);
         uint32_t cts = 0;
-        cts |= read_it2(0x35) >> 4;
-        cts |= read_it2(0x36) << 4;
-        cts |= read_it2(0x37) << 12;
-        printf("CTS: %lu\n", cts);
+		cts |= HDMITX_ReadI2C_Byte(0x35) >> 4;
+		cts |= HDMITX_ReadI2C_Byte(0x36) << 4;
+		cts |= HDMITX_ReadI2C_Byte(0x37) << 12;
+		printf("CTS: %lu\n", cts);
         Switch_HDMITX_Bank(0);
 #endif
     }
@@ -512,7 +510,6 @@ void program_mode()
     printf("\nLines: %u %c\n", (unsigned)cm.totlines, cm.progressive ? 'p' : 'i');
     printf("Clocks per line: %u\n", (unsigned)cm.clkcnt);
 
-    //h_syncinlen = tvp_readreg(TVP_HSINWIDTH);
     h_syncinlen = cm.hsync_width;
 
 #ifdef DEBUG
@@ -738,8 +735,7 @@ int init_hw()
     }
 
     /* check if TVP is found */
-	uint32_t chiprev = tvp_readreg(TVP_CHIPREV);
-    if (chiprev == 0xff)
+	if (tvp_readreg(TVP_CHIPREV) == 0xff)
 	{
         printf("Error: could not read from TVP7002\n");
         return -3;
@@ -747,8 +743,7 @@ int init_hw()
 
 	tvp_init();
 
-    chiprev = HDMITX_ReadI2C_Byte(IT_DEVICEID);
-    if (chiprev != 0x13)
+	if (HDMITX_ReadI2C_Byte(REG_TX_DEVICE_ID0) != IT6613_DEVICEID)
 	{
         printf("Error: could not read from IT6613\n");
         return -4;

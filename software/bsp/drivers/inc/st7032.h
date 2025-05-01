@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2017  Markus Hiienkari <mhiienka@niksula.hut.fi>
+// Copyright (C) 2015-2016  Markus Hiienkari <mhiienka@niksula.hut.fi>
+// Copyright (C) 2025  Balázs Triszka <info@balika011.hu>
 //
 // This file is part of Open Source Scan Converter project.
 //
@@ -17,26 +18,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef PCM1862_H_
-#define PCM1862_H_
+#ifndef ST7032_H_
+#define ST7032_H_
 
-#include "pcm1862_regs.h"
-#include "sysconfig.h"
+#include "system.h"
+#include <stdio.h>
 
-typedef enum
-{
-	PCM_INPUT1 = 0,
-	PCM_INPUT2 = 1,
-	PCM_INPUT3 = 2,
-	PCM_INPUT4 = 3
-} pcm_input_t;
+void st7032_init();
 
-void pcm_source_sel(pcm_input_t input);
+void st7032_on();
+void st7032_off();
 
-void pcm_set_stereo_mode(int mono_enable);
+void st7032_write_row1(const char *str);
+void st7032_write_row2(const char *str);
 
-void pcm_set_gain(int8_t db_gain);
-
-int pcm1862_init();
-
-#endif /* PCM1862_H_ */
+#endif /* st7032_H_ */

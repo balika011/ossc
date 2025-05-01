@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2025  Balázs Triszka <info@balika011.hu>
+// Copyright (C) 2017  Markus Hiienkari <mhiienka@niksula.hut.fi>
 //
 // This file is part of Open Source Scan Converter project.
 //
@@ -17,19 +17,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SH1107_H_
-#define SH1107_H_
+#ifndef PCM1862_H_
+#define PCM1862_H_
 
-#include "system.h"
-#include <stdio.h>
-#include "sysconfig.h"
+#include "pcm1862_regs.h"
 
-int sh1107_init();
+typedef enum
+{
+	PCM_INPUT1 = 0,
+	PCM_INPUT2 = 1,
+	PCM_INPUT3 = 2,
+	PCM_INPUT4 = 3
+} pcm_input_t;
 
-void sh1107_on();
-void sh1107_off();
+void pcm_source_sel(pcm_input_t input);
 
-void sh1107_write_row1(const char *str);
-void sh1107_write_row2(const char *str);
+void pcm_set_stereo_mode(int mono_enable);
 
-#endif /* sh1107_H_ */
+void pcm_set_gain(int8_t db_gain);
+
+int pcm1862_init();
+
+#endif /* PCM1862_H_ */

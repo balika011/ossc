@@ -23,6 +23,8 @@
 #include "i2c_opencores.h"
 #include "tvp7002.h"
 
+static void tvp_writereg(uint32_t regaddr, uint8_t data);
+
 // #define SYNCBYPASS    // Bypass VGA syncs (for debug - needed for interlace?)
 // #define ADCPOWERDOWN  // Power-down ADCs
 // #define PLLPOSTDIV    // Double-rate PLL with div-by-2 (decrease jitter?)
@@ -123,7 +125,7 @@ static void tvp_sel_clk(tvp_refclk_t refclk, uint8_t ext_pclk)
 	tvp_writereg(TVP_INPMUX2, status);
 }
 
-inline uint32_t tvp_readreg(uint32_t regaddr)
+uint32_t tvp_readreg(uint32_t regaddr)
 {
 	I2C_start(I2CA_BASE, TVP_BASE, 0);
 	// don't use repeated start as it seems unreliable at 400kHz
@@ -132,24 +134,19 @@ inline uint32_t tvp_readreg(uint32_t regaddr)
 	return I2C_read(I2CA_BASE, 1);
 }
 
-inline void tvp_writereg(uint32_t regaddr, uint8_t data)
+static void tvp_writereg(uint32_t regaddr, uint8_t data)
 {
 	I2C_start(I2CA_BASE, TVP_BASE, 0);
 	I2C_write(I2CA_BASE, regaddr, 0);
 	I2C_write(I2CA_BASE, data, 1);
 }
 
-inline void tvp_disable_output()
-{
-	tvp_writereg(TVP_MISCCTRL2, 0x03);
-}
-
-inline void tvp_enable_output()
+static void tvp_enable_output()
 {
 	tvp_writereg(TVP_MISCCTRL2, 0x00);
 }
 
-inline void tvp_powerdown()
+void tvp_powerdown()
 {
 	uint8_t syncproc_rst = tvp_readreg(TVP_MISCCTRL4) | (1 << 7);
 
@@ -161,24 +158,24 @@ inline void tvp_powerdown()
 	tvp_writereg(TVP_POWERCTRL, 0x07);
 }
 
-inline void tvp_powerup()
+void tvp_powerup()
 {
 	tvp_writereg(TVP_MISCCTRL1, 0x11);
 	tvp_writereg(TVP_POWERCTRL, 0x00);
 }
 
-inline void tvp_set_hpllcoast(uint8_t pre, uint8_t post)
+void tvp_set_hpllcoast(uint8_t pre, uint8_t post)
 {
 	tvp_writereg(TVP_HPLLPRECOAST, pre);
 	tvp_writereg(TVP_HPLLPOSTCOAST, post);
 }
 
-inline void tvp_set_linelen_tol(uint8_t val)
+void tvp_set_linelen_tol(uint8_t val)
 {
 	tvp_writereg(TVP_LINELENTOL, val);
 }
 
-inline void tvp_set_ssthold(uint8_t vsdetect_thold)
+void tvp_set_ssthold(uint8_t vsdetect_thold)
 {
 	tvp_writereg(TVP_SSTHOLD, vsdetect_thold);
 }

@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include "sysconfig.h"
+#include "tvp7002.h"
 
 #define SIGNED_NUMVAL_ZERO  128
 
@@ -71,16 +72,6 @@ typedef enum {
     AV3_YPBPR       = 9,
     AV_LAST         = 10
 } avinput_t;
-
-typedef struct {
-    uint8_t r_f_off;
-    uint8_t g_f_off;
-    uint8_t b_f_off;
-    uint8_t r_f_gain;
-    uint8_t g_f_gain;
-    uint8_t b_f_gain;
-    uint8_t c_gain;
-} __attribute__((packed)) color_setup_t;
 
 typedef struct {
     /* P-LM mode options */

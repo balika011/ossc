@@ -23,7 +23,7 @@
 #include "i2c_opencores.h"
 #include "ths7353.h"
 
-inline uint32_t ths_readreg(uint8_t channel)
+static uint32_t ths_readreg(uint8_t channel)
 {
 	// Phase 1
 	I2C_start(I2CA_BASE, THS_BASE, 0);
@@ -34,7 +34,7 @@ inline uint32_t ths_readreg(uint8_t channel)
 	return I2C_read(I2CA_BASE, 1);
 }
 
-inline void ths_writereg(uint8_t channel, uint8_t data)
+static void ths_writereg(uint8_t channel, uint8_t data)
 {
 	I2C_start(I2CA_BASE, THS_BASE, 0);
 	I2C_write(I2CA_BASE, channel, 0);

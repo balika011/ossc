@@ -1,5 +1,4 @@
 //
-// Copyright (C) 2015-2016  Markus Hiienkari <mhiienka@niksula.hut.fi>
 // Copyright (C) 2025  Balázs Triszka <info@balika011.hu>
 //
 // This file is part of Open Source Scan Converter project.
@@ -18,19 +17,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ST7032_H_
-#define ST7032_H_
+#ifndef SH1107_H_
+#define SH1107_H_
 
 #include "system.h"
 #include <stdio.h>
-#include "sysconfig.h"
 
-void st7032_init();
+int sh1107_init();
 
-void st7032_on();
-void st7032_off();
+void sh1107_on();
+void sh1107_off();
 
-void st7032_write_row1(const char *str);
-void st7032_write_row2(const char *str);
+void sh1107_write_row1(const char *str);
+void sh1107_write_row2(const char *str);
 
-#endif /* st7032_H_ */
+#endif /* sh1107_H_ */

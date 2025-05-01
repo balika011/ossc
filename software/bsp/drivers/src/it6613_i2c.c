@@ -2,18 +2,19 @@
 #include "system.h"
 #include "i2c_opencores.h"
 #include "it6613.h"
+#include <it6613_drv.h>
 
-inline uint32_t read_it2(uint32_t regaddr)
+static uint32_t read_it2(uint32_t regaddr)
 {
-	I2C_start(I2CA_BASE, IT_BASE, 0);
+	I2C_start(I2CA_BASE, (HDMI_TX_I2C_SLAVE_ADDR >> 1), 0);
 	I2C_write(I2CA_BASE, regaddr, 0);
-	I2C_start(I2CA_BASE, IT_BASE, 1);
+	I2C_start(I2CA_BASE, (HDMI_TX_I2C_SLAVE_ADDR >> 1), 1);
 	return I2C_read(I2CA_BASE, 1);
 }
 
-inline void write_it2(uint32_t regaddr, uint8_t data)
+static void write_it2(uint32_t regaddr, uint8_t data)
 {
-	I2C_start(I2CA_BASE, IT_BASE, 0);
+	I2C_start(I2CA_BASE, (HDMI_TX_I2C_SLAVE_ADDR >> 1), 0);
 	I2C_write(I2CA_BASE, regaddr, 0);
 	I2C_write(I2CA_BASE, data, 1);
 }

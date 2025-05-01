@@ -22,6 +22,7 @@
 #include "avconfig.h"
 #include "av_controller.h"
 #include "tvp7002.h"
+#include "video_modes.h"
 
 #define DEFAULT_ON              1
 

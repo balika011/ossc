@@ -60,7 +60,7 @@ bool HDMITX_ChipVerify(void)
 bool HDMITX_Init(void)
 {
 	bool bSuccess = true;
-	HDMITX_Reset();
+
 	usleep(500 * 1000);
 	if (!HDMITX_ChipVerify())
 	{

@@ -45,20 +45,6 @@
 #define V_ACTIVE_MAX 1728
 
 typedef enum {
-    FORMAT_RGBS = 0,
-    FORMAT_RGBHV = 1,
-    FORMAT_RGsB = 2,
-    FORMAT_YPbPr = 3
-} video_format;
-
-typedef enum {
-    VIDEO_SDTV      = (1<<0),
-    VIDEO_EDTV      = (1<<1),
-    VIDEO_HDTV      = (1<<2),
-    VIDEO_PC        = (1<<3),
-} video_type;
-
-typedef enum {
     GROUP_NONE      = 0,
     GROUP_240P      = 1,
     GROUP_288P      = 2,

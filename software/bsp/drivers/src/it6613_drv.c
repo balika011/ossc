@@ -44,13 +44,16 @@ static void SetupAudioChannel();
 
 static SYS_STATUS SetAVIInfoFrame(AVI_InfoFrame *pAVIInfoFrame);
 static SYS_STATUS SetAudioInfoFrame(Audio_InfoFrame *pAudioInfoFrame);
+#if 0
 static SYS_STATUS SetSPDInfoFrame(SPD_InfoFrame *pSPDInfoFrame);
 static SYS_STATUS SetMPEGInfoFrame(MPEG_InfoFrame *pMPGInfoFrame);
+#endif
 static SYS_STATUS SetGPInfoFrame(uint8_t *pInfoFrameData);
 static SYS_STATUS ReadEDID(uint8_t *pData, uint8_t bSegment, uint8_t offset, uint16_t Count);
 static void AbortDDC();
 static void ClearDDCFIFO();
 static void ClearDDCFIFO();
+#ifdef SUPPORT_HDCP
 static void GenerateDDCSCLK();
 static SYS_STATUS HDCP_EnableEncryption();
 static void HDCP_ResetAuth();
@@ -67,15 +70,20 @@ static SYS_STATUS HDCP_GetKSVList(uint8_t *pKSVList, uint8_t cDownStream);
 static SYS_STATUS HDCP_CheckSHA(uint8_t M0[], uint16_t BStatus, uint8_t KSVList[], int devno, uint8_t Vr[]);
 static void HDCP_ResumeAuthentication();
 static void HDCP_Reset();
+#endif
 
 static void ENABLE_NULL_PKT();
+#if 0
 static void ENABLE_ACP_PKT();
 static void ENABLE_ISRC1_PKT();
 static void ENABLE_ISRC2_PKT();
+#endif
 static void ENABLE_AVI_INFOFRM_PKT();
 static void ENABLE_AUD_INFOFRM_PKT();
+#if 0
 static void ENABLE_SPD_INFOFRM_PKT();
 static void ENABLE_MPG_INFOFRM_PKT();
+#endif
 
 static void DISABLE_NULL_PKT();
 static void DISABLE_ACP_PKT();
@@ -85,7 +93,9 @@ static void DISABLE_AVI_INFOFRM_PKT();
 static void DISABLE_AUD_INFOFRM_PKT();
 static void DISABLE_SPD_INFOFRM_PKT();
 static void DISABLE_MPG_INFOFRM_PKT();
+#ifdef SUPPORT_HDCP
 static uint8_t countbit(uint8_t b);
+#endif
 
 #ifdef HDMITX_REG_DEBUG
 static void DumpCatHDMITXReg();
@@ -177,6 +187,7 @@ void HDMITX_InitInstance(INSTANCE *pInstance)
 	}
 }
 
+#ifdef SUPPORT_HDCP
 static uint8_t InitIT6613_HDCPROM()
 {
 	uint8_t uc[5];
@@ -206,6 +217,7 @@ static uint8_t InitIT6613_HDCPROM()
 
 	return ER_SUCCESS;
 }
+#endif
 
 void InitIT6613()
 {
@@ -263,7 +275,6 @@ int EnableVideoOutput(VIDEOPCLKLEVEL level, uint8_t inputColorMode, uint8_t outp
 	// bInputVideoMode,bOutputVideoMode,Instance[0].bInputVideoSignalType,bAudioInputType,should be configured by upper F/W or loaded from EEPROM.
 	// should be configured by initsys.c
 	uint16_t i;
-	uint8_t uc;
 
 	HDMITX_WriteI2C_Byte(REG_TX_SW_RST, B_VID_RST | B_AUD_RST | B_AREF_RST | B_HDCP_RST);
 
@@ -288,7 +299,7 @@ int EnableVideoOutput(VIDEOPCLKLEVEL level, uint8_t inputColorMode, uint8_t outp
 	}
 
 #ifdef INVERT_VID_LATCHEDGE
-	uc = HDMITX_ReadI2C_Byte(REG_TX_CLK_CTRL1);
+	uint8_t uc = HDMITX_ReadI2C_Byte(REG_TX_CLK_CTRL1);
 	uc |= B_VDO_LATCH_EDGE;
 	HDMITX_WriteI2C_Byte(REG_TX_CLK_CTRL1, uc);
 #endif
@@ -458,6 +469,7 @@ int GetEDIDData(int EDIDBlockID, uint8_t *pEDIDData)
 	return true;
 }
 
+#ifdef SUPPORT_HDCP
 int EnableHDCP(uint8_t bEnable)
 {
 	if (bEnable)
@@ -475,6 +487,7 @@ int EnableHDCP(uint8_t bEnable)
 	}
 	return true;
 }
+#endif
 
 int CheckHDMITX(uint8_t *pHPD, uint8_t *pHPDChange)
 {
@@ -518,7 +531,9 @@ int CheckHDMITX(uint8_t *pHPD, uint8_t *pHPDChange)
 			if (Instance[0].bAuthenticated)
 			{
 				ErrorF("when DDC hang,and aborted DDC,the HDCP authentication need to restart.\n");
+#ifdef SUPPORT_HDCP
 				HDCP_ResumeAuthentication();
+#endif
 			}
 		}
 
@@ -554,7 +569,9 @@ int CheckHDMITX(uint8_t *pHPD, uint8_t *pHPDChange)
 			AbortDDC(); // @emily add
 			HDCP_ResumeAuthentication();
 		}
-#endif // SUPPORT_HDCP
+#else
+		(void)intdata2;
+#endif
 
 		intdata3 = HDMITX_ReadI2C_Byte(REG_TX_INT_STAT3); // reg 0x08
 		if (intdata3 & B_INT_VIDSTABLE)
@@ -1813,12 +1830,15 @@ ClearDDCFIFO()
 	HDMITX_WriteI2C_Byte(REG_TX_DDC_CMD, CMD_FIFO_CLR);
 }
 
+#ifdef SUPPORT_HDCP
 static void
 GenerateDDCSCLK()
 {
 	HDMITX_WriteI2C_Byte(REG_TX_DDC_MASTER_CTRL, B_MASTERDDC | B_MASTERHOST);
 	HDMITX_WriteI2C_Byte(REG_TX_DDC_CMD, CMD_GEN_SCLCLK);
 }
+#endif
+
 //////////////////////////////////////////////////////////////////////
 // Function: AbortDDC
 // Parameter: N/A
@@ -2888,6 +2908,7 @@ ENABLE_NULL_PKT()
 	HDMITX_WriteI2C_Byte(REG_TX_NULL_CTRL, B_ENABLE_PKT | B_REPEAT_PKT);
 }
 
+#if 0
 static void
 ENABLE_ACP_PKT()
 {
@@ -2908,6 +2929,7 @@ ENABLE_ISRC2_PKT()
 
 	HDMITX_WriteI2C_Byte(REG_TX_ISRC2_CTRL, B_ENABLE_PKT | B_REPEAT_PKT);
 }
+#endif
 
 static void
 ENABLE_AVI_INFOFRM_PKT()
@@ -2923,6 +2945,7 @@ ENABLE_AUD_INFOFRM_PKT()
 	HDMITX_WriteI2C_Byte(REG_TX_AUD_INFOFRM_CTRL, B_ENABLE_PKT | B_REPEAT_PKT);
 }
 
+#if 0
 static void
 ENABLE_SPD_INFOFRM_PKT()
 {
@@ -2936,6 +2959,7 @@ ENABLE_MPG_INFOFRM_PKT()
 
 	HDMITX_WriteI2C_Byte(REG_TX_MPG_INFOFRM_CTRL, B_ENABLE_PKT | B_REPEAT_PKT);
 }
+#endif
 
 static void
 DISABLE_NULL_PKT()
@@ -3107,6 +3131,7 @@ SetGPInfoFrame(uint8_t *pInfoFrameData)
 	return ER_SUCCESS;
 }
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Function: SetSPDInfoFrame()
 // Parameter: pSPDInfoFrame - the pointer to HDMI SPD Infoframe ucData
@@ -3181,6 +3206,7 @@ SetMPEGInfoFrame(MPEG_InfoFrame *pMPGInfoFrame)
 
 	return ER_SUCCESS;
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // Function: DumpCatHDMITXReg()

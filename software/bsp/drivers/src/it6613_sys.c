@@ -76,7 +76,10 @@ void HDMITX_SetOutput()
 		OS_PRINTF("ConfigAVIInfoFrame, VIC=%d\n", VIC);
 		ConfigAVIInfoFrame(VIC, pixelrep);
 
+#ifdef SUPPORT_HDCP
 		EnableHDCP(true);
+#endif
+
 		if (bAudioEnable)
 		{
 			// int EnableAudioOutput(uint32_t  VideoPixelClock,uint8_t bAudioSampleFreq,uint8_t ChannelNumber,uint8_t bAudSWL,uint8_t bSPDIF)

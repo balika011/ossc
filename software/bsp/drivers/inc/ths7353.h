@@ -20,8 +20,6 @@
 #ifndef THS7353_H_
 #define THS7353_H_
 
-#include "sysconfig.h"
-
 #define THS_BASE (0x58 >> 1)
 
 #define THS_CH1 0x01
